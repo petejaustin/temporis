@@ -15,6 +15,7 @@ find_package(Boost REQUIRED COMPONENTS graph)
 
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/../ggg/include)
+include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # Create build directory if it doesn't exist
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -22,8 +23,17 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR})
 # Set the output directory for the executable
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
+# Add all source files
+set(SOURCES
+    src/main.cpp
+    src/presburger_term.cpp
+    src/presburger_formula.cpp
+    src/temporal_game_manager.cpp
+    src/dot_parser.cpp
+)
+
 # Add executable
-add_executable(temporis src/main.cpp)
+add_executable(temporis ${SOURCES})
 
 # Link libraries
 target_link_libraries(temporis ${Boost_LIBRARIES})
