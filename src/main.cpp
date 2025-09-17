@@ -33,8 +33,21 @@ public:
     PresburgerTerm operator+(const PresburgerTerm& other) const {
         if (variable_.empty() && other.variable_.empty()) {
             return PresburgerTerm(constant_ + other.constant_);
+        } else if (variable_.empty()) {
+            PresburgerTerm result = other;
+            result.constant_ += constant_;
+            return result;
+        } else if (other.variable_.empty()) {
+            PresburgerTerm result = *this;
+            result.constant_ += other.constant_;
+            return result;
+        } else if (variable_ == other.variable_) {
+            PresburgerTerm result = *this;
+            result.coefficient_ += other.coefficient_;
+            result.constant_ += other.constant_;
+            return result;
         }
-        // Simplified for demonstration
+        // For different variables, return the first one (simplified)
         return *this;
     }
     
@@ -46,9 +59,26 @@ public:
     }
     
     std::string to_string() const {
-        if (variable_.empty()) return std::to_string(constant_);
-        if (coefficient_ == 1 && constant_ == 0) return variable_;
-        return std::to_string(coefficient_) + "*" + variable_ + "+" + std::to_string(constant_);
+        if (variable_.empty()) {
+            return std::to_string(constant_);
+        }
+        
+        std::string result;
+        if (coefficient_ == 1) {
+            result = variable_;
+        } else if (coefficient_ == -1) {
+            result = "-" + variable_;
+        } else {
+            result = std::to_string(coefficient_) + "*" + variable_;
+        }
+        
+        if (constant_ > 0) {
+            result += " + " + std::to_string(constant_);
+        } else if (constant_ < 0) {
+            result += " - " + std::to_string(-constant_);
+        }
+        
+        return result;
     }
 };
 
@@ -234,7 +264,7 @@ public:
         
         // Evaluate constraint with current time
         std::map<std::string, int> values;
-        values["t"] = time;
+        values["time"] = time;
         
         return it->second->evaluate(values);
     }
@@ -270,7 +300,7 @@ public:
     void print_formula_explanations() const {
         std::cout << "=== Presburger Formula Explanations ===\n";
         std::cout << "Variables:\n";
-        std::cout << "  t = current time\n\n";
+        std::cout << "  time = current time\n\n";
         
         for (const auto& [edge, constraint] : edge_constraints_) {
             auto source = boost::source(edge, graph_);
@@ -290,22 +320,90 @@ private:
     std::map<std::string, PresburgerTemporalVertex> vertex_map_;
 
     std::unique_ptr<PresburgerFormula> parse_constraint(const std::string& constraint_str) {
-        // Parse simple constraints like "t >= 2", "t = 3", "t <= 5"
-        std::regex ge_pattern(R"(t\s*>=\s*(\d+))");
-        std::regex eq_pattern(R"(t\s*=\s*(\d+))");
-        std::regex le_pattern(R"(t\s*<=\s*(\d+))");
+        // Parse simple constraints like "time >= 2", "time = 3", "time <= 5"
+        std::regex ge_pattern(R"(time\s*>=\s*(\d+))");
+        std::regex eq_pattern(R"(time\s*=\s*(\d+))");
+        std::regex le_pattern(R"(time\s*<=\s*(\d+))");
+        
+        // Parse existential constraints like "exists k. time = 2*k + 1"
+        std::regex exists_pattern(R"(exists\s+(\w+)\.\s*(.+))");
+        
+        // Parse arithmetic constraints with variables like "time = 2*k + 1", "time >= k + 3"
+        std::regex arith_eq_pattern(R"(time\s*=\s*(\d+)\*(\w+)\s*\+\s*(\d+))");
+        std::regex arith_ge_pattern(R"(time\s*>=\s*(\w+)\s*\+\s*(\d+))");
+        std::regex arith_le_pattern(R"(time\s*<=\s*(\w+)\s*\+\s*(\d+))");
+        std::regex var_eq_pattern(R"(time\s*=\s*(\w+)\s*\+\s*(\d+))");
         
         std::smatch match;
         
-        if (std::regex_match(constraint_str, match, ge_pattern)) {
+        // Handle existential quantifiers
+        if (std::regex_match(constraint_str, match, exists_pattern)) {
+            std::string var = match[1].str();
+            std::string inner_constraint = match[2].str();
+            
+            // Parse the inner constraint
+            auto inner_formula = parse_constraint(inner_constraint);
+            if (inner_formula) {
+                return PresburgerFormula::exists(var, std::move(inner_formula));
+            }
+        }
+        // Handle arithmetic expressions like "t = 2*k + 1"
+        else if (std::regex_match(constraint_str, match, arith_eq_pattern)) {
+            int coeff = std::stoi(match[1].str());
+            std::string var = match[2].str();
+            int constant = std::stoi(match[3].str());
+            
+            // Create term: coeff*var + constant
+            PresburgerTerm right_term(var);
+            right_term = right_term * coeff;
+            PresburgerTerm const_term(constant);
+            PresburgerTerm combined = right_term + const_term;
+            
+            return PresburgerFormula::equal(PresburgerTerm("time"), combined);
+        }
+        // Handle expressions like "time >= k + 3"
+        else if (std::regex_match(constraint_str, match, arith_ge_pattern)) {
+            std::string var = match[1].str();
+            int constant = std::stoi(match[2].str());
+            
+            PresburgerTerm right_term(var);
+            PresburgerTerm const_term(constant);
+            PresburgerTerm combined = right_term + const_term;
+            
+            return PresburgerFormula::greaterequal(PresburgerTerm("time"), combined);
+        }
+        // Handle expressions like "time <= k + 5"
+        else if (std::regex_match(constraint_str, match, arith_le_pattern)) {
+            std::string var = match[1].str();
+            int constant = std::stoi(match[2].str());
+            
+            PresburgerTerm right_term(var);
+            PresburgerTerm const_term(constant);
+            PresburgerTerm combined = right_term + const_term;
+            
+            return PresburgerFormula::lessequal(PresburgerTerm("time"), combined);
+        }
+        // Handle expressions like "time = k + 2"
+        else if (std::regex_match(constraint_str, match, var_eq_pattern)) {
+            std::string var = match[1].str();
+            int constant = std::stoi(match[2].str());
+            
+            PresburgerTerm right_term(var);
+            PresburgerTerm const_term(constant);
+            PresburgerTerm combined = right_term + const_term;
+            
+            return PresburgerFormula::equal(PresburgerTerm("time"), combined);
+        }
+        // Handle simple constraints
+        else if (std::regex_match(constraint_str, match, ge_pattern)) {
             int value = std::stoi(match[1].str());
-            return PresburgerFormula::greaterequal(PresburgerTerm("t"), PresburgerTerm(value));
+            return PresburgerFormula::greaterequal(PresburgerTerm("time"), PresburgerTerm(value));
         } else if (std::regex_match(constraint_str, match, eq_pattern)) {
             int value = std::stoi(match[1].str());
-            return PresburgerFormula::equal(PresburgerTerm("t"), PresburgerTerm(value));
+            return PresburgerFormula::equal(PresburgerTerm("time"), PresburgerTerm(value));
         } else if (std::regex_match(constraint_str, match, le_pattern)) {
             int value = std::stoi(match[1].str());
-            return PresburgerFormula::lessequal(PresburgerTerm("t"), PresburgerTerm(value));
+            return PresburgerFormula::lessequal(PresburgerTerm("time"), PresburgerTerm(value));
         }
         
         return nullptr; // No constraint

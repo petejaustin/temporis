@@ -1,13 +1,153 @@
-# Temporis: Presburger Temporal Game E## Usage
+# Temporis: Advanced Presburger Temporal Games
 
-### Compilation
+A C++20 framework for analyzing temporal games with **Presburger arithmetic constraints** and **existential quantifiers**.
+
+## Features
+
+- **2-Player Temporal Games**: Standard game format with players 0 and 1
+- **Presburger Constraints**: Full support for linear arithmetic over integers
+- **Existential Quantifiers**: Express complex mathematical relationships
+- **Multiple Variables**: Support for constraints with multiple temporal variables
+- **DOT Format Input**: Standard graph format with custom temporal annotations
+- **Professional Build System**: CMake-based with proper directory structure
+
+## Quick Start
+
+### Build
 ```bash
-cd temporis
-g++ -std=c++20 -I../ggg/include main.cpp -o main
+mkdir build && cd build
+cmake ..
+make
 ```
 
-### Execution
+### Run Example
 ```bash
+./build/temporis input-files/example_temporal.dot
+./build/temporis input-files/complex_temporal_game.dot
+./build/temporis input-files/advanced_presburger_game.dot
+```
+
+## Constraint Language
+
+### Basic Constraints
+- **Linear inequalities**: `time <= 5`, `time >= 3`, `2*time + 1 <= 10`
+- **Equality**: `time = 7`, `3*time = 12`
+- **Modular arithmetic**: `time % 3 = 1`
+
+### Existential Quantifiers
+Express existence of integer values satisfying conditions:
+
+```
+exists k. time = 2*k + 1    # time is odd
+exists k. time = 3*k + 1    # time ≡ 1 (mod 3)
+exists j. exists k. time = j + 2*k    # complex multi-variable
+```
+
+### Multi-Variable Support
+Constraints can reference multiple temporal variables and quantified variables:
+```
+exists k. exists j. time = 2*k + 3*j + 1
+```
+
+## Game Format
+
+### Vertex Properties
+- **name**: Unique vertex identifier (v0, v1, v2, ...)
+- **player**: Game player (0 or 1)
+
+### Edge Properties  
+- **name**: Unique edge identifier (e0, e1, e2, ...)
+- **constraint**: Presburger formula determining edge availability
+
+### Example DOT File
+```dot
+digraph TemporalGame {
+    v0 [name="v0", player=0];
+    v1 [name="v1", player=1];
+    v2 [name="v2", player=0];
+    
+    v0 -> v1 [label="e0", constraint="exists k. time = 2*k + 1"];
+    v1 -> v2 [label="e1", constraint="time <= 5"];
+    v2 -> v0 [label="e2", constraint="exists k. time = 3*k + 1"];
+}
+```
+
+## Mathematical Foundations
+
+### Presburger Arithmetic
+The constraint language supports:
+- **Linear arithmetic**: Addition, subtraction, scalar multiplication
+- **Comparisons**: =, <=, >=, <, >
+- **Modular arithmetic**: % operator
+- **Existential quantification**: exists keyword
+
+### Temporal Semantics
+- **Time Variable**: `time` represents discrete time steps (0, 1, 2, ...)
+- **Edge Availability**: Constraints determine when edges are traversable
+- **Game Evolution**: Players make moves based on available edges at current time
+
+### Constraint Evaluation
+The system evaluates constraints at each time step:
+1. **Parse** Presburger formulas with regex-based parser
+2. **Substitute** current time value for variable `time`
+3. **Evaluate** existential quantifiers by testing integer witnesses
+4. **Determine** edge availability based on constraint satisfaction
+
+## Architecture
+
+### Core Components
+- **PresburgerTerm**: Represents linear expressions with coefficients
+- **PresburgerTemporalDotParser**: Parses DOT files with temporal annotations
+- **Constraint Evaluator**: Evaluates Presburger formulas with existential quantifiers
+
+### Build System
+- **CMake**: Professional build configuration
+- **C++20**: Modern C++ with advanced template features
+- **Boost**: Graph library integration
+- **Directory Structure**: Organized src/, input-files/, build/ layout
+
+## Examples
+
+### Simple Game (`example_temporal.dot`)
+Basic 2-player game with linear constraints.
+
+### Complex Game (`complex_temporal_game.dot`)
+Multi-vertex game with various constraint types.
+
+### Advanced Game (`advanced_presburger_game.dot`)
+Demonstrates existential quantifiers and complex mathematical relationships:
+- Odd time constraints: `exists k. time = 2*k + 1`
+- Modular arithmetic: `exists k. time = 3*k + 1`
+- Multi-variable formulas: Complex quantified expressions
+
+## Pattern Analysis
+
+The system provides detailed analysis of temporal evolution:
+- **Edge Activity**: Shows when each edge is available
+- **Constraint Evaluation**: Real-time formula satisfaction
+- **Pattern Recognition**: Identifies mathematical relationships
+
+Example output:
+```
+v1->v2 active at times: 1 3 5 7    # Odd times (exists k. time = 2*k + 1)
+v2->v3 active at times: 0 2 4 6 8  # Even times (exists k. time = 2*k + 0)  
+v3->v4 active at times: 3 4 5 6 7 8 # time >= 3
+```
+
+## Dependencies
+
+- **C++20**: Modern C++ compiler with full C++20 support
+- **CMake**: Version 3.15 or higher
+- **Boost**: Graph library (automatically found by CMake)
+
+## License
+
+This project uses advanced mathematical concepts and professional software engineering practices.
+Built with modern C++20 and designed for research in temporal game theory.
+
+---
+
+*Temporis: Where time meets mathematics in game theory.*
 # DOT file input is required
 ./main example_temporal.dot
 
