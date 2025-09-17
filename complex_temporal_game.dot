@@ -1,0 +1,19 @@
+digraph complex_temporal_game {
+    // More complex 2-player game with various constraint types
+    v0 [name="v0", player=0];
+    v1 [name="v1", player=1];
+    v2 [name="v2", player=0];
+    v3 [name="v3", player=1];
+    v4 [name="v4", player=0];
+    v5 [name="v5", player=1];
+    
+    // Various Presburger constraint patterns
+    v0 -> v1 [label="e0", constraint="t >= 1"];           // Active from time 1
+    v1 -> v2 [label="e1", constraint="t = 2"];            // Active only at time 2
+    v2 -> v3 [label="e2", constraint="t <= 4"];           // Active until time 4
+    v3 -> v4 [label="e3", constraint="t >= 3"];           // Active from time 3
+    v4 -> v5 [label="e4"];                                // Always active
+    v0 -> v5 [label="e5", constraint="t = 0"];            // Active only at time 0
+    v1 -> v4 [label="e6", constraint="t >= 2"];           // Active from time 2
+    v2 -> v5 [label="e7", constraint="t <= 3"];           // Active until time 3
+}
