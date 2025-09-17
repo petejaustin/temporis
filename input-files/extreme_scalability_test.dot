@@ -1,0 +1,17 @@
+digraph EightVariableChallenge {
+    // Test with 8 variables - challenging but processable in ~1 minute
+    v0 [name="v0", player=0];
+    v1 [name="v1", player=1];
+    v2 [name="v2", player=0];
+    
+    // 8 variables with mixed coefficients
+    // time = a + 2*b + c + d + e + f + g + h + 20
+    v0 -> v1 [label="e0", constraint="exists a. exists b. exists c. exists d. exists e. exists f. exists g. exists h. time = a + 2*b + c + d + e + f + g + h + 20"];
+    
+    // 8 variables, simpler pattern
+    // time = w + x + y + z + p + q + r + s + 15  
+    v1 -> v2 [label="e1", constraint="exists w. exists x. exists y. exists z. exists p. exists q. exists r. exists s. time = w + x + y + z + p + q + r + s + 15"];
+    
+    // Return with simple constraint
+    v2 -> v0 [label="e2", constraint="time <= 25"];
+}

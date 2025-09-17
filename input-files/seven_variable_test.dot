@@ -1,0 +1,11 @@
+digraph SevenVariableTest {
+    // 7 variables - should complete in about 1 minute
+    v0 [name="v0", player=0];
+    v1 [name="v1", player=1];
+    
+    // 7 variables: time = a + b + c + d + e + f + g + 15
+    v0 -> v1 [label="e0", constraint="exists a. exists b. exists c. exists d. exists e. exists f. exists g. time = a + b + c + d + e + f + g + 15"];
+    
+    // Simple return constraint
+    v1 -> v0 [label="e1", constraint="time <= 20"];
+}

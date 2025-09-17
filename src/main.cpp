@@ -18,67 +18,78 @@ class PresburgerFormula;
 class PresburgerTerm;
 
 /**
- * @brief Presburger arithmetic term representation
+ * @brief Presburger arithmetic term representation supporting multiple variables
  */
 class PresburgerTerm {
 public:
-    std::string variable_;
-    int coefficient_;
+    std::map<std::string, int> coefficients_;  // variable -> coefficient mapping
     int constant_;
 
 public:
-    PresburgerTerm(const std::string& var) : variable_(var), coefficient_(1), constant_(0) {}
-    PresburgerTerm(int val) : variable_(""), coefficient_(0), constant_(val) {}
+    PresburgerTerm(const std::string& var) : constant_(0) {
+        coefficients_[var] = 1;
+    }
+    
+    PresburgerTerm(int val) : constant_(val) {}
+    
+    PresburgerTerm() : constant_(0) {}
     
     PresburgerTerm operator+(const PresburgerTerm& other) const {
-        if (variable_.empty() && other.variable_.empty()) {
-            return PresburgerTerm(constant_ + other.constant_);
-        } else if (variable_.empty()) {
-            PresburgerTerm result = other;
-            result.constant_ += constant_;
-            return result;
-        } else if (other.variable_.empty()) {
-            PresburgerTerm result = *this;
-            result.constant_ += other.constant_;
-            return result;
-        } else if (variable_ == other.variable_) {
-            PresburgerTerm result = *this;
-            result.coefficient_ += other.coefficient_;
-            result.constant_ += other.constant_;
-            return result;
+        PresburgerTerm result = *this;
+        result.constant_ += other.constant_;
+        
+        // Add coefficients for each variable
+        for (const auto& [var, coeff] : other.coefficients_) {
+            result.coefficients_[var] += coeff;
         }
-        // For different variables, return the first one (simplified)
-        return *this;
+        
+        return result;
     }
     
     PresburgerTerm operator*(int scalar) const {
         PresburgerTerm result = *this;
-        result.coefficient_ *= scalar;
         result.constant_ *= scalar;
+        
+        for (auto& [var, coeff] : result.coefficients_) {
+            coeff *= scalar;
+        }
+        
         return result;
     }
     
     std::string to_string() const {
-        if (variable_.empty()) {
-            return std::to_string(constant_);
-        }
-        
         std::string result;
-        if (coefficient_ == 1) {
-            result = variable_;
-        } else if (coefficient_ == -1) {
-            result = "-" + variable_;
-        } else {
-            result = std::to_string(coefficient_) + "*" + variable_;
+        bool first = true;
+        
+        // Add variable terms
+        for (const auto& [var, coeff] : coefficients_) {
+            if (coeff == 0) continue;
+            
+            if (!first && coeff > 0) result += " + ";
+            if (coeff < 0) result += " - ";
+            
+            int abs_coeff = std::abs(coeff);
+            if (abs_coeff == 1) {
+                result += var;
+            } else {
+                result += std::to_string(abs_coeff) + "*" + var;
+            }
+            first = false;
         }
         
-        if (constant_ > 0) {
-            result += " + " + std::to_string(constant_);
-        } else if (constant_ < 0) {
-            result += " - " + std::to_string(-constant_);
+        // Add constant term
+        if (constant_ != 0 || first) {
+            if (!first && constant_ > 0) result += " + ";
+            if (constant_ < 0 && !first) result += " - ";
+            
+            if (first || constant_ < 0) {
+                result += std::to_string(constant_);
+            } else {
+                result += std::to_string(constant_);
+            }
         }
         
-        return result;
+        return result.empty() ? "0" : result;
     }
 };
 
@@ -178,14 +189,18 @@ public:
 
 private:
     int evaluate_term(const PresburgerTerm& term, const std::map<std::string, int>& values) const {
-        if (term.variable_.empty()) {
-            return term.constant_;
+        int result = term.constant_;
+        
+        // Add contribution from each variable
+        for (const auto& [var, coeff] : term.coefficients_) {
+            auto it = values.find(var);
+            if (it != values.end()) {
+                result += coeff * it->second;
+            }
+            // Unknown variables default to 0 (no contribution)
         }
-        auto it = values.find(term.variable_);
-        if (it != values.end()) {
-            return term.coefficient_ * it->second + term.constant_;
-        }
-        return 0; // Unknown variable defaults to 0
+        
+        return result;
     }
 };
 
@@ -321,18 +336,12 @@ private:
 
     std::unique_ptr<PresburgerFormula> parse_constraint(const std::string& constraint_str) {
         // Parse simple constraints like "time >= 2", "time = 3", "time <= 5"
-        std::regex ge_pattern(R"(time\s*>=\s*(\d+))");
-        std::regex eq_pattern(R"(time\s*=\s*(\d+))");
-        std::regex le_pattern(R"(time\s*<=\s*(\d+))");
+        std::regex simple_ge_pattern(R"(time\s*>=\s*(\d+))");
+        std::regex simple_eq_pattern(R"(time\s*=\s*(\d+))");
+        std::regex simple_le_pattern(R"(time\s*<=\s*(\d+))");
         
         // Parse existential constraints like "exists k. time = 2*k + 1"
         std::regex exists_pattern(R"(exists\s+(\w+)\.\s*(.+))");
-        
-        // Parse arithmetic constraints with variables like "time = 2*k + 1", "time >= k + 3"
-        std::regex arith_eq_pattern(R"(time\s*=\s*(\d+)\*(\w+)\s*\+\s*(\d+))");
-        std::regex arith_ge_pattern(R"(time\s*>=\s*(\w+)\s*\+\s*(\d+))");
-        std::regex arith_le_pattern(R"(time\s*<=\s*(\w+)\s*\+\s*(\d+))");
-        std::regex var_eq_pattern(R"(time\s*=\s*(\w+)\s*\+\s*(\d+))");
         
         std::smatch match;
         
@@ -347,66 +356,125 @@ private:
                 return PresburgerFormula::exists(var, std::move(inner_formula));
             }
         }
-        // Handle arithmetic expressions like "t = 2*k + 1"
-        else if (std::regex_match(constraint_str, match, arith_eq_pattern)) {
-            int coeff = std::stoi(match[1].str());
-            std::string var = match[2].str();
-            int constant = std::stoi(match[3].str());
-            
-            // Create term: coeff*var + constant
-            PresburgerTerm right_term(var);
-            right_term = right_term * coeff;
-            PresburgerTerm const_term(constant);
-            PresburgerTerm combined = right_term + const_term;
-            
-            return PresburgerFormula::equal(PresburgerTerm("time"), combined);
-        }
-        // Handle expressions like "time >= k + 3"
-        else if (std::regex_match(constraint_str, match, arith_ge_pattern)) {
-            std::string var = match[1].str();
-            int constant = std::stoi(match[2].str());
-            
-            PresburgerTerm right_term(var);
-            PresburgerTerm const_term(constant);
-            PresburgerTerm combined = right_term + const_term;
-            
-            return PresburgerFormula::greaterequal(PresburgerTerm("time"), combined);
-        }
-        // Handle expressions like "time <= k + 5"
-        else if (std::regex_match(constraint_str, match, arith_le_pattern)) {
-            std::string var = match[1].str();
-            int constant = std::stoi(match[2].str());
-            
-            PresburgerTerm right_term(var);
-            PresburgerTerm const_term(constant);
-            PresburgerTerm combined = right_term + const_term;
-            
-            return PresburgerFormula::lessequal(PresburgerTerm("time"), combined);
-        }
-        // Handle expressions like "time = k + 2"
-        else if (std::regex_match(constraint_str, match, var_eq_pattern)) {
-            std::string var = match[1].str();
-            int constant = std::stoi(match[2].str());
-            
-            PresburgerTerm right_term(var);
-            PresburgerTerm const_term(constant);
-            PresburgerTerm combined = right_term + const_term;
-            
-            return PresburgerFormula::equal(PresburgerTerm("time"), combined);
-        }
-        // Handle simple constraints
-        else if (std::regex_match(constraint_str, match, ge_pattern)) {
+        // Handle simple constraints first
+        else if (std::regex_match(constraint_str, match, simple_ge_pattern)) {
             int value = std::stoi(match[1].str());
             return PresburgerFormula::greaterequal(PresburgerTerm("time"), PresburgerTerm(value));
-        } else if (std::regex_match(constraint_str, match, eq_pattern)) {
+        } else if (std::regex_match(constraint_str, match, simple_eq_pattern)) {
             int value = std::stoi(match[1].str());
             return PresburgerFormula::equal(PresburgerTerm("time"), PresburgerTerm(value));
-        } else if (std::regex_match(constraint_str, match, le_pattern)) {
+        } else if (std::regex_match(constraint_str, match, simple_le_pattern)) {
             int value = std::stoi(match[1].str());
             return PresburgerFormula::lessequal(PresburgerTerm("time"), PresburgerTerm(value));
         }
+        // Handle complex arithmetic expressions
+        else if (constraint_str.find("time") != std::string::npos && 
+                 (constraint_str.find("=") != std::string::npos || 
+                  constraint_str.find(">=") != std::string::npos || 
+                  constraint_str.find("<=") != std::string::npos)) {
+            
+            return parse_arithmetic_constraint(constraint_str);
+        }
         
         return nullptr; // No constraint
+    }
+    
+    std::unique_ptr<PresburgerFormula> parse_arithmetic_constraint(const std::string& constraint_str) {
+        // Parse expressions like "time = 2*a + 3*b + 4*c + 5"
+        // This is a simplified parser that handles general linear combinations
+        
+        std::string op;
+        size_t op_pos = std::string::npos;
+        
+        if ((op_pos = constraint_str.find(" >= ")) != std::string::npos) {
+            op = ">=";
+        } else if ((op_pos = constraint_str.find(" <= ")) != std::string::npos) {
+            op = "<=";
+        } else if ((op_pos = constraint_str.find(" = ")) != std::string::npos) {
+            op = "=";
+        } else {
+            return nullptr;
+        }
+        
+        std::string left_side = constraint_str.substr(0, op_pos);
+        std::string right_side = constraint_str.substr(op_pos + op.length() + 2);
+        
+        // Left side should be "time"
+        if (left_side.find("time") == std::string::npos) {
+            return nullptr;
+        }
+        
+        // Parse the right side as a linear combination
+        PresburgerTerm right_term = parse_linear_expression(right_side);
+        
+        if (op == "=") {
+            return PresburgerFormula::equal(PresburgerTerm("time"), right_term);
+        } else if (op == ">=") {
+            return PresburgerFormula::greaterequal(PresburgerTerm("time"), right_term);
+        } else if (op == "<=") {
+            return PresburgerFormula::lessequal(PresburgerTerm("time"), right_term);
+        }
+        
+        return nullptr;
+    }
+    
+    PresburgerTerm parse_linear_expression(const std::string& expr) {
+        // Parse expressions like "2*a + 3*b + 4*c + 5" or "a + b + c + 1"
+        PresburgerTerm result;
+        
+        // Split by + and - while keeping the operators
+        std::vector<std::string> terms;
+        std::string current_term;
+        bool negative = false;
+        
+        for (size_t i = 0; i < expr.length(); ++i) {
+            char c = expr[i];
+            if (c == '+' || c == '-') {
+                if (!current_term.empty()) {
+                    terms.push_back((negative ? "-" : "") + current_term);
+                    current_term.clear();
+                }
+                negative = (c == '-');
+            } else if (c != ' ') {
+                current_term += c;
+            }
+        }
+        if (!current_term.empty()) {
+            terms.push_back((negative ? "-" : "") + current_term);
+        }
+        
+        // Parse each term
+        for (const std::string& term_str : terms) {
+            std::string trimmed = term_str;
+            // Remove leading/trailing whitespace
+            trimmed.erase(0, trimmed.find_first_not_of(" \t"));
+            trimmed.erase(trimmed.find_last_not_of(" \t") + 1);
+            
+            if (trimmed.empty()) continue;
+            
+            bool is_negative = trimmed[0] == '-';
+            if (is_negative) trimmed = trimmed.substr(1);
+            
+            // Check if it's a pure number (constant)
+            if (std::regex_match(trimmed, std::regex(R"(\d+)"))) {
+                int value = std::stoi(trimmed);
+                result.constant_ += is_negative ? -value : value;
+            }
+            // Check if it's coefficient*variable
+            else if (std::regex_match(trimmed, std::regex(R"((\d+)\*(\w+))"))) {
+                std::smatch match;
+                std::regex_match(trimmed, match, std::regex(R"((\d+)\*(\w+))"));
+                int coeff = std::stoi(match[1].str());
+                std::string var = match[2].str();
+                result.coefficients_[var] += is_negative ? -coeff : coeff;
+            }
+            // Check if it's just a variable
+            else if (std::regex_match(trimmed, std::regex(R"(\w+)"))) {
+                result.coefficients_[trimmed] += is_negative ? -1 : 1;
+            }
+        }
+        
+        return result;
     }
 
 public:
