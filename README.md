@@ -1,18 +1,35 @@
-# Temporis: Presburger Temporal Game Examples
+# Temporis: Presburger Temporal Game E## Usage
 
-This directory contains examples of 2-player temporal games using Presburger arithmetic constraints for edge availability, built with the Game Graph Gym (GGG) library.
+### Compilation
+```bash
+cd temporis
+g++ -std=c++20 -I../ggg/include main.cpp -o main
+```
+
+### Execution
+```bash
+# DOT file input is required
+./main example_temporal.dot
+
+# Use complex example
+./main complex_temporal_game.dot
+
+# Usage message shown if no file provided
+./main
+```rectory contains examples of 2-player temporal games using Presburger arithmetic constraints for edge availability, built with the Game Graph Gym (GGG) library.
 
 ## Files Overview
 
-### `presburger_temporal_graph_example.cpp`
+### `main.cpp`
 **2-player temporal game with Presburger arithmetic constraints**
 - Simple vertex naming (v0, v1, v2, ...) following GGG conventions
 - 2-player game structure (player 0 and player 1 vertices)
 - Edge availability determined solely by Presburger arithmetic formulas
-- DOT file input support for game specification
+- DOT file input parser for game specification (no hardcoded examples)
 
 **Key Features:**
 - PresburgerTemporalGameManager class
+- Complete DOT file parser with regex-based parsing
 - Presburger arithmetic constraint evaluation
 - Temporal game state simulation
 - Real-time edge availability analysis based on mathematical constraints
@@ -106,7 +123,7 @@ Mathematical constraint evaluation through:
 - Real-time constraint evaluation at each time step
 
 ### DOT File Format
-Simple input format compatible with GGG test suite structure:
+Input-only format compatible with GGG test suite structure:
 ```dot
 digraph temporal_game {
     v0 [name="v0", player=0];
@@ -115,10 +132,19 @@ digraph temporal_game {
 }
 ```
 
+**Parsing Features:**
+- Complete regex-based DOT file parsing
+- Automatic vertex and edge detection
+- Constraint parsing for `t >= n`, `t = n`, `t <= n` patterns
+- No hardcoded examples - all content from input files
+
 ## Design Philosophy
 
 This implementation focuses on:
+- **Input-Only Operation**: No hardcoded examples, all content from DOT files
+- **Complete DOT Parsing**: Regex-based parser for vertices, edges, and constraints
 - **Simplicity**: Minimal vertex properties, only name and player
 - **Mathematical Precision**: Edge availability controlled solely by Presburger constraints
 - **GGG Compatibility**: Follows Game Graph Gym naming and structural conventions
 - **2-Player Games**: Standard game-theoretic framework
+- **Required Input Files**: Enforces proper usage by requiring DOT file arguments

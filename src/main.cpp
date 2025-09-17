@@ -283,9 +283,34 @@ public:
 };
 
 /**
- * @brief Simple DOT file parser for Presburger temporal games
+ * @brief DOT file parser for Presburger temporal games
  */
 class PresburgerTemporalDotParser {
+private:
+    std::map<std::string, PresburgerTemporalVertex> vertex_map_;
+
+    std::unique_ptr<PresburgerFormula> parse_constraint(const std::string& constraint_str) {
+        // Parse simple constraints like "t >= 2", "t = 3", "t <= 5"
+        std::regex ge_pattern(R"(t\s*>=\s*(\d+))");
+        std::regex eq_pattern(R"(t\s*=\s*(\d+))");
+        std::regex le_pattern(R"(t\s*<=\s*(\d+))");
+        
+        std::smatch match;
+        
+        if (std::regex_match(constraint_str, match, ge_pattern)) {
+            int value = std::stoi(match[1].str());
+            return PresburgerFormula::greaterequal(PresburgerTerm("t"), PresburgerTerm(value));
+        } else if (std::regex_match(constraint_str, match, eq_pattern)) {
+            int value = std::stoi(match[1].str());
+            return PresburgerFormula::equal(PresburgerTerm("t"), PresburgerTerm(value));
+        } else if (std::regex_match(constraint_str, match, le_pattern)) {
+            int value = std::stoi(match[1].str());
+            return PresburgerFormula::lessequal(PresburgerTerm("t"), PresburgerTerm(value));
+        }
+        
+        return nullptr; // No constraint
+    }
+
 public:
     bool parse_file(const std::string& filename, PresburgerTemporalGameManager& manager) {
         std::ifstream file(filename);
@@ -294,43 +319,58 @@ public:
             return false;
         }
         
-        std::string content((std::istreambuf_iterator<char>(file)),
-                           std::istreambuf_iterator<char>());
+        std::string line;
+        std::regex vertex_pattern(R"(\s*(\w+)\s*\[\s*name\s*=\s*\"([^\"]+)\"\s*,\s*player\s*=\s*(\d+)\s*\]\s*;)");
+        std::regex edge_pattern(R"(\s*(\w+)\s*->\s*(\w+)\s*\[\s*label\s*=\s*\"([^\"]+)\"(?:\s*,\s*constraint\s*=\s*\"([^\"]+)\")?\s*\]\s*;?)");
+        
+        while (std::getline(file, line)) {
+            // Skip comments and empty lines
+            if (line.empty() || line.find("//") == 0 || line.find("digraph") != std::string::npos || 
+                line.find("{") != std::string::npos || line.find("}") != std::string::npos) {
+                continue;
+            }
+            
+            std::smatch match;
+            
+            // Parse vertex declarations
+            if (std::regex_search(line, match, vertex_pattern)) {
+                std::string vertex_id = match[1].str();
+                std::string name = match[2].str();
+                int player = std::stoi(match[3].str());
+                
+                auto vertex = manager.add_vertex(name, player);
+                vertex_map_[vertex_id] = vertex;
+                continue;
+            }
+            
+            // Parse edge declarations
+            if (std::regex_search(line, match, edge_pattern)) {
+                std::string source_id = match[1].str();
+                std::string target_id = match[2].str();
+                std::string label = match[3].str();
+                std::string constraint_str = match[4].str(); // May be empty
+                
+                if (vertex_map_.find(source_id) == vertex_map_.end() || 
+                    vertex_map_.find(target_id) == vertex_map_.end()) {
+                    std::cerr << "Error: Unknown vertex in edge: " << source_id << " -> " << target_id << std::endl;
+                    continue;
+                }
+                
+                auto source = vertex_map_[source_id];
+                auto target = vertex_map_[target_id];
+                auto edge = manager.add_edge(source, target, label);
+                
+                // Parse and add constraint if present
+                if (!constraint_str.empty()) {
+                    auto constraint = parse_constraint(constraint_str);
+                    if (constraint) {
+                        manager.add_edge_constraint(edge, std::move(constraint));
+                    }
+                }
+            }
+        }
+        
         file.close();
-        
-        // Create simple 2-player game vertices
-        auto v0 = manager.add_vertex("v0", 0);  // Player 0
-        auto v1 = manager.add_vertex("v1", 1);  // Player 1
-        auto v2 = manager.add_vertex("v2", 0);  // Player 0
-        auto v3 = manager.add_vertex("v3", 1);  // Player 1
-        auto v4 = manager.add_vertex("v4", 0);  // Player 0
-        
-        // Create edges with Presburger constraints
-        auto e0 = manager.add_edge(v0, v1, "e0");
-        auto e1 = manager.add_edge(v1, v2, "e1");
-        auto e2 = manager.add_edge(v2, v3, "e2");
-        auto e3 = manager.add_edge(v3, v4, "e3");
-        auto e4 = manager.add_edge(v0, v4, "e4");
-        
-        // Add simple Presburger constraints
-        // Edge e0: active when t >= 2
-        auto constraint1 = PresburgerFormula::greaterequal(PresburgerTerm("t"), PresburgerTerm(2));
-        manager.add_edge_constraint(e0, std::move(constraint1));
-        
-        // Edge e1: active when t = 3
-        auto constraint2 = PresburgerFormula::equal(PresburgerTerm("t"), PresburgerTerm(3));
-        manager.add_edge_constraint(e1, std::move(constraint2));
-        
-        // Edge e2: active when t <= 5
-        auto constraint3 = PresburgerFormula::lessequal(PresburgerTerm("t"), PresburgerTerm(5));
-        manager.add_edge_constraint(e2, std::move(constraint3));
-        
-        // Edge e3: active when t >= 4
-        auto constraint4 = PresburgerFormula::greaterequal(PresburgerTerm("t"), PresburgerTerm(4));
-        manager.add_edge_constraint(e3, std::move(constraint4));
-        
-        // Edge e4: no constraint (always active)
-        
         return true;
     }
 };
@@ -341,11 +381,13 @@ public:
 int main(int argc, char* argv[]) {
     using namespace ggg::graphs;
     
-    std::string filename = "example_temporal.dot";
-    if (argc > 1) {
-        filename = argv[1];
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <dot_file>" << std::endl;
+        std::cerr << "Example: " << argv[0] << " example_temporal.dot" << std::endl;
+        return 1;
     }
     
+    std::string filename = argv[1];
     std::cout << "Loading Presburger Arithmetic Temporal Game from: " << filename << "\n\n";
     
     PresburgerTemporalGameManager manager;

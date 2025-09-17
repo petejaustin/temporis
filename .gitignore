@@ -1,0 +1,82 @@
+# Build directories and artifacts
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.cmake
+
+# Compiled binaries
+temporis
+main
+*.exe
+*.out
+*.app
+
+# Object files and libraries
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dll
+*.dylib
+
+# Debug and profiling files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+*.ilk
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Temporary and backup files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.orig
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+
+# Keep these file types (explicitly allow patterns)
+# C++ files
+!*.cpp
+!*.hpp
+!*.h
+!*.cc
+!*.cxx
+
+# DOT files
+!*.dot
+
+# CMake files
+!CMakeLists.txt
+!*.cmake.in
+
+# Documentation
+!README.md
+!*.md
+
+# Directories to keep
+!src/
+!input-files/
