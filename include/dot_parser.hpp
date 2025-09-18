@@ -26,6 +26,8 @@ public:
 private:
     std::unique_ptr<PresburgerFormula> parse_constraint(const std::string& constraint_str);
     std::unique_ptr<PresburgerFormula> parse_existential_formula(const std::string& formula_str);
+    std::unique_ptr<PresburgerFormula> parse_modulus_constraint(const std::string& formula_str, size_t mod_pos);
+    std::unique_ptr<PresburgerFormula> parse_percent_modulus_constraint(const std::string& formula_str, size_t percent_pos);
     std::unique_ptr<PresburgerFormula> parse_comparison_formula(const std::string& formula_str, const std::string& op, size_t pos);
     std::unique_ptr<PresburgerFormula> parse_logical_formula(const std::string& formula_str, const std::string& op, size_t pos);
     std::unique_ptr<PresburgerTerm> parse_presburger_term(const std::string& term_str);

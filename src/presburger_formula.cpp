@@ -4,7 +4,7 @@ namespace ggg {
 namespace graphs {
 
 PresburgerFormula::PresburgerFormula(Type t, const PresburgerTerm& l, const PresburgerTerm& r) 
-    : type_(t), left_(l), right_(r) {}
+    : type_(t), left_(l), right_(r), modulus_(0), remainder_(0) {}
 
 std::unique_ptr<PresburgerFormula> PresburgerFormula::equal(const PresburgerTerm& left, const PresburgerTerm& right) {
     return std::make_unique<PresburgerFormula>(EQUAL, left, right);
@@ -16,6 +16,13 @@ std::unique_ptr<PresburgerFormula> PresburgerFormula::greaterequal(const Presbur
 
 std::unique_ptr<PresburgerFormula> PresburgerFormula::lessequal(const PresburgerTerm& left, const PresburgerTerm& right) {
     return std::make_unique<PresburgerFormula>(LESSEQUAL, left, right);
+}
+
+std::unique_ptr<PresburgerFormula> PresburgerFormula::modulus(const PresburgerTerm& expr, int modulus, int remainder) {
+    auto result = std::make_unique<PresburgerFormula>(MODULUS, expr, PresburgerTerm(0));
+    result->modulus_ = modulus;
+    result->remainder_ = remainder;
+    return result;
 }
 
 std::unique_ptr<PresburgerFormula> PresburgerFormula::and_formula(std::vector<std::unique_ptr<PresburgerFormula>> formulas) {
@@ -36,6 +43,7 @@ std::string PresburgerFormula::to_string() const {
         case EQUAL: return left_.to_string() + " = " + right_.to_string();
         case GREATEREQUAL: return left_.to_string() + " >= " + right_.to_string();
         case LESSEQUAL: return left_.to_string() + " <= " + right_.to_string();
+        case MODULUS: return left_.to_string() + " ≡ " + std::to_string(remainder_) + " (mod " + std::to_string(modulus_) + ")";
         case AND: return "AND(...)";
         case EXISTS: return "∃" + existential_var_ + ". (...)";
         default: return "unknown";
@@ -58,6 +66,10 @@ bool PresburgerFormula::evaluate(const std::map<std::string, int>& values) const
             int left_val = evaluate_term(left_, values);
             int right_val = evaluate_term(right_, values);
             return left_val <= right_val;
+        }
+        case MODULUS: {
+            int expr_val = evaluate_term(left_, values);
+            return (expr_val % modulus_) == remainder_;
         }
         case AND: {
             for (const auto& child : children_) {

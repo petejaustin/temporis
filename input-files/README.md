@@ -49,6 +49,19 @@ This directory contains a curated set of test input files for the Temporis tempo
 - **Target**: v10
 - **Use Case**: Solver performance evaluation
 
+### 8. **modulus_test.dot**
+- **Purpose**: Test modulus constraint syntax
+- **Features**: Both `mod` and `%` modulus operators
+- **Target**: v2
+- **Constraints**: Various modulus patterns (3k, 4k+1, 5k+2, 2k)
+- **Use Case**: Testing new modulus constraint parsing
+
+### 9. **advanced_modulus.dot**
+- **Purpose**: Complex modulus patterns with existential quantifiers
+- **Features**: Modulus within existential scopes
+- **Target**: v2  
+- **Use Case**: Advanced modulus constraint testing
+
 ## Syntax Format
 
 All reachability games use the vertex target attribute syntax:
@@ -56,6 +69,29 @@ All reachability games use the vertex target attribute syntax:
 ```dot
 v0 [name="v0", player=0];           // Regular vertex
 v1 [name="v1", player=0, target=1]; // Target vertex
+```
+
+### Temporal Constraints
+
+The system supports various temporal constraint types:
+
+```dot
+// Linear constraints
+[constraint="time >= 5"]
+[constraint="time <= 10"] 
+[constraint="time = 7"]
+
+// Existential quantifiers
+[constraint="exists k. time = 2*k"]        // Even times
+[constraint="exists k. time = 3*k + 1"]    // 3k+1 pattern
+
+// Modulus constraints (NEW!)
+[constraint="time mod 5 == 2"]             // Mathematical syntax
+[constraint="time%3==0"]                   // C-style syntax
+[constraint="expr mod m == r"]              // General form
+
+// Combined constraints
+[constraint="time >= 3 && time <= 8"]      // Time windows
 ```
 
 ## Testing Commands

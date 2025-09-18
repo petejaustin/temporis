@@ -228,6 +228,18 @@ std::unique_ptr<PresburgerFormula> PresburgerTemporalDotParser::parse_constraint
         return parse_existential_formula(cleaned);
     }
     
+    // Parse modulus constraints: expr%m==r or expr mod m == r
+    auto mod_pos = cleaned.find("mod");
+    if (mod_pos != std::string::npos) {
+        return parse_modulus_constraint(cleaned, mod_pos);
+    }
+    
+    // Parse modulus with % operator: expr%m==r
+    auto percent_pos = cleaned.find('%');
+    if (percent_pos != std::string::npos) {
+        return parse_percent_modulus_constraint(cleaned, percent_pos);
+    }
+    
     // Parse comparison operators
     for (const auto& op : {">=", "<=", ">", "<", "==", "!="}) {
         auto pos = cleaned.find(op);
@@ -437,6 +449,58 @@ PresburgerTerm PresburgerTemporalDotParser::parse_linear_expression(const std::s
     }
     
     return result;
+}
+
+std::unique_ptr<PresburgerFormula> PresburgerTemporalDotParser::parse_modulus_constraint(const std::string& formula_str, size_t mod_pos) {
+    // Parse: expr mod m == r  or  expr mod m = r
+    std::string expr_str = formula_str.substr(0, mod_pos);
+    std::string mod_part = formula_str.substr(mod_pos + 3); // Skip "mod"
+    
+    // Find the equals sign
+    auto eq_pos = mod_part.find("==");
+    if (eq_pos == std::string::npos) {
+        eq_pos = mod_part.find('=');
+        if (eq_pos == std::string::npos) {
+            // Invalid syntax, return true
+            return PresburgerFormula::equal(PresburgerTerm(1), PresburgerTerm(1));
+        }
+    }
+    
+    std::string modulus_str = mod_part.substr(0, eq_pos);
+    std::string remainder_str = mod_part.substr(eq_pos + (mod_part[eq_pos + 1] == '=' ? 2 : 1));
+    
+    // Parse components
+    auto expr_term = parse_presburger_term(expr_str);
+    int modulus = std::stoi(modulus_str);
+    int remainder = std::stoi(remainder_str);
+    
+    return PresburgerFormula::modulus(*expr_term, modulus, remainder);
+}
+
+std::unique_ptr<PresburgerFormula> PresburgerTemporalDotParser::parse_percent_modulus_constraint(const std::string& formula_str, size_t percent_pos) {
+    // Parse: expr%m==r  or  expr%m=r
+    std::string expr_str = formula_str.substr(0, percent_pos);
+    std::string mod_part = formula_str.substr(percent_pos + 1); // Skip "%"
+    
+    // Find the equals sign
+    auto eq_pos = mod_part.find("==");
+    if (eq_pos == std::string::npos) {
+        eq_pos = mod_part.find('=');
+        if (eq_pos == std::string::npos) {
+            // Invalid syntax, return true
+            return PresburgerFormula::equal(PresburgerTerm(1), PresburgerTerm(1));
+        }
+    }
+    
+    std::string modulus_str = mod_part.substr(0, eq_pos);
+    std::string remainder_str = mod_part.substr(eq_pos + (mod_part[eq_pos + 1] == '=' ? 2 : 1));
+    
+    // Parse components
+    auto expr_term = parse_presburger_term(expr_str);
+    int modulus = std::stoi(modulus_str);
+    int remainder = std::stoi(remainder_str);
+    
+    return PresburgerFormula::modulus(*expr_term, modulus, remainder);
 }
 
 } // namespace graphs
