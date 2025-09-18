@@ -44,7 +44,6 @@ void TemporalAnalyzer::analyze_temporal_edges(int start_time, int end_time) cons
 void TemporalAnalyzer::generate_full_report(int start_time, int end_time) const {
     print_game_statistics();
     print_game_structure();
-    manager_.print_formula_explanations();
     analyze_temporal_edges(start_time, end_time);
 }
 

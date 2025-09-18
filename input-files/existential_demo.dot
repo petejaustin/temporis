@@ -1,0 +1,24 @@
+digraph ExistentialConstraints {
+    /*
+     * Existential Quantifier Demo
+     * 
+     * Demonstrates existential quantifiers in temporal constraints.
+     * Some edges are only available at specific mathematical patterns.
+     */
+    
+    // Vertices
+    v0 [name="v0", player=0];           // Start
+    v1 [name="v1", player=1];           // Choice A
+    v2 [name="v2", player=1];           // Choice B  
+    v3 [name="v3", player=0, target=1]; // Target
+    
+    // Edges with existential constraints
+    v0 -> v1 [label="even_times", constraint="exists k. time = 2*k"];        // Even times only
+    v0 -> v2 [label="odd_times", constraint="exists k. time = 2*k + 1"];     // Odd times only
+    
+    v1 -> v3 [label="from_even", constraint="time <= 10"];                   // Quick from even
+    v1 -> v0 [label="even_loop"];                                            // Loop back
+    
+    v2 -> v3 [label="from_odd", constraint="time >= 3"];                     // Delayed from odd
+    v2 -> v0 [label="odd_loop"];                                             // Loop back
+}

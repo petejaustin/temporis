@@ -16,7 +16,7 @@ bool PresburgerTemporalDotParser::parse_file(const std::string& filename, Presbu
     }
     
     std::string line;
-    std::regex vertex_pattern(R"(\s*(\w+)\s*\[\s*name\s*=\s*\"([^\"]+)\"\s*,\s*player\s*=\s*(\d+)\s*\]\s*;)");
+    std::regex vertex_pattern(R"(\s*(\w+)\s*\[\s*name\s*=\s*\"([^\"]+)\"\s*,\s*player\s*=\s*(\d+)(?:\s*,\s*target\s*=\s*(\d+))?\s*\]\s*;)");
     std::regex edge_pattern(R"(\s*(\w+)\s*->\s*(\w+)\s*\[\s*label\s*=\s*\"([^\"]+)\"(?:\s*,\s*constraint\s*=\s*\"([^\"]+)\")?\s*\]\s*;?)");
     
     while (std::getline(file, line)) {
@@ -33,6 +33,7 @@ bool PresburgerTemporalDotParser::parse_file(const std::string& filename, Presbu
             std::string vertex_id = match[1].str();
             std::string name = match[2].str();
             int player = std::stoi(match[3].str());
+            // target attribute is optional (match[4])
             
             auto vertex = manager.add_vertex(name, player);
             vertex_map_[vertex_id] = vertex;
@@ -84,65 +85,48 @@ bool PresburgerTemporalDotParser::parse_file_with_objective(const std::string& f
     vertex_map_.clear();
     
     std::string line;
-    std::regex vertex_pattern(R"(\s*(\w+)\s*\[\s*name\s*=\s*\"([^\"]+)\"\s*,\s*player\s*=\s*(\d+)\s*\]\s*;?.*?)");
-    std::regex edge_pattern(R"(\s*(\w+)\s*->\s*(\w+)\s*\[\s*label\s*=\s*\"([^\"]+)\"(?:\s*,\s*constraint\s*=\s*\"([^\"]+)\")?\s*\]\s*;?.*?)");
-    std::regex objective_pattern(R"(\s*//\s*OBJECTIVE:\s*(.+))");
+    std::regex vertex_pattern(R"(\s*(\w+)\s*\[\s*name\s*=\s*\"([^\"]+)\"\s*,\s*player\s*=\s*(\d+)(?:\s*,\s*target\s*=\s*(\d+))?\s*\]\s*;)");
+    std::regex edge_pattern(R"(\s*(\w+)\s*->\s*(\w+)\s*\[\s*label\s*=\s*\"([^\"]+)\"(?:\s*,\s*constraint\s*=\s*\"([^\"]+)\")?\s*\]\s*;?)");
     
-    bool found_objective = false;
-    std::string objective_string;
+    std::set<PresburgerTemporalVertex> target_vertices;
     
-    // First pass: collect all content
-    std::vector<std::string> lines;
     while (std::getline(file, line)) {
-        lines.push_back(line);
-    }
-    file.close();
-    
-    // Parse objective first
-    for (const auto& line : lines) {
-        std::smatch obj_match;
-        if (std::regex_match(line, obj_match, objective_pattern)) {
-            objective_string = obj_match[1].str();
-            found_objective = true;
-            break;
-        }
-    }
-    
-    // Parse vertices and edges normally
-    for (const auto& line : lines) {
-        // Trim whitespace
-        std::string trimmed_line = line;
-        trimmed_line.erase(0, trimmed_line.find_first_not_of(" \t"));
-        trimmed_line.erase(trimmed_line.find_last_not_of(" \t") + 1);
-        
-        // Skip comments and structural elements
-        if (trimmed_line.empty() || trimmed_line.find("/*") != std::string::npos || 
-            trimmed_line.find("*/") != std::string::npos ||
-            trimmed_line.find("digraph") != std::string::npos || 
-            trimmed_line.find("{") != std::string::npos || trimmed_line.find("}") != std::string::npos ||
-            (trimmed_line.find("//") == 0)) {
+        // Skip comments and empty lines
+        if (line.empty() || line.find("//") == 0 || line.find("digraph") != std::string::npos || 
+            line.find("{") != std::string::npos || line.find("}") != std::string::npos) {
             continue;
         }
         
-        // Parse vertices
-        std::smatch vertex_match;
-        if (std::regex_match(trimmed_line, vertex_match, vertex_pattern)) {
-            std::string vertex_id = vertex_match[1].str();
-            std::string name = vertex_match[2].str();
-            int player = std::stoi(vertex_match[3].str());
+        std::smatch match;
+        
+        // Parse vertex declarations
+        if (std::regex_search(line, match, vertex_pattern)) {
+            std::string vertex_id = match[1].str();
+            std::string name = match[2].str();
+            int player = std::stoi(match[3].str());
+            
+            // Check if target attribute is present (match[4])
+            bool is_target = false;
+            if (match.size() > 4 && !match[4].str().empty()) {
+                is_target = (std::stoi(match[4].str()) == 1);
+            }
             
             auto vertex = manager.add_vertex(name, player);
             vertex_map_[vertex_id] = vertex;
+            
+            // Add to target vertices if marked as target
+            if (is_target) {
+                target_vertices.insert(vertex);
+            }
             continue;
         }
         
-        // Parse edges
-        std::smatch edge_match;
-        if (std::regex_match(trimmed_line, edge_match, edge_pattern)) {
-            std::string source_id = edge_match[1].str();
-            std::string target_id = edge_match[2].str();
-            std::string label = edge_match[3].str();
-            std::string constraint_str = edge_match.size() > 4 ? edge_match[4].str() : "";
+        // Parse edge declarations
+        if (std::regex_search(line, match, edge_pattern)) {
+            std::string source_id = match[1].str();
+            std::string target_id = match[2].str();
+            std::string label = match[3].str();
+            std::string constraint_str = match[4].str(); // May be empty
             
             if (vertex_map_.find(source_id) == vertex_map_.end() || 
                 vertex_map_.find(target_id) == vertex_map_.end()) {
@@ -164,12 +148,20 @@ bool PresburgerTemporalDotParser::parse_file_with_objective(const std::string& f
         }
     }
     
-    // Now parse the objective with vertices available
-    if (found_objective) {
-        objective = parse_objective(objective_string);
+    file.close();
+    
+    // Create reachability objective if target vertices were found
+    if (!target_vertices.empty()) {
+        objective = std::make_shared<ReachabilityObjective>(
+            ReachabilityObjective::ObjectiveType::REACHABILITY,
+            target_vertices
+        );
+        return true;
     }
     
-    return found_objective;
+    // No target vertices found, but parsing was successful
+    objective = nullptr;
+    return true;
 }
 
 std::shared_ptr<ReachabilityObjective> PresburgerTemporalDotParser::parse_objective(const std::string& objective_str) {

@@ -36,17 +36,10 @@ public:
      * @brief Load and analyze a DOT file
      * 
      * @param filename Path to the DOT file
+     * @param verbose Whether to include detailed output
      * @return true if successful, false otherwise
      */
-    bool load_and_analyze_file(const std::string& filename);
-
-    /**
-     * @brief Load DOT file with reachability objective and solve the game
-     * 
-     * @param filename Path to the DOT file with objective specification
-     * @return true if successful, false otherwise
-     */
-    bool load_and_solve_reachability_game(const std::string& filename);
+    bool load_and_analyze_file(const std::string& filename, bool verbose = false);
 
     /**
      * @brief Run the demo mode (when no file is provided)

@@ -7,17 +7,31 @@ TemporalGameApplication::TemporalGameApplication() {
 }
 
 int TemporalGameApplication::run(int argc, char* argv[]) {
-    if (argc > 1) {
-        std::string filename = argv[1];
-        
+    // Parse command line arguments
+    bool verbose = false;
+    std::string filename;
+    
+    for (int i = 1; i < argc; i++) {
+        std::string arg = argv[i];
+        if (arg == "--verbose" || arg == "-v") {
+            verbose = true;
+        } else if (arg.find(".dot") != std::string::npos) {
+            filename = arg;
+        }
+    }
+    
+    if (!filename.empty()) {
         // Try to parse with objective first
         std::shared_ptr<ReachabilityObjective> objective;
         bool has_objective = parser_->parse_file_with_objective(filename, *manager_, objective);
         
         if (has_objective && objective) {
-            // File parsed successfully with objective, now just do the analysis and solving
-            print_header(filename);
-            analyzer_->generate_full_report();
+            // File parsed successfully with objective, now do the analysis and solving
+            if (verbose) {
+                print_header(filename);
+                analyzer_->print_game_structure();
+                analyzer_->analyze_temporal_edges(0, 25);  // Analyze first 26 time steps
+            }
             
             std::cout << "\n=== Reachability Game Solving ===\n";
             
@@ -28,30 +42,10 @@ int TemporalGameApplication::run(int argc, char* argv[]) {
             auto [player0_winning, player1_winning] = solver.compute_winning_regions(0);
             solver.print_winning_regions_analysis(player0_winning, player1_winning);
             
-            // Also solve from a specific initial vertex if one is identifiable
-            PresburgerTemporalVertex initial_vertex;
-            bool found_initial = false;
-            
-            auto [vertices_begin, vertices_end] = boost::vertices(manager_->graph());
-            for (auto vertex_it = vertices_begin; vertex_it != vertices_end; ++vertex_it) {
-                if (manager_->graph()[*vertex_it].name == "v0") {
-                    initial_vertex = *vertex_it;
-                    found_initial = true;
-                    break;
-                }
-            }
-            
-            if (found_initial) {
-                std::cout << "\n=== Detailed Analysis from Initial Vertex v0 ===\n";
-                auto solution = solver.solve(initial_vertex, 0);
-                GameState initial_state{initial_vertex, 0};
-                solver.print_solution_analysis(solution, initial_state);
-            }
-            
             return true;
         } else {
             // No objective found, parse as regular file
-            return load_and_analyze_file(filename) ? 0 : 1;
+            return load_and_analyze_file(filename, verbose) ? 0 : 1;
         }
     } else {
         run_demo_mode();
@@ -59,8 +53,10 @@ int TemporalGameApplication::run(int argc, char* argv[]) {
     }
 }
 
-bool TemporalGameApplication::load_and_analyze_file(const std::string& filename) {
-    print_header(filename);
+bool TemporalGameApplication::load_and_analyze_file(const std::string& filename, bool verbose) {
+    if (verbose) {
+        print_header(filename);
+    }
     
     // Parse the DOT file
     if (!parser_->parse_file(filename, *manager_)) {
@@ -68,58 +64,12 @@ bool TemporalGameApplication::load_and_analyze_file(const std::string& filename)
         return false;
     }
     
-    // Generate full analysis report
-    analyzer_->generate_full_report();
-    
-    return true;
-}
-
-bool TemporalGameApplication::load_and_solve_reachability_game(const std::string& filename) {
-    print_header(filename);
-    
-    std::shared_ptr<ReachabilityObjective> objective;
-    
-    // Parse the DOT file with objective
-    if (!parser_->parse_file_with_objective(filename, *manager_, objective)) {
-        std::cerr << "Failed to parse file: " << filename << std::endl;
-        return false;
-    }
-    
-    // Generate basic analysis report
-    analyzer_->generate_full_report();
-    
-    // Solve reachability game if objective was found
-    if (objective) {
-        std::cout << "\n=== Reachability Game Solving ===\n";
-        
-        // Create solver
-        TemporalReachabilitySolver solver(*manager_, objective, 30); // 30 time steps max
-        
-        // Compute winning regions for all vertices
-        auto [player0_winning, player1_winning] = solver.compute_winning_regions(0);
-        solver.print_winning_regions_analysis(player0_winning, player1_winning);
-        
-        // Also solve from a specific initial vertex if one is identifiable
-        PresburgerTemporalVertex initial_vertex;
-        bool found_initial = false;
-        
-        auto [vertices_begin, vertices_end] = boost::vertices(manager_->graph());
-        for (auto vertex_it = vertices_begin; vertex_it != vertices_end; ++vertex_it) {
-            if (manager_->graph()[*vertex_it].name == "v0") {
-                initial_vertex = *vertex_it;
-                found_initial = true;
-                break;
-            }
-        }
-        
-        if (found_initial) {
-            std::cout << "\n=== Detailed Analysis from Initial Vertex v0 ===\n";
-            auto solution = solver.solve(initial_vertex, 0);
-            GameState initial_state{initial_vertex, 0};
-            solver.print_solution_analysis(solution, initial_state);
-        }
+    // Generate analysis report based on verbosity level
+    if (verbose) {
+        analyzer_->generate_full_report();
     } else {
-        std::cout << "\nNo reachability objective found in file. Use comment format: // OBJECTIVE: type targets [time_bound]\n";
+        // Basic output - just game stats
+        analyzer_->print_game_statistics();
     }
     
     return true;

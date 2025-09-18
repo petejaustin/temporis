@@ -1,0 +1,33 @@
+digraph ComplexTemporal {
+    /*
+     * Complex Temporal Game
+     * 
+     * Advanced temporal constraints with multiple quantifiers
+     * and complex mathematical relationships.
+     */
+    
+    // Player 0 vertices
+    v0 [name="v0", player=0];           // Start
+    v2 [name="v2", player=0];           // Intermediate A
+    v4 [name="v4", player=0, target=1]; // Target
+    
+    // Player 1 vertices
+    v1 [name="v1", player=1];           // Gate A
+    v3 [name="v3", player=1];           // Gate B
+    v5 [name="v5", player=1];           // Trap
+    
+    // Complex temporal edges
+    v0 -> v1 [label="init", constraint="time >= 1"];
+    v0 -> v2 [label="bypass", constraint="exists k. time = 3*k"];            // Multiples of 3
+    
+    v1 -> v2 [label="gate_a", constraint="time <= 7"];
+    v1 -> v5 [label="to_trap", constraint="time >= 8"];                      // Late trap
+    
+    v2 -> v3 [label="progress"];
+    v2 -> v4 [label="direct", constraint="exists k. time = 5*k + 2"];        // Specific pattern
+    
+    v3 -> v4 [label="gate_b", constraint="time >= 4 && time <= 12"];         // Time window
+    v3 -> v5 [label="to_trap2"];
+    
+    v5 -> v0 [label="escape", constraint="exists k. time = 2*k"];            // Even escape
+}

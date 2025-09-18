@@ -1,0 +1,55 @@
+digraph PerformanceTest {
+    /*
+     * Performance Test Game
+     * 
+     * Larger game for testing solver performance with more
+     * vertices and complex temporal relationships.
+     */
+    
+    // Start and target
+    v0 [name="v0", player=0];            // Start
+    v10 [name="v10", player=0, target=1]; // Final target
+    
+    // Layer 1 - Player 1 choices
+    v1 [name="v1", player=1];
+    v2 [name="v2", player=1];
+    v3 [name="v3", player=1];
+    
+    // Layer 2 - Player 0 responses  
+    v4 [name="v4", player=0];
+    v5 [name="v5", player=0];
+    v6 [name="v6", player=0];
+    
+    // Layer 3 - Player 1 final choices
+    v7 [name="v7", player=1];
+    v8 [name="v8", player=1];
+    v9 [name="v9", player=1];
+    
+    // Temporal edges with various constraints
+    v0 -> v1 [label="path_a", constraint="time >= 1"];
+    v0 -> v2 [label="path_b", constraint="time >= 2"];
+    v0 -> v3 [label="path_c", constraint="exists k. time = 2*k"];
+    
+    v1 -> v4 [label="choice_1a", constraint="time <= 5"];
+    v1 -> v5 [label="choice_1b"];
+    v2 -> v5 [label="choice_2a", constraint="time >= 3"];
+    v2 -> v6 [label="choice_2b", constraint="time <= 8"];
+    v3 -> v6 [label="choice_3a"];
+    v3 -> v4 [label="choice_3b", constraint="exists k. time = 3*k"];
+    
+    v4 -> v7 [label="resp_4a", constraint="time >= 4"];
+    v4 -> v8 [label="resp_4b"];
+    v5 -> v8 [label="resp_5a", constraint="time <= 12"];
+    v5 -> v9 [label="resp_5b", constraint="time >= 6"];
+    v6 -> v9 [label="resp_6a"];
+    v6 -> v7 [label="resp_6b", constraint="exists k. time = 4*k + 1"];
+    
+    v7 -> v10 [label="final_a", constraint="time >= 7"];
+    v8 -> v10 [label="final_b", constraint="time <= 15"];
+    v9 -> v10 [label="final_c", constraint="exists k. time = 2*k + 1"];
+    
+    // Some loops for complexity
+    v7 -> v1 [label="loop_7", constraint="time >= 10"];
+    v8 -> v2 [label="loop_8", constraint="time >= 12"];
+    v9 -> v3 [label="loop_9", constraint="time >= 14"];
+}
