@@ -1,0 +1,24 @@
+digraph spec_test {
+
+    v0 [name="v0", player=0, target=1];
+    v1 [name="v1", player=1];
+    v2 [name="v2", player=0];
+    v3 [name="v3", player=1];
+    v4 [name="v4", player=0];
+    v5 [name="v5", player=1];
+    v6 [name="v6", player=0];
+    v7 [name="v7", player=1];
+    v8 [name="v8", player=0];
+    v9 [name="v9", player=1];
+    
+    v0 -> v1 [constraint="exists x y. (time >= 2 && x + y >= 10 && x >= 5)"];
+    v1 -> v2 [constraint="exists x y. (time <= 15 && (x % 3 == 1 || y <= 7))"];
+    v2 -> v3 [constraint="exists x y z. (time > 5 && !(x + y > z + 3))"];
+    v3 -> v4 [constraint="exists x y. (time < 20 && (x % 2 == 0 && y < 15) || time >= 10)"];
+    v4 -> v5 [constraint="exists x y. (time <= 25 && !(x % 4 == 2) && y + 3 <= 12)"];
+    v5 -> v6 [constraint="exists x y z. (time >= 8 && x + 2*y + z >= 20 && x >= 0)"];
+    v6 -> v7 [constraint="exists x y. (time > 12 && (x > y || !(x % 5 == 0)))"];
+    v7 -> v8 [constraint="exists x y z w. (time >= 15 && ((x + y > 10 && z % 3 == 2) || !(w <= 5)) && time < 30)"];
+    v8 -> v9 [constraint="exists x y. (time < 35 && x + y < 25 && x >= y)"];
+    v9 -> v0 [constraint="exists x. (time <= 40 && (x <= 0 || time >= 30))"];
+}

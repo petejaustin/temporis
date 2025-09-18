@@ -14,7 +14,7 @@ namespace graphs {
  */
 class PresburgerFormula {
 public:
-    enum Type { EQUAL, GREATEREQUAL, LESSEQUAL, AND, EXISTS, MODULUS };
+    enum Type { EQUAL, GREATEREQUAL, LESSEQUAL, AND, OR, NOT, EXISTS, MODULUS };
 
 private:
     Type type_;
@@ -33,6 +33,8 @@ public:
     static std::unique_ptr<PresburgerFormula> lessequal(const PresburgerTerm& left, const PresburgerTerm& right);
     static std::unique_ptr<PresburgerFormula> modulus(const PresburgerTerm& expr, int modulus, int remainder);
     static std::unique_ptr<PresburgerFormula> and_formula(std::vector<std::unique_ptr<PresburgerFormula>> formulas);
+    static std::unique_ptr<PresburgerFormula> or_formula(std::vector<std::unique_ptr<PresburgerFormula>> formulas);
+    static std::unique_ptr<PresburgerFormula> not_formula(std::unique_ptr<PresburgerFormula> formula);
     static std::unique_ptr<PresburgerFormula> exists(const std::string& var, std::unique_ptr<PresburgerFormula> formula);
     
     std::string to_string() const;

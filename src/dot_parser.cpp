@@ -228,6 +228,19 @@ std::unique_ptr<PresburgerFormula> PresburgerTemporalDotParser::parse_constraint
         return parse_existential_formula(cleaned);
     }
     
+    // Parse negation operator
+    if (cleaned.starts_with("!")) {
+        std::string inner_formula = cleaned.substr(1);
+        auto inner = parse_constraint(inner_formula);
+        return PresburgerFormula::not_formula(std::move(inner));
+    }
+    
+    // Parse parenthesized expressions
+    if (cleaned.starts_with("(") && cleaned.ends_with(")")) {
+        std::string inner_formula = cleaned.substr(1, cleaned.length() - 2);
+        return parse_constraint(inner_formula);
+    }
+    
     // Parse modulus constraints: expr%m==r or expr mod m == r
     auto mod_pos = cleaned.find("mod");
     if (mod_pos != std::string::npos) {
@@ -317,8 +330,13 @@ std::unique_ptr<PresburgerFormula> PresburgerTemporalDotParser::parse_logical_fo
         formulas.push_back(std::move(left_formula));
         formulas.push_back(std::move(right_formula));
         return PresburgerFormula::and_formula(std::move(formulas));
+    } else if (op == "||") {
+        std::vector<std::unique_ptr<PresburgerFormula>> formulas;
+        formulas.push_back(std::move(left_formula));
+        formulas.push_back(std::move(right_formula));
+        return PresburgerFormula::or_formula(std::move(formulas));
     } else {
-        // For OR, we'll simulate with AND for now (simplification)
+        // Default to AND for unknown operators
         std::vector<std::unique_ptr<PresburgerFormula>> formulas;
         formulas.push_back(std::move(left_formula));
         formulas.push_back(std::move(right_formula));

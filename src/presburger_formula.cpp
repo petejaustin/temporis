@@ -31,6 +31,18 @@ std::unique_ptr<PresburgerFormula> PresburgerFormula::and_formula(std::vector<st
     return result;
 }
 
+std::unique_ptr<PresburgerFormula> PresburgerFormula::or_formula(std::vector<std::unique_ptr<PresburgerFormula>> formulas) {
+    auto result = std::make_unique<PresburgerFormula>(OR, PresburgerTerm(0), PresburgerTerm(0));
+    result->children_ = std::move(formulas);
+    return result;
+}
+
+std::unique_ptr<PresburgerFormula> PresburgerFormula::not_formula(std::unique_ptr<PresburgerFormula> formula) {
+    auto result = std::make_unique<PresburgerFormula>(NOT, PresburgerTerm(0), PresburgerTerm(0));
+    result->children_.push_back(std::move(formula));
+    return result;
+}
+
 std::unique_ptr<PresburgerFormula> PresburgerFormula::exists(const std::string& var, std::unique_ptr<PresburgerFormula> formula) {
     auto result = std::make_unique<PresburgerFormula>(EXISTS, PresburgerTerm(0), PresburgerTerm(0));
     result->existential_var_ = var;
@@ -45,6 +57,8 @@ std::string PresburgerFormula::to_string() const {
         case LESSEQUAL: return left_.to_string() + " <= " + right_.to_string();
         case MODULUS: return left_.to_string() + " ≡ " + std::to_string(remainder_) + " (mod " + std::to_string(modulus_) + ")";
         case AND: return "AND(...)";
+        case OR: return "OR(...)";
+        case NOT: return "NOT(...)";
         case EXISTS: return "∃" + existential_var_ + ". (...)";
         default: return "unknown";
     }
@@ -78,6 +92,20 @@ bool PresburgerFormula::evaluate(const std::map<std::string, int>& values) const
                 }
             }
             return true;
+        }
+        case OR: {
+            for (const auto& child : children_) {
+                if (child->evaluate(values)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        case NOT: {
+            if (children_.empty()) {
+                return false;
+            }
+            return !children_[0]->evaluate(values);
         }
         case EXISTS: {
             // Simplified existential quantification - try values 0 to 10
