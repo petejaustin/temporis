@@ -521,5 +521,168 @@ std::unique_ptr<PresburgerFormula> PresburgerTemporalDotParser::parse_percent_mo
     return PresburgerFormula::modulus(*expr_term, modulus, remainder);
 }
 
+bool PresburgerTemporalDotParser::validate_file_format(const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Validation Error: Could not open file " << filename << std::endl;
+        return false;
+    }
+    
+    std::map<std::string, std::vector<std::string>> edge_map;  // vertex -> list of target vertices
+    std::set<std::string> vertices;
+    std::set<std::string> target_vertices;
+    std::vector<std::string> constraint_strings;
+    
+    std::string line;
+    std::regex vertex_pattern(R"(\s*(\w+)\s*\[\s*name\s*=\s*\"([^\"]+)\"\s*,\s*player\s*=\s*(\d+)(?:\s*,\s*target\s*=\s*(\d+))?\s*\]\s*;)");
+    std::regex edge_pattern(R"(\s*(\w+)\s*->\s*(\w+)\s*\[(?:\s*label\s*=\s*\"([^\"]+)\")?(?:\s*,\s*constraint\s*=\s*\"([^\"]+)\")?\s*\]\s*;?)");
+    std::regex simple_edge_pattern(R"(\s*(\w+)\s*->\s*(\w+)\s*\[\s*constraint\s*=\s*\"([^\"]+)\"\s*\]\s*;)");
+    
+    while (std::getline(file, line)) {
+        // Skip empty lines and comments
+        if (line.empty() || line.find("//") == 0 || line.find("/*") != std::string::npos ||
+            line.find("digraph") != std::string::npos || 
+            line.find("{") != std::string::npos || line.find("}") != std::string::npos) {
+            continue;
+        }
+        
+        std::smatch match;
+        
+        // Parse vertices
+        if (std::regex_search(line, match, vertex_pattern)) {
+            std::string vertex_id = match[1].str();
+            vertices.insert(vertex_id);
+            
+            // Check if this is a target vertex
+            if (match.size() > 4 && !match[4].str().empty()) {
+                int target_flag = std::stoi(match[4].str());
+                if (target_flag == 1) {
+                    target_vertices.insert(vertex_id);
+                }
+            }
+        }
+        // Parse edges with constraints
+        else if (std::regex_search(line, match, simple_edge_pattern)) {
+            std::string source_id = match[1].str();
+            std::string target_id = match[2].str();
+            std::string constraint_str = match[3].str();
+            
+            edge_map[source_id].push_back(target_id);
+            constraint_strings.push_back(constraint_str);
+        }
+        // Parse edges with labels and constraints  
+        else if (std::regex_search(line, match, edge_pattern)) {
+            std::string source_id = match[1].str();
+            std::string target_id = match[2].str();
+            
+            edge_map[source_id].push_back(target_id);
+            
+            if (match.size() > 4 && !match[4].str().empty()) {
+                std::string constraint_str = match[4].str();
+                constraint_strings.push_back(constraint_str);
+            }
+        }
+    }
+    
+    file.close();
+    
+    // Perform validation checks
+    bool is_valid = true;
+    
+    // Check 1: Each vertex has at least one outgoing edge
+    if (!validate_vertices_have_outgoing_edges(edge_map, vertices)) {
+        is_valid = false;
+    }
+    
+    // Check 2: At least one vertex should be a target
+    if (!validate_has_target_vertices(target_vertices)) {
+        is_valid = false;
+    }
+    
+    // Check 3: Time should be reasoned about in every constraint
+    for (const auto& constraint_str : constraint_strings) {
+        if (!validate_time_in_constraint(constraint_str)) {
+            is_valid = false;
+        }
+    }
+    
+    // Only show detailed validation results in validation-only mode
+    // We can detect this if the result will be used for exit code
+    return is_valid;
+}
+
+// Overloaded version for detailed validation reporting
+bool PresburgerTemporalDotParser::validate_file_format_with_report(const std::string& filename) {
+    bool is_valid = validate_file_format(filename);
+    
+    if (is_valid) {
+        std::cout << "✅ File format validation PASSED: " << filename << std::endl;
+        // Count details for report
+        std::ifstream file(filename);
+        std::string line;
+        std::set<std::string> vertices;
+        std::set<std::string> target_vertices;
+        int constraint_count = 0;
+        
+        std::regex vertex_pattern(R"(\s*(\w+)\s*\[\s*name\s*=\s*\"([^\"]+)\"\s*,\s*player\s*=\s*(\d+)(?:\s*,\s*target\s*=\s*(\d+))?\s*\]\s*;)");
+        std::regex constraint_pattern(R"(constraint\s*=\s*\"([^\"]+)\")");
+        
+        while (std::getline(file, line)) {
+            std::smatch match;
+            if (std::regex_search(line, match, vertex_pattern)) {
+                vertices.insert(match[1].str());
+                if (match.size() > 4 && !match[4].str().empty() && std::stoi(match[4].str()) == 1) {
+                    target_vertices.insert(match[1].str());
+                }
+            }
+            if (std::regex_search(line, match, constraint_pattern)) {
+                constraint_count++;
+            }
+        }
+        
+        std::cout << "   - " << vertices.size() << " vertices (all have outgoing edges)" << std::endl;
+        std::cout << "   - " << target_vertices.size() << " target vertices" << std::endl;
+        std::cout << "   - " << constraint_count << " constraints (all include time reasoning)" << std::endl;
+    } else {
+        std::cout << "❌ File format validation FAILED: " << filename << std::endl;
+    }
+    
+    return is_valid;
+}
+
+bool PresburgerTemporalDotParser::validate_vertices_have_outgoing_edges(
+    const std::map<std::string, std::vector<std::string>>& edge_map,
+    const std::set<std::string>& vertices) {
+    
+    bool all_have_edges = true;
+    
+    for (const auto& vertex : vertices) {
+        auto it = edge_map.find(vertex);
+        if (it == edge_map.end() || it->second.empty()) {
+            std::cerr << "Validation Error: Vertex '" << vertex << "' has no outgoing edges" << std::endl;
+            all_have_edges = false;
+        }
+    }
+    
+    return all_have_edges;
+}
+
+bool PresburgerTemporalDotParser::validate_has_target_vertices(const std::set<std::string>& target_vertices) {
+    if (target_vertices.empty()) {
+        std::cerr << "Validation Error: No target vertices found (at least one vertex must have target=1)" << std::endl;
+        return false;
+    }
+    return true;
+}
+
+bool PresburgerTemporalDotParser::validate_time_in_constraint(const std::string& constraint_str) {
+    // Check if 'time' appears in the constraint string
+    if (constraint_str.find("time") == std::string::npos) {
+        std::cerr << "Validation Error: Constraint does not include time reasoning: '" << constraint_str << "'" << std::endl;
+        return false;
+    }
+    return true;
+}
+
 } // namespace graphs
 } // namespace ggg

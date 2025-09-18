@@ -62,4 +62,9 @@ private:
      * @param filename Optional filename being processed
      */
     void print_header(const std::string& filename = "") const;
+    
+    /**
+     * @brief Print usage information
+     */
+    void print_usage() const;
 };

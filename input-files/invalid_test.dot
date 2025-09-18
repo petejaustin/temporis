@@ -1,0 +1,13 @@
+digraph invalid_test {
+    // This file has validation errors
+    
+    // Vertices (v2 will have no outgoing edges)
+    v0 [name="v0", player=0];  // No target vertices!
+    v1 [name="v1", player=1];
+    v2 [name="v2", player=0];  // This vertex will have no outgoing edges
+    
+    // Edges (missing edge from v2, and constraints without time)
+    v0 -> v1 [constraint="x >= 5"];  // No time reasoning!
+    v1 -> v0 [constraint="exists y. (y <= 10)"];  // No time reasoning!
+    // v2 has no outgoing edges - validation error!
+}
