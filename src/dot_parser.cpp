@@ -1,4 +1,4 @@
-#include "temporis/dot_parser.hpp"
+#include "dot_parser.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>

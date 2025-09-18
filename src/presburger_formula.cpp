@@ -1,4 +1,4 @@
-#include "temporis/presburger_formula.hpp"
+#include "presburger_formula.hpp"
 
 namespace ggg {
 namespace graphs {

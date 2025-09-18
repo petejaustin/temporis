@@ -30,6 +30,9 @@ set(SOURCES
     src/presburger_formula.cpp
     src/temporal_game_manager.cpp
     src/dot_parser.cpp
+    src/temporal_analyzer.cpp
+    src/temporal_game_demo.cpp
+    src/temporal_game_application.cpp
 )
 
 # Add executable

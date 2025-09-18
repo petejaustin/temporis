@@ -1,4 +1,4 @@
-#include "temporis/temporal_game_manager.hpp"
+#include "temporal_game_manager.hpp"
 #include <iostream>
 #include <vector>
 #include <algorithm>
