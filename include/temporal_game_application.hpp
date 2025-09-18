@@ -3,6 +3,8 @@
 #include "temporal_game_manager.hpp"
 #include "dot_parser.hpp"
 #include "temporal_analyzer.hpp"
+#include "temporal_reachability_solver.hpp"
+#include "reachability_objective.hpp"
 #include <string>
 #include <memory>
 
@@ -37,6 +39,14 @@ public:
      * @return true if successful, false otherwise
      */
     bool load_and_analyze_file(const std::string& filename);
+
+    /**
+     * @brief Load DOT file with reachability objective and solve the game
+     * 
+     * @param filename Path to the DOT file with objective specification
+     * @return true if successful, false otherwise
+     */
+    bool load_and_solve_reachability_game(const std::string& filename);
 
     /**
      * @brief Run the demo mode (when no file is provided)

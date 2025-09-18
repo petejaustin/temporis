@@ -1,9 +1,0 @@
-digraph TestCustomVariables {
-    v0 [name="v0", player=0];
-    v1 [name="v1", player=1];
-    v2 [name="v2", player=0];
-    
-    v0 -> v1 [label="e0", constraint="exists z. time = 3*z + 2"];
-    v1 -> v2 [label="e1", constraint="exists w. time = 5*w + 1"];
-    v2 -> v0 [label="e2", constraint="exists y. time = 2*y + 0"];
-}

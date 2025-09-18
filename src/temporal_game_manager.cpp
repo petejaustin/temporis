@@ -27,6 +27,12 @@ void PresburgerTemporalGameManager::add_edge_constraint(PresburgerTemporalEdge e
     edge_constraints_[edge] = std::move(constraint);
 }
 
+void PresburgerTemporalGameManager::clear_graph() {
+    graph_.clear();
+    edge_constraints_.clear();
+    current_time_ = 0;
+}
+
 PresburgerTemporalGraph& PresburgerTemporalGameManager::graph() {
     return graph_;
 }

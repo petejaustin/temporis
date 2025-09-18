@@ -1,7 +1,0 @@
-digraph TestTimeVariable {
-    v0 [name="v0", player=0];
-    v1 [name="v1", player=1];
-    
-    v0 -> v1 [label="e0", constraint="exists k. time = 2*k + 1"];
-    v1 -> v0 [label="e1", constraint="time >= 3"];
-}

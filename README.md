@@ -24,10 +24,14 @@ make
 
 ### Run Examples
 ```bash
-# Analyze temporal games from DOT files
-./temporis input-files/seven_variable_test.dot
-./temporis input-files/simple_nested_test.dot
-./temporis input-files/test_time_variable.dot
+# Progressive test suite - start here!
+./temporis input-files/test_01_basic.dot
+./temporis input-files/test_02_existential.dot  
+./temporis input-files/test_03_multi_variable.dot
+
+# Advanced scenarios
+./temporis input-files/test_04_complex_game.dot
+./temporis input-files/test_05_performance.dot  # Warning: takes several minutes!
 
 # Run modular component demo
 ./temporis
@@ -147,63 +151,109 @@ The system evaluates constraints at each time step:
 3. **Evaluate** existential quantifiers by testing integer witnesses
 4. **Determine** edge availability based on constraint satisfaction
 
-## 🧪 Examples & Test Files
+## 🧪 Standardized Test Suite
 
-The `input-files/` directory contains comprehensive test scenarios:
+The `input-files/` directory contains 5 carefully designed test files that progressively demonstrate system capabilities:
 
-### **seven_variable_test.dot** ⭐
-**Demonstrates scalability with 7 existential variables**
+### **📋 Test 01: Basic Linear Constraints** (`test_01_basic.dot`)
+**Purpose**: Foundation testing with simple temporal logic
+- **Structure**: 4 vertices, 4 edges, mixed players
+- **Constraints**: 
+  - `time >= 2` (activation threshold)
+  - `time <= 8` (deactivation threshold)  
+  - `time = 5` (exact timing)
+  - No constraint (always active)
+- **Learning**: Basic temporal constraint patterns
+
+### **⚡ Test 02: Existential Quantifiers** (`test_02_existential.dot`)
+**Purpose**: Single-variable existential quantification
+- **Structure**: 2 vertices, 3 edges, simple game
+- **Constraints**:
+  - `∃k. time = 2*k + 1` (odd times: 1, 3, 5, 7...)
+  - `∃j. time = 3*j` (multiples of 3: 0, 3, 6, 9...)
+  - `time >= 4` (comparison with linear constraint)
+- **Learning**: Mathematical pattern recognition via quantifiers
+
+### **🔢 Test 03: Multi-Variable Quantifiers** (`test_03_multi_variable.dot`)
+**Purpose**: Multiple existential variables in single constraints
+- **Structure**: 3 vertices, 3 edges, strategic layout
+- **Constraints**:
+  - `∃j. ∃k. time = j + k + 3` (sums of two integers)
+  - `∃j. ∃k. time = 2*j + 3*k` (linear combinations)
+  - `∃a. ∃b. ∃c. time = a + b + c + 6` (three-variable sums)
+- **Learning**: Complex mathematical relationships
+
+### **🎮 Test 04: Complex Game Structure** (`test_04_complex_game.dot`)
+**Purpose**: Realistic game with mixed constraint types
+- **Structure**: 6 vertices, 10 edges, full game dynamics
+- **Constraints**: Every type from simple to multi-variable
+- **Features**:
+  - Strategic player positioning
+  - Time windows and exact timing
+  - Modular arithmetic patterns
+  - Return paths and reset conditions
+- **Learning**: Real-world game scenario analysis
+
+### **🚀 Test 05: Performance Stress Test** (`test_05_performance.dot`)
+**Purpose**: Scalability and performance benchmarking
+- **Structure**: 2 vertices, 4 edges, minimal overhead
+- **Constraints**:
+  - 5 variables: `∃a. ∃b. ∃c. ∃d. ∃e. time = a + b + c + d + e + 10` (~30 seconds)
+  - 6 variables: `∃a. ∃b. ∃c. ∃d. ∃e. ∃f. time = a + b + c + d + e + f + 15` (~2-3 minutes)
+- **Warning**: ⚠️ This test may take several minutes to complete!
+- **Learning**: Performance characteristics and computational limits
+
+### **📊 Progressive Testing Strategy**
+```bash
+# Quick basic functionality
+./temporis input-files/test_01_basic.dot
+
+# Mathematical patterns  
+./temporis input-files/test_02_existential.dot
+
+# Complex mathematics
+./temporis input-files/test_03_multi_variable.dot
+
+# Full game scenarios
+./temporis input-files/test_04_complex_game.dot
+
+# Performance benchmarking (patience required!)
+./temporis input-files/test_05_performance.dot
 ```
-∃a. ∃b. ∃c. ∃d. ∃e. ∃f. ∃g. time = a + b + c + d + e + f + g + 15
-```
-- **Performance**: ~2 minutes execution time
-- **Purpose**: Scalability demonstration
-
-### **simple_nested_test.dot**
-**Nested existential quantifiers**
-- Demonstrates complex quantifier nesting
-- Shows parser handling of nested expressions
-
-### **test_time_variable.dot**  
-**Basic time constraint testing**
-- Simple `time >= 3` constraints
-- Foundation for temporal logic
-
-### **test_custom_variables.dot**
-**Custom variable usage beyond 'time'**
-- Multiple variable types
-- Variable naming flexibility
 
 ## 📊 Analysis Output
 
 The system provides detailed temporal analysis:
 
 ```
-Loading Presburger Arithmetic Temporal Game from: seven_variable_test.dot
+Loading Presburger Arithmetic Temporal Game from: test_01_basic.dot
 ==================================================
 
-Presburger temporal game loaded with 2 vertices and 2 edges.
+Presburger temporal game loaded with 4 vertices and 4 edges.
 
 === Game Structure ===
-Player 0 vertices: v0 
-Player 1 vertices: v1 
+Player 0 vertices: v0 v2 
+Player 1 vertices: v1 v3 
 
 === Presburger Formula Explanations ===
 Variables:
   time = current time
 
 v0 -> v1:
-  Formula: ∃a. ∃b. ∃c. ∃d. ∃e. ∃f. ∃g. time = a + b + c + d + e + f + g + 15
+  Formula: time >= 2
   Explanation: Edge is active when this formula evaluates to true
 
 === Temporal Edge Analysis ===
 Time 0:
-  v0 -> v1 (e0): INACTIVE
-  v1 -> v0 (e1): ACTIVE [time <= 20]
+  v0 -> v1 (e0): INACTIVE [time >= 2]
+  v3 -> v0 (e3): ACTIVE [no constraint]
 
-Time 15:  
-  v0 -> v1 (e0): ACTIVE [∃a. ∃b. ∃c. ∃d. ∃e. ∃f. ∃g. time = a + b + c + d + e + f + g + 15]
-  v1 -> v0 (e1): ACTIVE [time <= 20]
+Time 2:  
+  v0 -> v1 (e0): ACTIVE [time >= 2]
+  v1 -> v2 (e1): ACTIVE [time <= 8]
+
+Time 5:
+  v2 -> v3 (e2): ACTIVE [time = 5]
 ```
 
 ## 🚀 Performance & Scalability

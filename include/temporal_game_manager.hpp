@@ -52,6 +52,8 @@ public:
     PresburgerTemporalEdge add_edge(PresburgerTemporalVertex source, PresburgerTemporalVertex target, const std::string& label = "");
     void add_edge_constraint(PresburgerTemporalEdge edge, std::unique_ptr<PresburgerFormula> constraint);
     
+    void clear_graph();  // Clear all vertices and edges
+    
     PresburgerTemporalGraph& graph();
     const PresburgerTemporalGraph& graph() const;
     void advance_time(int new_time);

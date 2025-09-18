@@ -33,6 +33,8 @@ set(SOURCES
     src/temporal_analyzer.cpp
     src/temporal_game_demo.cpp
     src/temporal_game_application.cpp
+    src/reachability_objective.cpp
+    src/temporal_reachability_solver.cpp
 )
 
 # Add executable

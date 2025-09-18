@@ -1,0 +1,262 @@
+Loading Presburger Arithmetic Temporal Game from: ../input-files/test_reachability_basic.dot
+==================================================
+
+Presburger temporal game loaded with 4 vertices and 6 edges.
+
+=== Game Structure ===
+Player 0 vertices: v0 v2 
+Player 1 vertices: v1 v3 
+
+=== Presburger Formula Explanations ===
+Variables:
+  time = current time
+
+v0 -> v1:
+  Formula: time >= 1
+  Explanation: Edge is active when this formula evaluates to true
+
+v0 -> v3:
+  Formula: time >= 3
+  Explanation: Edge is active when this formula evaluates to true
+
+v1 -> v2:
+  Formula: time <= 5
+  Explanation: Edge is active when this formula evaluates to true
+
+v3 -> v0:
+  Formula: time <= 10
+  Explanation: Edge is active when this formula evaluates to true
+
+v3 -> v2:
+  Formula: time >= 8
+  Explanation: Edge is active when this formula evaluates to true
+
+=== Temporal Edge Analysis ===
+Time 0:
+  v0 -> v1 (e0): INACTIVE
+  v0 -> v3 (e1): INACTIVE
+  v1 -> v2 (e2): ACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): ACTIVE
+  v3 -> v2 (e5): INACTIVE
+
+Time 1:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): INACTIVE
+  v1 -> v2 (e2): ACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): ACTIVE
+  v3 -> v2 (e5): INACTIVE
+
+Time 2:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): INACTIVE
+  v1 -> v2 (e2): ACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): ACTIVE
+  v3 -> v2 (e5): INACTIVE
+
+Time 3:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): ACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): ACTIVE
+  v3 -> v2 (e5): INACTIVE
+
+Time 4:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): ACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): ACTIVE
+  v3 -> v2 (e5): INACTIVE
+
+Time 5:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): ACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): ACTIVE
+  v3 -> v2 (e5): INACTIVE
+
+Time 6:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): ACTIVE
+  v3 -> v2 (e5): INACTIVE
+
+Time 7:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): ACTIVE
+  v3 -> v2 (e5): INACTIVE
+
+Time 8:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): ACTIVE
+  v3 -> v2 (e5): ACTIVE
+
+Time 9:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): ACTIVE
+  v3 -> v2 (e5): ACTIVE
+
+Time 10:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): ACTIVE
+  v3 -> v2 (e5): ACTIVE
+
+Time 11:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): INACTIVE
+  v3 -> v2 (e5): ACTIVE
+
+Time 12:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): INACTIVE
+  v3 -> v2 (e5): ACTIVE
+
+Time 13:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): INACTIVE
+  v3 -> v2 (e5): ACTIVE
+
+Time 14:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): INACTIVE
+  v3 -> v2 (e5): ACTIVE
+
+Time 15:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): INACTIVE
+  v3 -> v2 (e5): ACTIVE
+
+Time 16:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): INACTIVE
+  v3 -> v2 (e5): ACTIVE
+
+Time 17:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): INACTIVE
+  v3 -> v2 (e5): ACTIVE
+
+Time 18:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): INACTIVE
+  v3 -> v2 (e5): ACTIVE
+
+Time 19:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): INACTIVE
+  v3 -> v2 (e5): ACTIVE
+
+Time 20:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): INACTIVE
+  v3 -> v2 (e5): ACTIVE
+
+Time 21:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): INACTIVE
+  v3 -> v2 (e5): ACTIVE
+
+Time 22:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): INACTIVE
+  v3 -> v2 (e5): ACTIVE
+
+Time 23:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): INACTIVE
+  v3 -> v2 (e5): ACTIVE
+
+Time 24:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): INACTIVE
+  v3 -> v2 (e5): ACTIVE
+
+Time 25:
+  v0 -> v1 (e0): ACTIVE
+  v0 -> v3 (e1): ACTIVE
+  v1 -> v2 (e2): INACTIVE
+  v1 -> v3 (e3): ACTIVE
+  v3 -> v0 (e4): INACTIVE
+  v3 -> v2 (e5): ACTIVE
+
+
+=== Reachability Game Solving ===
+
+=== Winning Regions Analysis ===
+Target vertices: v2 
+
+Winning regions:
+Player 0: v2 v1 v3
+Player 1: v0
+
+=== Detailed Analysis from Initial Vertex v0 ===
+
+=== Temporal Reachability Game Solution ===
+Objective: Reachability: Player 0 wins by reaching target
+Target vertices: 1 
+
+Winner: Player 1
+Explanation: Player 1 (maximizer) has a winning strategy to prevent the reachability objective.
+
+Sample strategy from initial state:

@@ -1,0 +1,37 @@
+digraph ComplexTemporalGame {
+    /*
+     * Test 04: Complex Game Structure
+     * 
+     * This test demonstrates a larger game with mixed constraint types,
+     * showing how different mathematical patterns interact in a full game.
+     * 
+     * Game structure: 6 vertices, varied constraints, realistic gameplay scenarios
+     * Demonstrates: constraint interaction, player strategies, temporal dynamics
+     */
+    
+    // Player 0 vertices (even-numbered)
+    v0 [name="v0", player=0];  // Start vertex
+    v2 [name="v2", player=0];  // Critical junction
+    v4 [name="v4", player=0];  // End goal
+    
+    // Player 1 vertices (odd-numbered) 
+    v1 [name="v1", player=1];  // Early choice
+    v3 [name="v3", player=1];  // Late choice
+    v5 [name="v5", player=1];  // Alternative path
+    
+    // Mixed constraint patterns
+    v0 -> v1 [label="e0", constraint="time >= 1"];                    // Simple start
+    v0 -> v5 [label="e1", constraint="exists k. time = 2*k"];         // Even times only
+    
+    v1 -> v2 [label="e2", constraint="time <= 10"];                   // Time window
+    v1 -> v3 [label="e3", constraint="exists j. time = 3*j + 1"];     // Modular arithmetic
+    
+    v2 -> v4 [label="e4"];                                            // Always available
+    v2 -> v5 [label="e5", constraint="time >= 5"];                    // Late activation
+    
+    v3 -> v4 [label="e6", constraint="exists a. exists b. time = a + b + 8"];  // Multi-variable
+    v3 -> v0 [label="e7", constraint="time <= 15"];                   // Return path
+    
+    v5 -> v4 [label="e8", constraint="time = 12"];                    // Exact timing
+    v4 -> v0 [label="e9", constraint="time >= 20"];                   // Reset condition
+}

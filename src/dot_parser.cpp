@@ -70,6 +70,148 @@ bool PresburgerTemporalDotParser::parse_file(const std::string& filename, Presbu
     return true;
 }
 
+bool PresburgerTemporalDotParser::parse_file_with_objective(const std::string& filename, 
+                                                           PresburgerTemporalGameManager& manager,
+                                                           std::shared_ptr<ReachabilityObjective>& objective) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        return false;
+    }
+    
+    // Clear the manager and vertex map to start fresh
+    manager.clear_graph();
+    vertex_map_.clear();
+    
+    std::string line;
+    std::regex vertex_pattern(R"(\s*(\w+)\s*\[\s*name\s*=\s*\"([^\"]+)\"\s*,\s*player\s*=\s*(\d+)\s*\]\s*;?.*?)");
+    std::regex edge_pattern(R"(\s*(\w+)\s*->\s*(\w+)\s*\[\s*label\s*=\s*\"([^\"]+)\"(?:\s*,\s*constraint\s*=\s*\"([^\"]+)\")?\s*\]\s*;?.*?)");
+    std::regex objective_pattern(R"(\s*//\s*OBJECTIVE:\s*(.+))");
+    
+    bool found_objective = false;
+    std::string objective_string;
+    
+    // First pass: collect all content
+    std::vector<std::string> lines;
+    while (std::getline(file, line)) {
+        lines.push_back(line);
+    }
+    file.close();
+    
+    // Parse objective first
+    for (const auto& line : lines) {
+        std::smatch obj_match;
+        if (std::regex_match(line, obj_match, objective_pattern)) {
+            objective_string = obj_match[1].str();
+            found_objective = true;
+            break;
+        }
+    }
+    
+    // Parse vertices and edges normally
+    for (const auto& line : lines) {
+        // Trim whitespace
+        std::string trimmed_line = line;
+        trimmed_line.erase(0, trimmed_line.find_first_not_of(" \t"));
+        trimmed_line.erase(trimmed_line.find_last_not_of(" \t") + 1);
+        
+        // Skip comments and structural elements
+        if (trimmed_line.empty() || trimmed_line.find("/*") != std::string::npos || 
+            trimmed_line.find("*/") != std::string::npos ||
+            trimmed_line.find("digraph") != std::string::npos || 
+            trimmed_line.find("{") != std::string::npos || trimmed_line.find("}") != std::string::npos ||
+            (trimmed_line.find("//") == 0)) {
+            continue;
+        }
+        
+        // Parse vertices
+        std::smatch vertex_match;
+        if (std::regex_match(trimmed_line, vertex_match, vertex_pattern)) {
+            std::string vertex_id = vertex_match[1].str();
+            std::string name = vertex_match[2].str();
+            int player = std::stoi(vertex_match[3].str());
+            
+            auto vertex = manager.add_vertex(name, player);
+            vertex_map_[vertex_id] = vertex;
+            continue;
+        }
+        
+        // Parse edges
+        std::smatch edge_match;
+        if (std::regex_match(trimmed_line, edge_match, edge_pattern)) {
+            std::string source_id = edge_match[1].str();
+            std::string target_id = edge_match[2].str();
+            std::string label = edge_match[3].str();
+            std::string constraint_str = edge_match.size() > 4 ? edge_match[4].str() : "";
+            
+            if (vertex_map_.find(source_id) == vertex_map_.end() || 
+                vertex_map_.find(target_id) == vertex_map_.end()) {
+                std::cerr << "Error: Unknown vertex in edge: " << source_id << " -> " << target_id << std::endl;
+                continue;
+            }
+            
+            auto source = vertex_map_[source_id];
+            auto target = vertex_map_[target_id];
+            auto edge = manager.add_edge(source, target, label);
+            
+            // Parse and add constraint if present
+            if (!constraint_str.empty()) {
+                auto constraint = parse_constraint(constraint_str);
+                if (constraint) {
+                    manager.add_edge_constraint(edge, std::move(constraint));
+                }
+            }
+        }
+    }
+    
+    // Now parse the objective with vertices available
+    if (found_objective) {
+        objective = parse_objective(objective_string);
+    }
+    
+    return found_objective;
+}
+
+std::shared_ptr<ReachabilityObjective> PresburgerTemporalDotParser::parse_objective(const std::string& objective_str) {
+    // Format: "type targets [time_bound]"
+    // Examples: "reachability v2,v3", "safety v1", "time_bounded_reach v2 10"
+    
+    std::istringstream iss(objective_str);
+    std::string type_str, targets_str, time_str;
+    iss >> type_str >> targets_str >> time_str;
+    
+    ReachabilityObjective::ObjectiveType type = parse_objective_type(type_str);
+    std::set<PresburgerTemporalVertex> targets = parse_target_vertices(targets_str);
+    int time_bound = time_str.empty() ? -1 : std::stoi(time_str);
+    
+    return std::make_shared<ReachabilityObjective>(type, targets, time_bound);
+}
+
+ReachabilityObjective::ObjectiveType PresburgerTemporalDotParser::parse_objective_type(const std::string& type_str) {
+    if (type_str == "reachability") return ReachabilityObjective::ObjectiveType::REACHABILITY;
+    if (type_str == "safety") return ReachabilityObjective::ObjectiveType::SAFETY;
+    if (type_str == "time_bounded_reach") return ReachabilityObjective::ObjectiveType::TIME_BOUNDED_REACH;
+    if (type_str == "time_bounded_safety") return ReachabilityObjective::ObjectiveType::TIME_BOUNDED_SAFETY;
+    return ReachabilityObjective::ObjectiveType::REACHABILITY; // Default
+}
+
+std::set<PresburgerTemporalVertex> PresburgerTemporalDotParser::parse_target_vertices(const std::string& targets_str) {
+    std::set<PresburgerTemporalVertex> targets;
+    std::istringstream iss(targets_str);
+    std::string vertex_id;
+    
+    while (std::getline(iss, vertex_id, ',')) {
+        // Remove whitespace
+        vertex_id.erase(std::remove_if(vertex_id.begin(), vertex_id.end(), ::isspace), vertex_id.end());
+        
+        if (vertex_map_.find(vertex_id) != vertex_map_.end()) {
+            targets.insert(vertex_map_[vertex_id]);
+        }
+    }
+    
+    return targets;
+}
+
 std::unique_ptr<PresburgerFormula> PresburgerTemporalDotParser::parse_constraint(const std::string& constraint_str) {
     // Remove whitespace
     std::string cleaned = constraint_str;

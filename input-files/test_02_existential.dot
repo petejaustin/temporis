@@ -1,0 +1,24 @@
+digraph ExistentialQuantifiers {
+    /*
+     * Test 02: Existential Quantifiers
+     * 
+     * This test demonstrates basic existential quantification with single
+     * quantified variables, showing mathematical pattern recognition.
+     * 
+     * Expected behavior:
+     * - e0 active: odd times (1, 3, 5, 7, ...)
+     * - e1 active: multiples of 3 (0, 3, 6, 9, ...)
+     * - e2 active: time >= 4 (from time 4 onwards)
+     */
+    
+    // Simple 2-player game structure
+    v0 [name="v0", player=0];
+    v1 [name="v1", player=1];
+    
+    // Single existential quantifiers
+    v0 -> v1 [label="e0", constraint="exists k. time = 2*k + 1"];  // Odd times
+    v1 -> v0 [label="e1", constraint="exists j. time = 3*j"];      // Multiples of 3
+    
+    // Add a simple constraint for comparison
+    v0 -> v0 [label="e2", constraint="time >= 4"];                // Linear constraint
+}

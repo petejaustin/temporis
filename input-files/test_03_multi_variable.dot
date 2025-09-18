@@ -1,0 +1,23 @@
+digraph MultiVariableQuantifiers {
+    /*
+     * Test 03: Multi-Variable Existential Quantifiers
+     * 
+     * This test demonstrates multiple existential variables in single constraints,
+     * showing the system's ability to handle complex mathematical relationships.
+     * 
+     * Expected behavior:
+     * - e0 active: times expressible as sum of two integers >= 3
+     * - e1 active: times expressible as 2*j + 3*k for some j,k
+     * - e2 active: times expressible as sum of three integers >= 6
+     */
+    
+    // Game vertices
+    v0 [name="v0", player=0];
+    v1 [name="v1", player=1];
+    v2 [name="v2", player=0];
+    
+    // Multi-variable constraints (2-3 variables for reasonable performance)
+    v0 -> v1 [label="e0", constraint="exists j. exists k. time = j + k + 3"];
+    v1 -> v2 [label="e1", constraint="exists j. exists k. time = 2*j + 3*k"];
+    v2 -> v0 [label="e2", constraint="exists a. exists b. exists c. time = a + b + c + 6"];
+}
