@@ -35,6 +35,7 @@ set(SOURCES
     src/temporal_game_application.cpp
     src/reachability_objective.cpp
     src/temporal_reachability_solver.cpp
+    src/time_bound_calculator.cpp
 )
 
 # Add executable

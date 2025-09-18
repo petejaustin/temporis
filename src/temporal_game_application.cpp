@@ -1,5 +1,6 @@
 #include "temporal_game_application.hpp"
 #include "temporal_game_demo.hpp"
+#include "time_bound_calculator.hpp"
 #include <iostream>
 
 TemporalGameApplication::TemporalGameApplication() {
@@ -11,6 +12,7 @@ int TemporalGameApplication::run(int argc, char* argv[]) {
     bool verbose = false;
     bool validate_only = false;
     std::string filename;
+    int user_time_bound = -1;  // -1 means auto-calculate
     
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
@@ -21,6 +23,22 @@ int TemporalGameApplication::run(int argc, char* argv[]) {
         } else if (arg == "--help" || arg == "-h") {
             print_usage();
             return 0;
+        } else if (arg == "--time-bound" || arg == "-t") {
+            if (i + 1 < argc) {
+                try {
+                    user_time_bound = std::stoi(argv[++i]);
+                    if (user_time_bound <= 0) {
+                        std::cerr << "Error: Time bound must be positive\n";
+                        return 1;
+                    }
+                } catch (const std::exception&) {
+                    std::cerr << "Error: Invalid time bound value\n";
+                    return 1;
+                }
+            } else {
+                std::cerr << "Error: --time-bound requires a value\n";
+                return 1;
+            }
         } else if (arg.find(".dot") != std::string::npos) {
             filename = arg;
         }
@@ -38,17 +56,26 @@ int TemporalGameApplication::run(int argc, char* argv[]) {
         bool has_objective = parser_->parse_file_with_objective(filename, *manager_, objective);
         
         if (has_objective && objective) {
-            // File parsed successfully with objective, now do the analysis and solving
+            // File parsed successfully with objective, now calculate appropriate time bounds
+            ggg::temporal::TimeBoundCalculator::Config bound_config;
+            bound_config.verbose = verbose;
+            bound_config.user_override = user_time_bound;  // Use user override if specified
+            ggg::temporal::TimeBoundCalculator bound_calculator(bound_config);
+            
+            int analysis_window = bound_calculator.calculate_analysis_window(*manager_);
+            int solver_bound = bound_calculator.calculate_solver_bound(*manager_, *objective);
+            
             if (verbose) {
                 print_header(filename);
+                std::cout << "\n" << bound_calculator.explain_calculation(*manager_, *objective) << "\n\n";
                 analyzer_->print_game_structure();
-                analyzer_->analyze_temporal_edges(0, 25);  // Analyze first 26 time steps
+                analyzer_->analyze_temporal_edges(0, analysis_window);
             }
             
             std::cout << "\n=== Reachability Game Solving ===\n";
             
-            // Create solver
-            TemporalReachabilitySolver solver(*manager_, objective, 30);
+            // Create solver with calculated time bound
+            TemporalReachabilitySolver solver(*manager_, objective, solver_bound);
             
             // Compute winning regions for all vertices
             auto [player0_winning, player1_winning] = solver.compute_winning_regions(0);
@@ -119,6 +146,7 @@ void TemporalGameApplication::print_usage() const {
     std::cout << std::endl;
     std::cout << "OPTIONS:" << std::endl;
     std::cout << "  -v, --verbose          Enable verbose output with detailed analysis" << std::endl;
+    std::cout << "  -t, --time-bound N     Set solver time bound (overrides auto-calculation)" << std::endl;
     std::cout << "  --validate             Validate file format and exit (no game solving)" << std::endl;
     std::cout << "  --check-format         Alias for --validate" << std::endl;
     std::cout << "  -h, --help             Show this help message" << std::endl;
@@ -132,6 +160,7 @@ void TemporalGameApplication::print_usage() const {
     std::cout << "EXAMPLES:" << std::endl;
     std::cout << "  temporis game.dot                    # Solve reachability game" << std::endl;
     std::cout << "  temporis --verbose game.dot          # Detailed analysis output" << std::endl;
+    std::cout << "  temporis --time-bound 50 game.dot    # Use custom time bound" << std::endl;
     std::cout << "  temporis --validate game.dot         # Check file format only" << std::endl;
     std::cout << std::endl;
 }
