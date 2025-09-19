@@ -1,0 +1,11 @@
+digraph simple_constraint_test {
+    // Very simple constraint test
+    v0 [name="v0", player=0, target=1];
+    v1 [name="v1", player=1];
+    
+    // Edge that should be blocked at time 0 but available at time 5+
+    v0 -> v1 [constraint="time >= 5"];
+    
+    // Always available edge back
+    v1 -> v0;
+}

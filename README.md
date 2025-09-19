@@ -39,24 +39,26 @@ make
 
 ## 🏛️ Architecture
 
-### Modular Components
+### GGG-Integrated Components
 
-The project follows **clean architecture principles** with complete separation of concerns:
+The project is **fully integrated with the GGG library** using native GGG data structures and solver interfaces:
 
 ```
 temporis/
-├── include/                    # Header files (.hpp)
-│   ├── dot_parser.hpp          # DOT file parsing interface
-│   ├── presburger_formula.hpp  # Mathematical formula representation
-│   ├── presburger_term.hpp     # Mathematical term operations
-│   ├── temporal_analyzer.hpp   # Analysis and reporting
-│   ├── temporal_game_application.hpp  # Application controller
-│   ├── temporal_game_demo.hpp  # Demo and testing utilities
-│   └── temporal_game_manager.hpp      # Core game management
-├── src/                        # Implementation files (.cpp)
-│   ├── main.cpp               # Minimal entry point (17 lines)
-│   └── [7 modular .cpp files]
-└── input-files/               # DOT test files
+├── include/                           # Header files (.hpp)
+│   ├── ggg_temporal_graph.hpp        # GGG-compatible temporal graph with Presburger parsing
+│   ├── ggg_temporal_solver.hpp       # GGG Solver interface implementation
+│   ├── presburger_formula.hpp        # Mathematical formula representation
+│   ├── presburger_term.hpp           # Mathematical term operations
+│   └── reachability_objective.hpp    # Temporal reachability goals
+├── src/                               # Implementation files (.cpp)
+│   ├── main_ggg.cpp                  # GGG-integrated entry point
+│   ├── ggg_temporal_graph.cpp        # Native GGG graph with constraint parsing
+│   ├── ggg_temporal_solver.cpp       # Minimax solver with winning regions
+│   ├── presburger_formula.cpp        # Constraint evaluation engine
+│   ├── presburger_term.cpp           # Term arithmetic operations
+│   └── reachability_objective.cpp    # Objective management
+└── input-files/                      # DOT test files with temporal constraints
 ```
 
 ### Key Classes

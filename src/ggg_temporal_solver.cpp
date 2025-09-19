@@ -8,17 +8,9 @@ namespace solvers {
 
 GGGTemporalReachabilitySolver::GGGTemporalReachabilitySolver(
     std::shared_ptr<graphs::GGGTemporalGameManager> manager,
-    std::shared_ptr<graphs::GGGReachabilityObjective> objective)
-    : manager_(manager), objective_(objective), max_time_(50) {
-    calculate_time_bounds();
-}
-
-GGGTemporalReachabilitySolver::GGGTemporalReachabilitySolver(
-    std::shared_ptr<graphs::GGGTemporalGameManager> manager,
     std::shared_ptr<graphs::GGGReachabilityObjective> objective,
-    const temporal::TimeBoundCalculator::Config& time_config)
-    : manager_(manager), objective_(objective), time_config_(time_config), max_time_(50) {
-    calculate_time_bounds();
+    int max_time, bool verbose)
+    : manager_(manager), objective_(objective), max_time_(max_time), verbose_(verbose) {
 }
 
 std::string GGGTemporalReachabilitySolver::get_name() const {
@@ -26,10 +18,12 @@ std::string GGGTemporalReachabilitySolver::get_name() const {
 }
 
 GGGTemporalReachabilitySolver::SolutionType GGGTemporalReachabilitySolver::solve(const GraphType& graph) {
-    // For GGG compatibility, solve from all possible initial states
+    // Compute winning regions from initial time
     auto [player0_winning, player1_winning] = compute_winning_regions(0);
     
-    SolutionType solution(true); // Mark as solved
+    // "Solved" means we successfully computed winning regions for all vertices
+    // This is independent of who wins the game
+    SolutionType solution(true);
     
     // Set winning regions
     for (auto vertex : player0_winning) {
@@ -86,17 +80,21 @@ GGGTemporalReachabilitySolver::compute_winning_regions(int initial_time) {
         TemporalGameState state{vertex, initial_time};
         std::set<TemporalGameState> visited;
         
-        // Check if this vertex is itself a target
+        // For each vertex as starting position, determine who wins
+        // If starting vertex is a target, Player 0 wins trivially
         if (objective_->is_target(vertex)) {
             player0_winning.insert(vertex);
             continue;
         }
         
+        // Otherwise, run game tree search to see if Player 0 can reach a target
         int winner = solve_recursive(state, visited);
         
         if (winner > 0) {
+            // Player 0 can reach a target starting from this vertex
             player0_winning.insert(vertex);
-        } else if (winner < 0) {
+        } else {
+            // Player 1 can prevent Player 0 from reaching a target
             player1_winning.insert(vertex);
         }
         // winner == 0 means draw/undetermined
@@ -220,16 +218,6 @@ GGGTemporalReachabilitySolver::SolutionType GGGTemporalReachabilitySolver::build
     }
     
     return solution;
-}
-
-void GGGTemporalReachabilitySolver::calculate_time_bounds() {
-    // For initial integration, use default time bound
-    // TODO: Extend TimeBoundCalculator to work with GGG graph types
-    max_time_ = time_config_.user_override > 0 ? time_config_.user_override : 50;
-    
-    if (time_config_.verbose) {
-        std::cout << "Using time bound: " << max_time_ << std::endl;
-    }
 }
 
 // TemporalReachabilitySolution implementation

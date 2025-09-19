@@ -23,52 +23,24 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR})
 # Set the output directory for the executable
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-# Add all source files for original temporis
+# Add source files for temporis (GGG-integrated version)
 set(TEMPORIS_SOURCES
-    src/main.cpp
-    src/presburger_term.cpp
-    src/presburger_formula.cpp
-    src/temporal_game_manager.cpp
-    src/dot_parser.cpp
-    src/temporal_analyzer.cpp
-    src/temporal_game_demo.cpp
-    src/temporal_game_application.cpp
-    src/reachability_objective.cpp
-    src/temporal_reachability_solver.cpp
-    src/time_bound_calculator.cpp
-)
-
-# Add source files for GGG-integrated version
-set(TEMPORIS_GGG_SOURCES
     src/main_ggg.cpp
     src/presburger_term.cpp
     src/presburger_formula.cpp
     src/ggg_temporal_graph.cpp
     src/ggg_temporal_solver.cpp
-    src/time_bound_calculator.cpp
-    src/dot_parser.cpp  # Still needed for parsing compatibility
-    src/temporal_game_manager.cpp  # Needed for old game manager
-    src/reachability_objective.cpp  # Needed for objective classes
+    src/reachability_objective.cpp
 )
 
-# Add original executable
+# Add main executable
 add_executable(temporis ${TEMPORIS_SOURCES})
 
-# Add GGG-integrated executable
-add_executable(temporis-ggg ${TEMPORIS_GGG_SOURCES})
-
-# Link libraries for both executables
+# Link libraries
 target_link_libraries(temporis ${Boost_LIBRARIES})
-target_link_libraries(temporis-ggg ${Boost_LIBRARIES})
 
-# Set target properties for both
+# Set target properties
 set_target_properties(temporis PROPERTIES
-    CXX_STANDARD 20
-    CXX_STANDARD_REQUIRED ON
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
-)
-
-set_target_properties(temporis-ggg PROPERTIES
     CXX_STANDARD 20
     CXX_STANDARD_REQUIRED ON
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}

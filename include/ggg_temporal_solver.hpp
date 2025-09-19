@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ggg_temporal_graph.hpp"
-#include "time_bound_calculator.hpp"
 #include "libggg/solvers/solver.hpp"
 #include <map>
 #include <set>
@@ -42,8 +41,8 @@ public:
 private:
     std::shared_ptr<graphs::GGGTemporalGameManager> manager_;
     std::shared_ptr<graphs::GGGReachabilityObjective> objective_;
-    temporal::TimeBoundCalculator::Config time_config_;
     int max_time_;
+    bool verbose_;
     
     // Memoization for dynamic programming
     std::map<TemporalGameState, int> memo_; // -1 = Player 1 wins, 1 = Player 0 wins, 0 = draw
@@ -53,14 +52,8 @@ public:
      * @brief Construct solver with game manager and objective
      */
     GGGTemporalReachabilitySolver(std::shared_ptr<graphs::GGGTemporalGameManager> manager,
-                                  std::shared_ptr<graphs::GGGReachabilityObjective> objective);
-    
-    /**
-     * @brief Construct solver with custom time bound configuration
-     */
-    GGGTemporalReachabilitySolver(std::shared_ptr<graphs::GGGTemporalGameManager> manager,
                                   std::shared_ptr<graphs::GGGReachabilityObjective> objective,
-                                  const temporal::TimeBoundCalculator::Config& time_config);
+                                  int max_time = 50, bool verbose = false);
 
     /**
      * @brief GGG Solver interface implementation
@@ -102,11 +95,6 @@ private:
      * @brief Build solution from memoized results
      */
     SolutionType build_solution_from_memo(Vertex initial_vertex, int initial_time);
-    
-    /**
-     * @brief Calculate appropriate time bound for the given game
-     */
-    void calculate_time_bounds();
 };
 
 /**

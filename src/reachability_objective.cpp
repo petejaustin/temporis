@@ -1,20 +1,20 @@
 #include "reachability_objective.hpp"
 
 ReachabilityObjective::ReachabilityObjective(ObjectiveType type,
-                                           const std::set<PresburgerTemporalVertex>& target_vertices,
+                                           const std::set<GGGTemporalVertex>& target_vertices,
                                            int time_bound)
     : type_(type), targets_(target_vertices), time_bound_(time_bound) {
 }
 
-void ReachabilityObjective::add_target(PresburgerTemporalVertex vertex) {
+void ReachabilityObjective::add_target(GGGTemporalVertex vertex) {
     targets_.insert(vertex);
 }
 
-bool ReachabilityObjective::is_target(PresburgerTemporalVertex vertex) const {
+bool ReachabilityObjective::is_target(GGGTemporalVertex vertex) const {
     return targets_.find(vertex) != targets_.end();
 }
 
-bool ReachabilityObjective::is_satisfied(PresburgerTemporalVertex current_vertex, int current_time) const {
+bool ReachabilityObjective::is_satisfied(GGGTemporalVertex current_vertex, int current_time) const {
     bool at_target = is_target(current_vertex);
     
     switch (type_) {
@@ -34,7 +34,7 @@ bool ReachabilityObjective::is_satisfied(PresburgerTemporalVertex current_vertex
     return false;
 }
 
-bool ReachabilityObjective::has_failed(PresburgerTemporalVertex current_vertex, int current_time) const {
+bool ReachabilityObjective::has_failed(GGGTemporalVertex current_vertex, int current_time) const {
     bool at_target = is_target(current_vertex);
     
     switch (type_) {

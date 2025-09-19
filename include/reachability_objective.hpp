@@ -1,6 +1,6 @@
 #pragma once
 
-#include "temporal_game_manager.hpp"
+#include "ggg_temporal_graph.hpp"
 #include <set>
 #include <string>
 
@@ -32,7 +32,7 @@ public:
      * @param time_bound Optional time bound (for time-bounded objectives)
      */
     ReachabilityObjective(ObjectiveType type, 
-                         const std::set<PresburgerTemporalVertex>& target_vertices,
+                         const std::set<GGGTemporalVertex>& target_vertices,
                          int time_bound = -1);
 
     /**
@@ -40,7 +40,7 @@ public:
      * 
      * @param vertex Target vertex to add
      */
-    void add_target(PresburgerTemporalVertex vertex);
+    void add_target(GGGTemporalVertex vertex);
 
     /**
      * @brief Check if a vertex is a target
@@ -48,7 +48,7 @@ public:
      * @param vertex Vertex to check
      * @return true if vertex is a target
      */
-    bool is_target(PresburgerTemporalVertex vertex) const;
+    bool is_target(GGGTemporalVertex vertex) const;
 
     /**
      * @brief Check if the objective is satisfied at current state
@@ -57,7 +57,7 @@ public:
      * @param current_time Current time
      * @return true if objective is satisfied
      */
-    bool is_satisfied(PresburgerTemporalVertex current_vertex, int current_time) const;
+    bool is_satisfied(GGGTemporalVertex current_vertex, int current_time) const;
 
     /**
      * @brief Check if the objective has failed at current state
@@ -66,7 +66,7 @@ public:
      * @param current_time Current time
      * @return true if objective has failed
      */
-    bool has_failed(PresburgerTemporalVertex current_vertex, int current_time) const;
+    bool has_failed(GGGTemporalVertex current_vertex, int current_time) const;
 
     /**
      * @brief Get the objective type
@@ -76,7 +76,7 @@ public:
     /**
      * @brief Get target vertices
      */
-    const std::set<PresburgerTemporalVertex>& get_targets() const { return targets_; }
+    const std::set<GGGTemporalVertex>& get_targets() const { return targets_; }
 
     /**
      * @brief Get time bound (-1 if no bound)
@@ -90,6 +90,6 @@ public:
 
 private:
     ObjectiveType type_;
-    std::set<PresburgerTemporalVertex> targets_;
+    std::set<GGGTemporalVertex> targets_;
     int time_bound_;
 };

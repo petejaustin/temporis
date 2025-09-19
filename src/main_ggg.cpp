@@ -105,14 +105,9 @@ public:
         objective_ = std::make_shared<ggg::graphs::GGGReachabilityObjective>(
             ggg::graphs::GGGReachabilityObjective::Type::REACHABILITY, targets);
         
-        // Configure time bounds
-        ggg::temporal::TimeBoundCalculator::Config time_config;
-        time_config.verbose = verbose;
-        time_config.user_override = user_time_bound;
-        
         // Create and run solver
         auto solver = std::make_shared<ggg::solvers::GGGTemporalReachabilitySolver>(
-            manager_, objective_, time_config);
+            manager_, objective_, user_time_bound > 0 ? user_time_bound : 50, verbose);
         
         if (verbose) {
             std::cout << "Solver: " << solver->get_name() << std::endl;
@@ -134,16 +129,16 @@ private:
         std::cout << "Temporis - GGG-Compatible Presburger Temporal Reachability Solver\n";
         std::cout << "==================================================================\n\n";
         std::cout << "USAGE:\n";
-        std::cout << "  temporis-ggg [OPTIONS] <input_file.dot>\n\n";
+        std::cout << "  temporis [OPTIONS] <input_file.dot>\n\n";
         std::cout << "OPTIONS:\n";
         std::cout << "  -v, --verbose          Enable verbose output\n";
         std::cout << "  -t, --time-bound N     Set solver time bound\n";
         std::cout << "  --validate             Validate file format only\n";
         std::cout << "  -h, --help             Show this help\n\n";
         std::cout << "EXAMPLES:\n";
-        std::cout << "  temporis-ggg game.dot                 # Solve reachability game\n";
-        std::cout << "  temporis-ggg --verbose game.dot       # Detailed output\n";
-        std::cout << "  temporis-ggg -t 100 game.dot          # Custom time bound\n";
+        std::cout << "  temporis game.dot                 # Solve reachability game\n";
+        std::cout << "  temporis --verbose game.dot       # Detailed output\n";
+        std::cout << "  temporis -t 100 game.dot          # Custom time bound\n";
     }
     
     void output_solution(const ggg::solvers::RSSolution<ggg::graphs::GGGTemporalGraph>& solution, bool verbose) {
@@ -151,7 +146,8 @@ private:
         std::cout << "Status: " << (solution.is_solved() ? "Solved" : "Unsolved") << std::endl;
         std::cout << "Valid: " << (solution.is_valid() ? "Yes" : "No") << std::endl;
         
-        if (verbose && solution.is_solved()) {
+        // Always show winning regions (this is the main output we care about)
+        if (solution.is_solved()) {
             std::cout << "\nWinning Regions:\n";
             
             auto [vertex_begin, vertex_end] = boost::vertices(*manager_->graph());
@@ -162,9 +158,9 @@ private:
                 std::cout << "  " << props.name << ": ";
                 if (solution.is_won_by_player0(vertex)) {
                     std::cout << "Player 0";
-                    if (solution.has_strategy(vertex)) {
+                    if (verbose && solution.has_strategy(vertex)) {
                         auto strategy_vertex = solution.get_strategy(vertex);
-                        if (strategy_vertex != boost::graph_traits<ggg::graphs::PresburgerTemporalGraph>::null_vertex()) {
+                        if (strategy_vertex != boost::graph_traits<ggg::graphs::GGGTemporalGraph>::null_vertex()) {
                             std::cout << " -> " << (*manager_->graph())[strategy_vertex].name;
                         }
                     }
