@@ -36,25 +36,6 @@ namespace {
 namespace ggg {
 namespace graphs {
 
-/**
- * @brief Parser function compatible with GGG solver wrapper
- */
-std::shared_ptr<GGGTemporalGraph> parse_presburger_temporal_graph(const std::string& filename) {
-    auto manager = std::make_shared<GGGTemporalGameManager>();
-    
-    if (!manager->load_from_dot_file(filename)) {
-        return nullptr;
-    }
-    
-    return manager->graph();
-}
-
-std::shared_ptr<GGGTemporalGraph> parse_presburger_temporal_graph(std::istream& in) {
-    // For now, stream parsing not implemented - could extend DOT parser
-    log_error("Stream parsing not yet implemented for GGG temporal graphs");
-    return nullptr;
-}
-
 } // namespace graphs
 } // namespace ggg
 

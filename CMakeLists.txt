@@ -17,7 +17,6 @@ add_executable(temporis
     src/presburger_formula.cpp
     src/ggg_temporal_graph.cpp
     src/ggg_temporal_solver.cpp
-    src/reachability_objective.cpp
 )
 
 # Modern CMake target configuration

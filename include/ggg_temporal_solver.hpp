@@ -3,10 +3,8 @@
 #include "ggg_temporal_graph.hpp"
 #include "libggg/solvers/solver.hpp"
 #include <map>
-#include <unordered_map>
 #include <set>
 #include <memory>
-#include <functional>
 #include <chrono>
 
 namespace ggg {
@@ -56,35 +54,6 @@ struct SolverStatistics {
 };
 
 /**
- * @brief Game state combining vertex and time for temporal analysis
- */
-struct TemporalGameState {
-    graphs::GGGTemporalVertex vertex;
-    int time;
-    
-    bool operator<(const TemporalGameState& other) const {
-        if (vertex != other.vertex) return vertex < other.vertex;
-        return time < other.time;
-    }
-    
-    bool operator==(const TemporalGameState& other) const {
-        return vertex == other.vertex && time == other.time;
-    }
-};
-
-/**
- * @brief Hash function for TemporalGameState to enable unordered_map usage
- */
-struct TemporalGameStateHash {
-    std::size_t operator()(const TemporalGameState& state) const {
-        // Combine vertex and time hashes using standard technique
-        std::size_t h1 = std::hash<graphs::GGGTemporalVertex>{}(state.vertex);
-        std::size_t h2 = std::hash<int>{}(state.time);
-        return h1 ^ (h2 << 1); // XOR with bit shift for good distribution
-    }
-};
-
-/**
  * @brief GGG-compatible solver for temporal reachability games
  * 
  * Implements the standard GGG Solver interface while providing specialized
@@ -104,9 +73,6 @@ private:
     
     // Performance and debugging statistics
     mutable SolverStatistics stats_;
-    
-    // Memoization for dynamic programming - optimized with hash map for O(1) lookup
-    std::unordered_map<TemporalGameState, int, TemporalGameStateHash> memo_; // -1 = Player 1 wins, 1 = Player 0 wins, 0 = draw
 
 public:
     /**
@@ -132,11 +98,6 @@ public:
     SolutionType solve_from_state(Vertex initial_vertex, int initial_time = 0);
     
     /**
-     * @brief Compute winning regions for all vertices at given time
-     */
-    std::pair<std::set<Vertex>, std::set<Vertex>> compute_winning_regions(int initial_time = 0);
-    
-    /**
      * @brief Get solver performance statistics
      */
     const SolverStatistics& get_statistics() const { return stats_; }
@@ -151,26 +112,6 @@ private:
      * @brief Compute backwards temporal attractor starting from targets at max_time
      */
     std::set<Vertex> compute_backwards_temporal_attractor();
-    
-    /**
-     * @brief Recursive solver using minimax with memoization
-     */
-    int solve_recursive(const TemporalGameState& state, std::set<TemporalGameState>& visited);
-    
-    /**
-     * @brief Check if a state is terminal
-     */
-    bool is_terminal_state(const TemporalGameState& state, int& winner);
-    
-    /**
-     * @brief Get available moves from a state
-     */
-    std::vector<Vertex> get_available_moves(const TemporalGameState& state);
-    
-    /**
-     * @brief Build solution from memoized results
-     */
-    SolutionType build_solution_from_memo(Vertex initial_vertex, int initial_time);
 };
 
 /**
