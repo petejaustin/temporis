@@ -302,9 +302,16 @@ std::unique_ptr<PresburgerFormula> GGGTemporalGameManager::parse_comparison_form
         return PresburgerFormula::greaterequal(*left_term, *right_term);
     } else if (op == "<=") {
         return PresburgerFormula::lessequal(*left_term, *right_term);
-    } else if (op == ">" || op == "<" || op == "==" || op == "!=") {
-        // For now, map all other comparisons to equal for simplicity
+    } else if (op == ">") {
+        return PresburgerFormula::greater(*left_term, *right_term);
+    } else if (op == "<") {
+        return PresburgerFormula::less(*left_term, *right_term);
+    } else if (op == "==" || op == "=") {
         return PresburgerFormula::equal(*left_term, *right_term);
+    } else if (op == "!=") {
+        // Implement != as NOT(equal)
+        auto equal_formula = PresburgerFormula::equal(*left_term, *right_term);
+        return PresburgerFormula::not_formula(std::move(equal_formula));
     } else {
         return PresburgerFormula::equal(*left_term, *right_term);
     }

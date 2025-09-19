@@ -18,6 +18,14 @@ std::unique_ptr<PresburgerFormula> PresburgerFormula::lessequal(const Presburger
     return std::make_unique<PresburgerFormula>(LESSEQUAL, left, right);
 }
 
+std::unique_ptr<PresburgerFormula> PresburgerFormula::greater(const PresburgerTerm& left, const PresburgerTerm& right) {
+    return std::make_unique<PresburgerFormula>(GREATER, left, right);
+}
+
+std::unique_ptr<PresburgerFormula> PresburgerFormula::less(const PresburgerTerm& left, const PresburgerTerm& right) {
+    return std::make_unique<PresburgerFormula>(LESS, left, right);
+}
+
 std::unique_ptr<PresburgerFormula> PresburgerFormula::modulus(const PresburgerTerm& expr, int modulus, int remainder) {
     auto result = std::make_unique<PresburgerFormula>(MODULUS, expr, PresburgerTerm(0));
     result->modulus_ = modulus;
@@ -55,6 +63,8 @@ std::string PresburgerFormula::to_string() const {
         case EQUAL: return left_.to_string() + " = " + right_.to_string();
         case GREATEREQUAL: return left_.to_string() + " >= " + right_.to_string();
         case LESSEQUAL: return left_.to_string() + " <= " + right_.to_string();
+        case GREATER: return left_.to_string() + " > " + right_.to_string();
+        case LESS: return left_.to_string() + " < " + right_.to_string();
         case MODULUS: return left_.to_string() + " ≡ " + std::to_string(remainder_) + " (mod " + std::to_string(modulus_) + ")";
         case AND: return "AND(...)";
         case OR: return "OR(...)";
@@ -80,6 +90,16 @@ bool PresburgerFormula::evaluate(const std::map<std::string, int>& values) const
             int left_val = evaluate_term(left_, values);
             int right_val = evaluate_term(right_, values);
             return left_val <= right_val;
+        }
+        case GREATER: {
+            int left_val = evaluate_term(left_, values);
+            int right_val = evaluate_term(right_, values);
+            return left_val > right_val;
+        }
+        case LESS: {
+            int left_val = evaluate_term(left_, values);
+            int right_val = evaluate_term(right_, values);
+            return left_val < right_val;
         }
         case MODULUS: {
             int expr_val = evaluate_term(left_, values);
