@@ -14,7 +14,7 @@ GGGTemporalReachabilitySolver::GGGTemporalReachabilitySolver(
 }
 
 std::string GGGTemporalReachabilitySolver::get_name() const {
-    return "Temporal Reachability Solver (Presburger Arithmetic)";
+    return "Backwards Temporal Attractor Solver";
 }
 
 GGGTemporalReachabilitySolver::SolutionType GGGTemporalReachabilitySolver::solve(const GraphType& graph) {
@@ -22,11 +22,10 @@ GGGTemporalReachabilitySolver::SolutionType GGGTemporalReachabilitySolver::solve
     stats_.reset();
     auto solve_start = std::chrono::high_resolution_clock::now();
     
-    // Compute winning regions from initial time
+    // Compute winning regions using backwards temporal attractor
     auto [player0_winning, player1_winning] = compute_winning_regions(0);
     
     // "Solved" means we successfully computed winning regions for all vertices
-    // This is independent of who wins the game
     SolutionType solution(true);
     
     // Set winning regions
@@ -37,22 +36,19 @@ GGGTemporalReachabilitySolver::SolutionType GGGTemporalReachabilitySolver::solve
         solution.set_winning_player(vertex, 1);
     }
     
-    // Build strategies from memoization
-    // This is a simplified strategy extraction - in practice, you'd want more sophisticated strategy synthesis
+    // Build basic strategies - for now, just pick any valid move for winning vertices
+    // This could be enhanced to build optimal strategies from the attractor computation
     auto [vertex_begin, vertex_end] = boost::vertices(graph);
     for (auto vertex_it = vertex_begin; vertex_it != vertex_end; ++vertex_it) {
         Vertex vertex = *vertex_it;
-        TemporalGameState state{vertex, 0};
         
-        if (memo_.find(state) != memo_.end() && memo_[state] > 0) {
-            // Player 0 wins from this state, find a winning move
-            auto moves = get_available_moves(state);
-            for (auto move : moves) {
-                TemporalGameState next_state{move, 1};
-                if (memo_.find(next_state) != memo_.end() && memo_[next_state] > 0) {
-                    solution.set_strategy(vertex, move);
-                    break;
-                }
+        if (player0_winning.find(vertex) != player0_winning.end()) {
+            // This vertex is winning for player 0, find a valid move at time 0
+            auto moves = manager_->get_available_moves(vertex, 0);
+            if (!moves.empty()) {
+                // For now, just pick the first available move
+                // TODO: Could be enhanced to pick moves that stay in winning region
+                solution.set_strategy(vertex, moves[0]);
             }
         }
     }
@@ -65,54 +61,63 @@ GGGTemporalReachabilitySolver::SolutionType GGGTemporalReachabilitySolver::solve
 }
 
 GGGTemporalReachabilitySolver::SolutionType GGGTemporalReachabilitySolver::solve_from_state(Vertex initial_vertex, int initial_time) {
-    memo_.clear();
-    TemporalGameState initial_state{initial_vertex, initial_time};
-    std::set<TemporalGameState> visited;
+    // For backwards attractor, initial_time doesn't affect the computation
+    // We always compute from max_time back to 0
+    auto [player0_winning, player1_winning] = compute_winning_regions(0);
     
-    int winner = solve_recursive(initial_state, visited);
+    SolutionType solution(true);
     
-    return build_solution_from_memo(initial_vertex, initial_time);
+    // Check if the initial vertex is in the winning region for player 0
+    if (player0_winning.find(initial_vertex) != player0_winning.end()) {
+        solution.set_winning_player(initial_vertex, 0);
+        
+        // Find a strategy move if available
+        auto moves = manager_->get_available_moves(initial_vertex, initial_time);
+        if (!moves.empty()) {
+            solution.set_strategy(initial_vertex, moves[0]);
+        }
+    } else {
+        solution.set_winning_player(initial_vertex, 1);
+    }
+    
+    return solution;
 }
 
 std::pair<std::set<GGGTemporalReachabilitySolver::Vertex>, std::set<GGGTemporalReachabilitySolver::Vertex>>
 GGGTemporalReachabilitySolver::compute_winning_regions(int initial_time) {
-    std::set<Vertex> player0_winning;
-    std::set<Vertex> player1_winning;
-    
     memo_.clear();
     
     // Time the graph traversal
     auto traversal_start = std::chrono::high_resolution_clock::now();
     
-    auto [vertex_begin, vertex_end] = boost::vertices(*manager_->graph());
+    // Backwards temporal attractor computation
+    std::set<Vertex> current_attractor = compute_backwards_temporal_attractor();
     
+    // Split vertices into winning regions based on final attractor
+    std::set<Vertex> player0_winning = current_attractor;
+    std::set<Vertex> player1_winning;
+    
+    auto [vertex_begin, vertex_end] = boost::vertices(*manager_->graph());
     for (auto vertex_it = vertex_begin; vertex_it != vertex_end; ++vertex_it) {
         Vertex vertex = *vertex_it;
-        TemporalGameState state{vertex, initial_time};
-        std::set<TemporalGameState> visited;
-        
-        // For each vertex as starting position, determine who wins
-        // If starting vertex is a target, Player 0 wins trivially
-        if (objective_->is_target(vertex)) {
-            player0_winning.insert(vertex);
-            continue;
-        }
-        
-        // Otherwise, run game tree search to see if Player 0 can reach a target
-        int winner = solve_recursive(state, visited);
-        
-        if (winner > 0) {
-            // Player 0 can reach a target starting from this vertex
-            player0_winning.insert(vertex);
-        } else {
-            // Player 1 can prevent Player 0 from reaching a target
+        if (player0_winning.find(vertex) == player0_winning.end()) {
             player1_winning.insert(vertex);
         }
-        // winner == 0 means draw/undetermined
     }
     
     auto traversal_end = std::chrono::high_resolution_clock::now();
     stats_.graph_traversal_time += (traversal_end - traversal_start);
+    
+    if (verbose_) {
+        std::cout << "Final attractor at time 0 has " << player0_winning.size() << " vertices: {";
+        bool first = true;
+        for (auto vertex : player0_winning) {
+            if (!first) std::cout << ", ";
+            std::cout << (*manager_->graph())[vertex].name;
+            first = false;
+        }
+        std::cout << "}\n";
+    }
     
     return {player0_winning, player1_winning};
 }
@@ -225,6 +230,99 @@ std::vector<GGGTemporalReachabilitySolver::Vertex> GGGTemporalReachabilitySolver
     }
     
     return moves;
+}
+
+std::set<GGGTemporalReachabilitySolver::Vertex> GGGTemporalReachabilitySolver::compute_backwards_temporal_attractor() {
+    // Start with target vertices at max_time as initial attractor
+    std::set<Vertex> current_attractor;
+    
+    // Initialize attractor with all target vertices
+    auto [vertex_begin, vertex_end] = boost::vertices(*manager_->graph());
+    for (auto vertex_it = vertex_begin; vertex_it != vertex_end; ++vertex_it) {
+        Vertex vertex = *vertex_it;
+        if (objective_->is_target(vertex)) {
+            current_attractor.insert(vertex);
+        }
+    }
+    
+    if (verbose_) {
+        std::cout << "Starting backwards attractor from time " << max_time_ 
+                  << " with " << current_attractor.size() << " target vertices: {";
+        bool first = true;
+        for (auto vertex : current_attractor) {
+            if (!first) std::cout << ", ";
+            std::cout << (*manager_->graph())[vertex].name;
+            first = false;
+        }
+        std::cout << "}\n";
+    }
+    
+    // Work backwards from max_time to 0
+    for (int time = max_time_ - 1; time >= 0; --time) {
+        stats_.states_explored++;
+        
+        std::set<Vertex> new_attractor;
+        
+        // For each vertex, check if it should be in the attractor at this time
+        for (auto vertex_it = vertex_begin; vertex_it != vertex_end; ++vertex_it) {
+            Vertex vertex = *vertex_it;
+            
+            // Get available moves from this vertex at this time
+            std::vector<Vertex> moves = manager_->get_available_moves(vertex, time);
+            stats_.constraint_evaluations++;
+            
+            if (moves.empty()) {
+                // No moves available - skip this vertex
+                stats_.constraint_failures++;
+                continue;
+            }
+            stats_.constraint_passes++;
+            
+            int player = (*manager_->graph())[vertex].player;
+            
+            if (player == 0) {
+                // Player 0 (existential): needs AT LEAST ONE edge to current attractor
+                bool has_edge_to_attractor = false;
+                for (auto move : moves) {
+                    if (current_attractor.find(move) != current_attractor.end()) {
+                        has_edge_to_attractor = true;
+                        break;
+                    }
+                }
+                if (has_edge_to_attractor) {
+                    new_attractor.insert(vertex);
+                }
+            } else {
+                // Player 1 (universal): needs ALL EDGES to go to current attractor
+                bool all_edges_to_attractor = true;
+                for (auto move : moves) {
+                    if (current_attractor.find(move) == current_attractor.end()) {
+                        all_edges_to_attractor = false;
+                        break;
+                    }
+                }
+                if (all_edges_to_attractor) {
+                    new_attractor.insert(vertex);
+                }
+            }
+        }
+        
+        // Update current attractor (non-monotonic: replace, don't union)
+        current_attractor = new_attractor;
+        
+        if (verbose_) {
+            std::cout << "Time " << time << ": attractor has " << current_attractor.size() << " vertices: {";
+            bool first = true;
+            for (auto vertex : current_attractor) {
+                if (!first) std::cout << ", ";
+                std::cout << (*manager_->graph())[vertex].name;
+                first = false;
+            }
+            std::cout << "}\n";
+        }
+    }
+    
+    return current_attractor;
 }
 
 GGGTemporalReachabilitySolver::SolutionType GGGTemporalReachabilitySolver::build_solution_from_memo(Vertex initial_vertex, int initial_time) {

@@ -148,6 +148,11 @@ public:
 
 private:
     /**
+     * @brief Compute backwards temporal attractor starting from targets at max_time
+     */
+    std::set<Vertex> compute_backwards_temporal_attractor();
+    
+    /**
      * @brief Recursive solver using minimax with memoization
      */
     int solve_recursive(const TemporalGameState& state, std::set<TemporalGameState>& visited);
