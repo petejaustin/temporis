@@ -3,11 +3,57 @@
 #include "ggg_temporal_graph.hpp"
 #include "libggg/solvers/solver.hpp"
 #include <map>
+#include <unordered_map>
 #include <set>
 #include <memory>
+#include <functional>
+#include <chrono>
 
 namespace ggg {
 namespace solvers {
+
+/**
+ * @brief Performance and debugging statistics for temporal solver
+ */
+struct SolverStatistics {
+    // State space exploration
+    size_t states_explored = 0;
+    size_t states_pruned = 0;
+    size_t max_time_reached = 0;
+    
+    // Constraint evaluation 
+    size_t constraint_evaluations = 0;
+    size_t constraint_passes = 0;
+    size_t constraint_failures = 0;
+    
+    // Memoization performance
+    size_t cache_hits = 0;
+    size_t cache_misses = 0;
+    
+    // Timing
+    std::chrono::duration<double> total_solve_time{0};
+    std::chrono::duration<double> constraint_eval_time{0};
+    std::chrono::duration<double> graph_traversal_time{0};
+    
+    // Reset all statistics
+    void reset() {
+        states_explored = states_pruned = max_time_reached = 0;
+        constraint_evaluations = constraint_passes = constraint_failures = 0;
+        cache_hits = cache_misses = 0;
+        total_solve_time = constraint_eval_time = graph_traversal_time = std::chrono::duration<double>{0};
+    }
+    
+    // Get cache hit ratio (0.0 to 1.0)
+    double cache_hit_ratio() const {
+        size_t total = cache_hits + cache_misses;
+        return total > 0 ? static_cast<double>(cache_hits) / total : 0.0;
+    }
+    
+    // Get constraint success ratio (0.0 to 1.0)
+    double constraint_success_ratio() const {
+        return constraint_evaluations > 0 ? static_cast<double>(constraint_passes) / constraint_evaluations : 0.0;
+    }
+};
 
 /**
  * @brief Game state combining vertex and time for temporal analysis
@@ -23,6 +69,18 @@ struct TemporalGameState {
     
     bool operator==(const TemporalGameState& other) const {
         return vertex == other.vertex && time == other.time;
+    }
+};
+
+/**
+ * @brief Hash function for TemporalGameState to enable unordered_map usage
+ */
+struct TemporalGameStateHash {
+    std::size_t operator()(const TemporalGameState& state) const {
+        // Combine vertex and time hashes using standard technique
+        std::size_t h1 = std::hash<graphs::GGGTemporalVertex>{}(state.vertex);
+        std::size_t h2 = std::hash<int>{}(state.time);
+        return h1 ^ (h2 << 1); // XOR with bit shift for good distribution
     }
 };
 
@@ -44,8 +102,11 @@ private:
     int max_time_;
     bool verbose_;
     
-    // Memoization for dynamic programming
-    std::map<TemporalGameState, int> memo_; // -1 = Player 1 wins, 1 = Player 0 wins, 0 = draw
+    // Performance and debugging statistics
+    mutable SolverStatistics stats_;
+    
+    // Memoization for dynamic programming - optimized with hash map for O(1) lookup
+    std::unordered_map<TemporalGameState, int, TemporalGameStateHash> memo_; // -1 = Player 1 wins, 1 = Player 0 wins, 0 = draw
 
 public:
     /**
@@ -74,6 +135,16 @@ public:
      * @brief Compute winning regions for all vertices at given time
      */
     std::pair<std::set<Vertex>, std::set<Vertex>> compute_winning_regions(int initial_time = 0);
+    
+    /**
+     * @brief Get solver performance statistics
+     */
+    const SolverStatistics& get_statistics() const { return stats_; }
+    
+    /**
+     * @brief Reset solver statistics
+     */
+    void reset_statistics() { stats_.reset(); }
 
 private:
     /**

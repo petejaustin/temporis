@@ -18,6 +18,10 @@ std::string GGGTemporalReachabilitySolver::get_name() const {
 }
 
 GGGTemporalReachabilitySolver::SolutionType GGGTemporalReachabilitySolver::solve(const GraphType& graph) {
+    // Reset statistics for this solve
+    stats_.reset();
+    auto solve_start = std::chrono::high_resolution_clock::now();
+    
     // Compute winning regions from initial time
     auto [player0_winning, player1_winning] = compute_winning_regions(0);
     
@@ -53,6 +57,10 @@ GGGTemporalReachabilitySolver::SolutionType GGGTemporalReachabilitySolver::solve
         }
     }
     
+    // Record total solve time
+    auto solve_end = std::chrono::high_resolution_clock::now();
+    stats_.total_solve_time = solve_end - solve_start;
+    
     return solution;
 }
 
@@ -72,6 +80,9 @@ GGGTemporalReachabilitySolver::compute_winning_regions(int initial_time) {
     std::set<Vertex> player1_winning;
     
     memo_.clear();
+    
+    // Time the graph traversal
+    auto traversal_start = std::chrono::high_resolution_clock::now();
     
     auto [vertex_begin, vertex_end] = boost::vertices(*manager_->graph());
     
@@ -100,14 +111,23 @@ GGGTemporalReachabilitySolver::compute_winning_regions(int initial_time) {
         // winner == 0 means draw/undetermined
     }
     
+    auto traversal_end = std::chrono::high_resolution_clock::now();
+    stats_.graph_traversal_time += (traversal_end - traversal_start);
+    
     return {player0_winning, player1_winning};
 }
 
 int GGGTemporalReachabilitySolver::solve_recursive(const TemporalGameState& state, std::set<TemporalGameState>& visited) {
+    // Track state exploration
+    stats_.states_explored++;
+    stats_.max_time_reached = std::max(stats_.max_time_reached, static_cast<size_t>(state.time));
+    
     // Check memoization
     if (memo_.find(state) != memo_.end()) {
+        stats_.cache_hits++;
         return memo_[state];
     }
+    stats_.cache_misses++;
     
     // Check for cycles
     if (visited.find(state) != visited.end()) {
@@ -124,6 +144,7 @@ int GGGTemporalReachabilitySolver::solve_recursive(const TemporalGameState& stat
     
     // Check time bound
     if (state.time >= max_time_) {
+        stats_.states_pruned++;
         memo_[state] = -1; // Time expired, Player 1 wins
         return memo_[state];
     }
@@ -187,7 +208,23 @@ bool GGGTemporalReachabilitySolver::is_terminal_state(const TemporalGameState& s
 }
 
 std::vector<GGGTemporalReachabilitySolver::Vertex> GGGTemporalReachabilitySolver::get_available_moves(const TemporalGameState& state) {
-    return manager_->get_available_moves(state.vertex, state.time);
+    // Time the constraint evaluation
+    auto constraint_start = std::chrono::high_resolution_clock::now();
+    
+    auto moves = manager_->get_available_moves(state.vertex, state.time);
+    
+    auto constraint_end = std::chrono::high_resolution_clock::now();
+    stats_.constraint_eval_time += (constraint_end - constraint_start);
+    
+    // Track constraint evaluation statistics
+    stats_.constraint_evaluations++;
+    if (!moves.empty()) {
+        stats_.constraint_passes++;
+    } else {
+        stats_.constraint_failures++;
+    }
+    
+    return moves;
 }
 
 GGGTemporalReachabilitySolver::SolutionType GGGTemporalReachabilitySolver::build_solution_from_memo(Vertex initial_vertex, int initial_time) {
