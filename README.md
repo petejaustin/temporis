@@ -1,19 +1,24 @@
-# Temporis: Advanced Presburger Temporal Games
+# GGG Temporis: Presburger Temporal Reachability Solver
 
-A **fully modular C++20 framework** for analyzing temporal games with **Presburger arithmetic constraints** and **existential quantifiers**. Built with professional software engineering practices and clean architecture.
+A **GGG-native temporal game solver** implementing **Presburger arithmetic constraints** with **existential quantifiers**. Fully integrated with the Game Graph Gym framework using native data structures and solver interfaces.
 
 ## 🌟 Features
 
-- **🎮 2-Player Temporal Games**: Standard game format with players 0 and 1
-- **🧮 Presburger Constraints**: Full support for linear arithmetic over integers
+- **🎮 GGG Integration**: Native `Solver<GraphType, SolutionType>` implementation
+- **🧮 Presburger Constraints**: Full support for linear arithmetic over integers  
 - **∃ Existential Quantifiers**: Express complex mathematical relationships with unlimited variables
 - **🔢 Multi-Variable Support**: Constraints with multiple temporal and quantified variables
 - **📝 DOT Format Input**: Standard graph format with custom temporal annotations
-- **🏗️ Modular Architecture**: Clean separation of concerns with header/implementation pairs
-- **⚡ Professional Build System**: CMake-based with proper directory structure
-- **🧪 Comprehensive Testing**: Multiple test scenarios included
+- **⚡ Professional Build System**: Modern CMake with GGG dependency management
+- **🧪 Comprehensive Testing**: Multiple constraint scenarios included
 
 ## 🚀 Quick Start
+
+### Prerequisites
+- GGG library (Game Graph Gym) in sibling directory
+- C++20 compatible compiler
+- CMake 3.20+
+- Boost Graph Library
 
 ### Build
 ```bash
@@ -24,17 +29,15 @@ make
 
 ### Run Examples
 ```bash
-# Progressive test suite - start here!
-./temporis input-files/test_01_basic.dot
-./temporis input-files/test_02_existential.dot  
-./temporis input-files/test_03_multi_variable.dot
+# Test temporal constraints
+./temporis ../input-files/simple_constraint_test.dot
+./temporis ../input-files/spec_test.dot
 
-# Advanced scenarios
-./temporis input-files/test_04_complex_game.dot
-./temporis input-files/test_05_performance.dot  # Warning: takes several minutes!
+# Verbose output for debugging
+./temporis --verbose ../input-files/spec_test_commented.dot
 
-# Run modular component demo
-./temporis
+# Invalid constraint testing
+./temporis ../input-files/invalid_test.dot
 ```
 
 ## 🏛️ Architecture
@@ -61,31 +64,27 @@ temporis/
 └── input-files/                      # DOT test files with temporal constraints
 ```
 
-### Key Classes
+### Key Components
 
-#### **🎯 TemporalGameApplication**
-- **Purpose**: Main application controller and orchestrator
-- **Features**: Command-line processing, file loading, mode management
+#### **🎯 GGGTemporalReachabilitySolver**
+- **Purpose**: Main solver implementing GGG's `Solver<GraphType, SolutionType>` interface
+- **Features**: Minimax algorithm with memoization, winning region computation, strategy synthesis
+- **Integration**: Returns `RSSolution<GGGTemporalGraph>` with regions and strategies
 
-#### **📊 TemporalAnalyzer** 
-- **Purpose**: Temporal analysis and comprehensive reporting
-- **Features**: Game structure analysis, temporal edge evaluation, statistics
+#### **📊 GGGTemporalGameManager** 
+- **Purpose**: Graph management using GGG's native `boost::adjacency_list`
+- **Features**: Vertex/edge management, constraint evaluation, DOT file parsing
+- **Integration**: Uses `DEFINE_GAME_GRAPH` macro for type generation
 
-#### **🎮 TemporalGameManager**
-- **Purpose**: Core game state management 
-- **Features**: Vertex/edge management, constraint evaluation, time advancement
-
-#### **📋 PresburgerTemporalDotParser**
-- **Purpose**: Complete DOT file parsing with constraint support
-- **Features**: Regex-based parsing, existential quantifiers, multiple variables
-
-#### **🧮 PresburgerTerm & PresburgerFormula**
+#### **🧮 PresburgerFormula & PresburgerTerm**
 - **Purpose**: Mathematical constraint representation and evaluation
-- **Features**: Linear arithmetic, coefficient handling, formula composition
+- **Features**: Linear arithmetic, coefficient handling, existential quantifiers
+- **Integration**: Embedded in GGG graph edge properties
 
-#### **🧪 TemporalGameDemo**
-- **Purpose**: Demonstration and testing functionality
-- **Features**: Component testing, sample game creation, modular verification
+#### **📋 GGGReachabilityObjective**
+- **Purpose**: Reachability goal specification compatible with GGG types
+- **Features**: Target vertex management, constraint satisfaction checking
+- **Integration**: Uses `GGGTemporalVertex` descriptors
 
 ## 📝 Constraint Language
 
@@ -153,102 +152,75 @@ The system evaluates constraints at each time step:
 3. **Evaluate** existential quantifiers by testing integer witnesses
 4. **Determine** edge availability based on constraint satisfaction
 
-## 🧪 Standardized Test Suite
+## 🧪 Test Suite
 
-The `input-files/` directory contains 5 carefully designed test files that progressively demonstrate system capabilities:
+The `input-files/` directory contains carefully designed test files demonstrating system capabilities:
 
-### **📋 Test 01: Basic Linear Constraints** (`test_01_basic.dot`)
-**Purpose**: Foundation testing with simple temporal logic
-- **Structure**: 4 vertices, 4 edges, mixed players
-- **Constraints**: 
-  - `time >= 2` (activation threshold)
-  - `time <= 8` (deactivation threshold)  
-  - `time = 5` (exact timing)
-  - No constraint (always active)
-- **Learning**: Basic temporal constraint patterns
+### **Available Test Files**
+- **`simple_constraint_test.dot`**: Basic temporal constraints with simple reachability
+- **`spec_test.dot`**: Specification test with complex Presburger constraints
+- **`spec_test_commented.dot`**: Same as spec_test.dot but with detailed comments
+- **`invalid_test.dot`**: Error handling test with malformed constraints
 
-### **⚡ Test 02: Existential Quantifiers** (`test_02_existential.dot`)
-**Purpose**: Single-variable existential quantification
-- **Structure**: 2 vertices, 3 edges, simple game
-- **Constraints**:
-  - `∃k. time = 2*k + 1` (odd times: 1, 3, 5, 7...)
-  - `∃j. time = 3*j` (multiples of 3: 0, 3, 6, 9...)
-  - `time >= 4` (comparison with linear constraint)
-- **Learning**: Mathematical pattern recognition via quantifiers
-
-### **🔢 Test 03: Multi-Variable Quantifiers** (`test_03_multi_variable.dot`)
-**Purpose**: Multiple existential variables in single constraints
-- **Structure**: 3 vertices, 3 edges, strategic layout
-- **Constraints**:
-  - `∃j. ∃k. time = j + k + 3` (sums of two integers)
-  - `∃j. ∃k. time = 2*j + 3*k` (linear combinations)
-  - `∃a. ∃b. ∃c. time = a + b + c + 6` (three-variable sums)
-- **Learning**: Complex mathematical relationships
-
-### **🎮 Test 04: Complex Game Structure** (`test_04_complex_game.dot`)
-**Purpose**: Realistic game with mixed constraint types
-- **Structure**: 6 vertices, 10 edges, full game dynamics
-- **Constraints**: Every type from simple to multi-variable
-- **Features**:
-  - Strategic player positioning
-  - Time windows and exact timing
-  - Modular arithmetic patterns
-  - Return paths and reset conditions
-- **Learning**: Real-world game scenario analysis
-
-### **🚀 Test 05: Performance Stress Test** (`test_05_performance.dot`)
-**Purpose**: Scalability and performance benchmarking
-- **Structure**: 2 vertices, 4 edges, minimal overhead
-- **Constraints**:
-  - 5 variables: `∃a. ∃b. ∃c. ∃d. ∃e. time = a + b + c + d + e + 10` (~30 seconds)
-  - 6 variables: `∃a. ∃b. ∃c. ∃d. ∃e. ∃f. time = a + b + c + d + e + f + 15` (~2-3 minutes)
-- **Warning**: ⚠️ This test may take several minutes to complete!
-- **Learning**: Performance characteristics and computational limits
-
-### **📊 Progressive Testing Strategy**
+### **Running Tests**
 ```bash
-# Quick basic functionality
-./temporis input-files/test_01_basic.dot
+# Basic functionality
+./temporis ../input-files/simple_constraint_test.dot
 
-# Mathematical patterns  
-./temporis input-files/test_02_existential.dot
+# Complex constraints  
+./temporis ../input-files/spec_test.dot
 
-# Complex mathematics
-./temporis input-files/test_03_multi_variable.dot
+# Verbose debugging
+./temporis --verbose ../input-files/spec_test_commented.dot
 
-# Full game scenarios
-./temporis input-files/test_04_complex_game.dot
+# Error handling
+./temporis ../input-files/invalid_test.dot
+```
 
-# Performance benchmarking (patience required!)
-./temporis input-files/test_05_performance.dot
+## 🎯 GGG Integration Details
+
+### **Native GGG Features Used**
+- **Graph Definition**: `DEFINE_GAME_GRAPH(GGGTemporal, ...)` macro for type generation
+- **Solver Interface**: Inherits from `Solver<GGGTemporalGraph, RSSolution<GGGTemporalGraph>>`
+- **Solution Types**: Returns `RSSolution<>` with winning regions and strategies
+- **Graph Operations**: Uses `boost::graph_traits`, `boost::vertices`, `boost::edges`
+- **Utilities**: Leverages `ggg::graphs::add_vertex`, `ggg::graphs::add_edge`
+
+### **Solver Integration**
+```cpp
+// Native GGG solver implementation
+class GGGTemporalReachabilitySolver : public Solver<graphs::GGGTemporalGraph, RSSolution<graphs::GGGTemporalGraph>> {
+public:
+    SolutionType solve(const GraphType& graph) override;
+    std::string get_name() const override;
+};
+```
+
+### **Build Dependencies**  
+```cmake
+# Modern CMake with GGG integration
+target_include_directories(temporis PRIVATE 
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/../ggg/include
+)
 ```
 
 ## 📊 Analysis Output
 
-The system provides detailed temporal analysis:
+The system provides GGG-compatible solver output:
 
 ```
-Loading Presburger Arithmetic Temporal Game from: test_01_basic.dot
-==================================================
+Solver: Temporal Reachability Solver (Presburger Arithmetic)
+Graph: 2 vertices, 2 edges
 
-Presburger temporal game loaded with 4 vertices and 4 edges.
+=== Solution ===
+Status: Solved
+Valid: Yes
 
-=== Game Structure ===
-Player 0 vertices: v0 v2 
-Player 1 vertices: v1 v3 
-
-=== Presburger Formula Explanations ===
-Variables:
-  time = current time
-
-v0 -> v1:
-  Formula: time >= 2
-  Explanation: Edge is active when this formula evaluates to true
-
-=== Temporal Edge Analysis ===
-Time 0:
-  v0 -> v1 (e0): INACTIVE [time >= 2]
-  v3 -> v0 (e3): ACTIVE [no constraint]
+Winning Regions:
+  v0: Player 0
+  v1: Player 0 -> v0
+```
 
 Time 2:  
   v0 -> v1 (e0): ACTIVE [time >= 2]
@@ -277,55 +249,55 @@ The modular architecture supports **unlimited variables** with predictable scali
 
 ## 🔧 Dependencies
 
+- **GGG Library**: Game Graph Gym framework (sibling directory)
+  - **⚠️ Compatibility**: Tested with GGG version from September 19th, 2025
+  - **Note**: Future GGG versions may change architecture - this implementation is designed for the September 2025 API
 - **C++20**: Modern C++ compiler with full C++20 support
 - **CMake**: Version 3.20 or higher
 - **Boost**: Graph library (automatically found by CMake)
-- **Standard Library**: Extensive use of modern C++ features
 
-## 🎯 Usage Modes
+## 🎯 Command Line Options
 
-### File Analysis Mode
 ```bash
-./temporis input-files/seven_variable_test.dot
-```
-- Loads and analyzes DOT file
-- Provides comprehensive temporal analysis
-- Shows constraint evaluation over time
+temporis [OPTIONS] <input_file.dot>
 
-### Demo Mode  
-```bash
-./temporis
+OPTIONS:
+  -v, --verbose          Enable verbose output
+  -t, --time-bound N     Set solver time bound (default: 50)
+  --validate             Validate file format only
+  -h, --help             Show help message
+
+EXAMPLES:
+  temporis game.dot                 # Solve reachability game
+  temporis --verbose game.dot       # Detailed output
+  temporis -t 100 game.dot          # Custom time bound
 ```
-- Demonstrates modular architecture
-- Tests all components
-- Shows Presburger term operations
-- Verifies clean compilation and linking
 
 ## 🏆 Engineering Excellence
 
-### Code Quality
-- **✅ Fully Modular**: Clean separation of concerns
-- **✅ Header/Implementation Separation**: Professional C++ structure  
-- **✅ Single Responsibility**: Each class has focused purpose
-- **✅ Comprehensive Documentation**: Doxygen-style comments
+### GGG Integration
+- **✅ Native Solver**: Implements `Solver<GraphType, SolutionType>` interface
+- **✅ Type Safety**: Uses GGG's `DEFINE_GAME_GRAPH` macro for type generation
+- **✅ Solution Compatibility**: Returns standard `RSSolution<>` objects
+- **✅ Graph Utilities**: Leverages GGG's boost graph operations
+- **✅ Framework Consistency**: Follows GGG naming and architectural patterns
+
+### Code Quality  
 - **✅ Modern C++20**: Latest language features and best practices
+- **✅ Clean Architecture**: Separation of graph, solver, and constraint logic
+- **✅ Professional Documentation**: Comprehensive inline comments
+- **✅ Memory Safety**: Smart pointers and RAII throughout
 
 ### Build System
-- **✅ CMake Integration**: Professional build configuration
-- **✅ Clean Dependencies**: Minimal external requirements
-- **✅ Directory Organization**: Logical project structure
-- **✅ Cross-Platform**: Works on modern Linux systems
-
-### Testing & Verification
-- **✅ Multiple Test Scenarios**: Comprehensive DOT file suite
-- **✅ Performance Testing**: Scalability verification
-- **✅ Functionality Testing**: Both analysis and demo modes
-- **✅ Regression Testing**: Preserved functionality through refactoring
+- **✅ Modern CMake**: Target-based configuration with proper dependencies
+- **✅ GGG Integration**: Seamless linking with Game Graph Gym library
+- **✅ Clean Structure**: Logical separation of headers, sources, and tests
+- **✅ Boost Policy**: Proper CMake policy handling for Boost libraries
 
 ## 📄 License
 
-This project demonstrates advanced mathematical concepts and professional software engineering practices. Built with modern C++20 and designed for research in temporal game theory.
+This project is part of the Game Graph Gym ecosystem, demonstrating advanced temporal constraint solving with mathematical precision using the GGG framework.
 
 ---
 
-🚀 **Temporis**: *Where modular architecture meets mathematical precision in temporal game theory.*
+🚀 **GGG Temporis**: *Native temporal reachability solving in the Game Graph Gym framework.*
