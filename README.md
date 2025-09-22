@@ -52,15 +52,13 @@ temporis/
 │   ├── ggg_temporal_graph.hpp        # GGG-compatible temporal graph with Presburger parsing
 │   ├── ggg_temporal_solver.hpp       # GGG Solver interface implementation
 │   ├── presburger_formula.hpp        # Mathematical formula representation
-│   ├── presburger_term.hpp           # Mathematical term operations
-│   └── reachability_objective.hpp    # Temporal reachability goals
+│   └── presburger_term.hpp           # Mathematical term operations
 ├── src/                               # Implementation files (.cpp)
 │   ├── main_ggg.cpp                  # GGG-integrated entry point
 │   ├── ggg_temporal_graph.cpp        # Native GGG graph with constraint parsing
-│   ├── ggg_temporal_solver.cpp       # Minimax solver with winning regions
+│   ├── ggg_temporal_solver.cpp       # Backwards temporal attractor solver
 │   ├── presburger_formula.cpp        # Constraint evaluation engine
-│   ├── presburger_term.cpp           # Term arithmetic operations
-│   └── reachability_objective.cpp    # Objective management
+│   └── presburger_term.cpp           # Term arithmetic operations
 └── input-files/                      # DOT test files with temporal constraints
 ```
 
@@ -68,7 +66,8 @@ temporis/
 
 #### **🎯 GGGTemporalReachabilitySolver**
 - **Purpose**: Main solver implementing GGG's `Solver<GraphType, SolutionType>` interface
-- **Features**: Minimax algorithm with memoization, winning region computation, strategy synthesis
+- **Algorithm**: Backwards temporal attractor algorithm working from maximum time to 0
+- **Features**: Brute-force attractor computation, winning region synthesis, player-specific strategies
 - **Integration**: Returns `RSSolution<GGGTemporalGraph>` with regions and strategies
 
 #### **📊 GGGTemporalGameManager** 
@@ -78,15 +77,18 @@ temporis/
 
 #### **🧮 PresburgerFormula & PresburgerTerm**
 - **Purpose**: Mathematical constraint representation and evaluation
-- **Features**: Linear arithmetic, coefficient handling, existential quantifiers
-- **Integration**: Embedded in GGG graph edge properties
-
-#### **📋 GGGReachabilityObjective**
-- **Purpose**: Reachability goal specification compatible with GGG types
-- **Features**: Target vertex management, constraint satisfaction checking
-- **Integration**: Uses `GGGTemporalVertex` descriptors
+- **Features**: Complete 10-operation arithmetic (=, >=, <=, >, <, %, &&, ||, !, ∃)
+- **Integration**: Embedded in GGG graph edge properties with full operation verification
 
 ## 📝 Constraint Language
+
+### Comprehensive Presburger Arithmetic Support
+The system implements **all 10 Presburger operations** with full verification:
+
+- **Comparisons**: `=`, `>=`, `<=`, `>`, `<` 
+- **Modular arithmetic**: `time % 3 == 1` (modulus constraints)
+- **Boolean logic**: `&&` (AND), `||` (OR), `!` (NOT)
+- **Quantification**: `∃` (existential quantifiers)
 
 ### Basic Constraints
 - **Linear inequalities**: `time <= 5`, `time >= 3`, `2*time + 1 <= 10`
@@ -188,11 +190,12 @@ The `input-files/` directory contains carefully designed test files demonstratin
 
 ### **Solver Integration**
 ```cpp
-// Native GGG solver implementation
+// Native GGG solver implementation using backwards temporal attractor
 class GGGTemporalReachabilitySolver : public Solver<graphs::GGGTemporalGraph, RSSolution<graphs::GGGTemporalGraph>> {
 public:
     SolutionType solve(const GraphType& graph) override;
-    std::string get_name() const override;
+    std::string get_name() const override { return "Backwards Temporal Attractor Solver"; }
+};
 };
 ```
 
@@ -205,12 +208,28 @@ target_include_directories(temporis PRIVATE
 )
 ```
 
+### File Structure
+```
+Source Files:
+├── ggg_temporal_solver.cpp      (194 lines) - Backwards temporal attractor
+├── ggg_temporal_graph.cpp       (412 lines) - Graph and constraint management  
+├── presburger_formula.cpp       (161 lines) - Mathematical constraint evaluation
+├── presburger_term.cpp          (79 lines)  - Term arithmetic operations
+└── main_ggg.cpp                 (246 lines) - GGG integration and CLI
+
+Header Files:
+├── ggg_temporal_solver.hpp      (148 lines) - Solver interface declarations
+├── ggg_temporal_graph.hpp       (119 lines) - Graph type definitions
+├── presburger_formula.hpp       (50 lines)  - Formula interface
+└── presburger_term.hpp          (28 lines)  - Term interface
+```
+
 ## 📊 Analysis Output
 
 The system provides GGG-compatible solver output:
 
 ```
-Solver: Temporal Reachability Solver (Presburger Arithmetic)
+Solver: Backwards Temporal Attractor Solver
 Graph: 2 vertices, 2 edges
 
 === Solution ===
@@ -230,22 +249,6 @@ Time 5:
   v2 -> v3 (e2): ACTIVE [time = 5]
 ```
 
-## 🚀 Performance & Scalability
-
-### Multi-Variable Constraint Performance
-The modular architecture supports **unlimited variables** with predictable scaling:
-
-- **2-3 variables**: Sub-second performance
-- **4-5 variables**: Several seconds  
-- **6 variables**: ~8.6 seconds
-- **7 variables**: ~2 minutes ⭐ (sweet spot demonstrated)
-- **8+ variables**: Several minutes (computationally intensive but architecturally supported)
-
-**Key Architectural Benefits:**
-- **Scalable Design**: `std::map<std::string, int>` supports unlimited variables
-- **Dynamic Parsing**: Regex-based parser handles arbitrary complexity
-- **Modular Evaluation**: Clean separation allows optimization of individual components
-- **No Hardcoded Limits**: Architecture fundamentally supports unlimited complexity
 
 ## 🔧 Dependencies
 
@@ -272,32 +275,3 @@ EXAMPLES:
   temporis --verbose game.dot       # Detailed output
   temporis -t 100 game.dot          # Custom time bound
 ```
-
-## 🏆 Engineering Excellence
-
-### GGG Integration
-- **✅ Native Solver**: Implements `Solver<GraphType, SolutionType>` interface
-- **✅ Type Safety**: Uses GGG's `DEFINE_GAME_GRAPH` macro for type generation
-- **✅ Solution Compatibility**: Returns standard `RSSolution<>` objects
-- **✅ Graph Utilities**: Leverages GGG's boost graph operations
-- **✅ Framework Consistency**: Follows GGG naming and architectural patterns
-
-### Code Quality  
-- **✅ Modern C++20**: Latest language features and best practices
-- **✅ Clean Architecture**: Separation of graph, solver, and constraint logic
-- **✅ Professional Documentation**: Comprehensive inline comments
-- **✅ Memory Safety**: Smart pointers and RAII throughout
-
-### Build System
-- **✅ Modern CMake**: Target-based configuration with proper dependencies
-- **✅ GGG Integration**: Seamless linking with Game Graph Gym library
-- **✅ Clean Structure**: Logical separation of headers, sources, and tests
-- **✅ Boost Policy**: Proper CMake policy handling for Boost libraries
-
-## 📄 License
-
-This project is part of the Game Graph Gym ecosystem, demonstrating advanced temporal constraint solving with mathematical precision using the GGG framework.
-
----
-
-🚀 **GGG Temporis**: *Native temporal reachability solving in the Game Graph Gym framework.*
