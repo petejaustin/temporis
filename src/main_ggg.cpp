@@ -56,6 +56,8 @@ public:
         bool verbose = false;
         bool debug = false;
         bool validate_only = false;
+        bool csv_output = false;
+        bool time_only = false;
         std::string filename;
         int user_time_bound = -1;
         
@@ -75,6 +77,10 @@ public:
             } else if (arg == "--validate" || arg == "--check-format") {
                 validate_only = true;
                 log_info("Validation mode enabled");
+            } else if (arg == "--csv") {
+                csv_output = true;
+            } else if (arg == "--time-only") {
+                time_only = true;
             } else if (arg == "--help" || arg == "-h") {
                 print_usage();
                 return 0;
@@ -140,20 +146,28 @@ public:
         auto solver = std::make_shared<ggg::solvers::GGGTemporalReachabilitySolver>(
             manager_, objective_, user_time_bound > 0 ? user_time_bound : 50, verbose);
         
-        log_info("Solver: ", solver->get_name());
+        // Only show solver info in normal output modes
+        if (!csv_output && !time_only) {
+            log_info("Solver: ", solver->get_name());
+        }
         log_debug("Graph: ", boost::num_vertices(*manager_->graph()), " vertices, ",
                                  boost::num_edges(*manager_->graph()), " edges");
         
         // Solve the game
         auto solution = solver->solve(*manager_->graph());
         
-        // Output statistics in verbose mode
-        if (verbose) {
-            output_statistics(solver->get_statistics());
+        // Handle different output modes
+        if (csv_output) {
+            output_csv(solution, solver->get_statistics(), filename);
+        } else if (time_only) {
+            output_time_only(solver->get_statistics());
+        } else {
+            // Standard output mode
+            if (verbose) {
+                output_statistics(solver->get_statistics());
+            }
+            output_solution(solution, verbose);
         }
-        
-        // Output results
-        output_solution(solution, verbose);
         
         return 0;
     }
@@ -169,6 +183,8 @@ private:
         std::cout << "  -d, --debug            Enable debug output (includes verbose)\n";
         std::cout << "  -t, --time-bound N     Set solver time bound\n";
         std::cout << "  --validate             Validate file format only\n";
+        std::cout << "  --csv                  Output results in CSV format\n";
+        std::cout << "  --time-only            Output only timing information\n";
         std::cout << "  -h, --help             Show this help\n\n";
         std::cout << "EXAMPLES:\n";
         std::cout << "  temporis game.dot                 # Solve reachability game\n";
@@ -237,6 +253,36 @@ private:
         std::cout << "  Graph traversal: " << std::fixed << std::setprecision(4) 
                   << stats.graph_traversal_time.count() << "s\n";
         std::cout << std::endl;
+    }
+
+    void output_csv(const ggg::solvers::RSSolution<ggg::graphs::GGGTemporalGraph>& solution, 
+                    const ggg::solvers::SolverStatistics& stats, 
+                    const std::string& filename) {
+        // Extract filename without path and extension for solver identification
+        std::string base_filename = filename;
+        size_t last_slash = base_filename.find_last_of("/\\");
+        if (last_slash != std::string::npos) {
+            base_filename = base_filename.substr(last_slash + 1);
+        }
+        size_t last_dot = base_filename.find_last_of(".");
+        if (last_dot != std::string::npos) {
+            base_filename = base_filename.substr(0, last_dot);
+        }
+
+        // Output CSV format compatible with GGG benchmark tools
+        // Format: solver,game,status,solve_time,constraint_eval_time,graph_traversal_time,vertices_explored
+        std::cout << "Backwards Temporal Attractor Solver,"
+                  << base_filename << ","
+                  << (solution.is_valid() ? "solved" : "unsolved") << ","
+                  << std::fixed << std::setprecision(6) << stats.total_solve_time.count() << ","
+                  << std::fixed << std::setprecision(6) << stats.constraint_eval_time.count() << ","
+                  << std::fixed << std::setprecision(6) << stats.graph_traversal_time.count() << ","
+                  << stats.states_explored << std::endl;
+    }
+
+    void output_time_only(const ggg::solvers::SolverStatistics& stats) {
+        // Output only the total solve time (used by benchmark tools)
+        std::cout << std::fixed << std::setprecision(6) << stats.total_solve_time.count() << std::endl;
     }
 };
 

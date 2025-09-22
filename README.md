@@ -9,6 +9,7 @@ A **GGG-native temporal game solver** implementing **Presburger arithmetic const
 - **∃ Existential Quantifiers**: Express complex mathematical relationships with unlimited variables
 - **🔢 Multi-Variable Support**: Constraints with multiple temporal and quantified variables
 - **📝 DOT Format Input**: Standard graph format with custom temporal annotations
+- **📊 Multiple Output Formats**: Standard, CSV, and time-only output for different use cases
 - **⚡ Professional Build System**: Modern CMake with GGG dependency management
 - **🧪 Comprehensive Testing**: Multiple constraint scenarios included
 
@@ -35,6 +36,12 @@ make
 
 # Verbose output for debugging
 ./temporis --verbose ../input-files/spec_test_commented.dot
+
+# CSV output for benchmarking
+./temporis --csv ../input-files/spec_test.dot
+
+# Time-only output for performance analysis
+./temporis --time-only ../input-files/simple_constraint_test.dot
 
 # Invalid constraint testing
 ./temporis ../input-files/invalid_test.dot
@@ -226,15 +233,66 @@ Header Files:
 
 ## 📊 Analysis Output
 
-The system provides GGG-compatible solver output:
+The system provides multiple output formats for different use cases:
 
+### Standard Output
 ```
 Solver: Backwards Temporal Attractor Solver
-Graph: 2 vertices, 2 edges
 
 === Solution ===
 Status: Solved
 Valid: Yes
+
+Winning Regions:
+  v0: Player 1
+  v1: Player 1
+```
+
+### CSV Output (`--csv`)
+Provides machine-readable format for benchmarking and analysis:
+```
+Backwards Temporal Attractor Solver,simple_constraint_test,solved,0.000013,0.000000,0.000013,50
+```
+
+**CSV Format**: `solver_name,game_name,status,total_time,constraint_time,traversal_time,states_explored`
+
+### Time-Only Output (`--time-only`)
+Returns just the solve time in seconds for performance measurement:
+```
+0.000010
+```
+
+### Verbose Output (`--verbose`)
+Complete diagnostic information including step-by-step attractor computation and detailed statistics:
+
+```
+Starting backwards attractor from time 50 with 1 target vertices: {v0}
+Time 49: attractor has 1 vertices: {v1}
+Time 48: attractor has 1 vertices: {v0}
+...
+
+=== Solver Statistics ===
+State space exploration:
+  States explored: 50
+  States pruned: 0
+  Max time reached: 0
+
+Constraint evaluation:
+  Total evaluations: 100
+  Successful: 95
+  Failed: 5
+  Success ratio: 95.00%
+
+Memoization performance:
+  Cache hits: 0
+  Cache misses: 0
+  Hit ratio: 0.00%
+
+Timing (seconds):
+  Total solve time: 0.0001s
+  Constraint evaluation: 0.0000s
+  Graph traversal: 0.0001s
+```
 
 Winning Regions:
   v0: Player 0
@@ -266,12 +324,17 @@ temporis [OPTIONS] <input_file.dot>
 
 OPTIONS:
   -v, --verbose          Enable verbose output
+  -d, --debug            Enable debug output (includes verbose)
   -t, --time-bound N     Set solver time bound (default: 50)
   --validate             Validate file format only
+  --csv                  Output results in CSV format
+  --time-only            Output only timing information
   -h, --help             Show help message
 
 EXAMPLES:
   temporis game.dot                 # Solve reachability game
   temporis --verbose game.dot       # Detailed output
   temporis -t 100 game.dot          # Custom time bound
+  temporis --csv game.dot           # CSV output for benchmarking
+  temporis --time-only game.dot     # Just solve time in seconds
 ```
