@@ -4,33 +4,11 @@
 #include <iostream>
 #include <iomanip>
 
-// Simple logging helpers for temporis
 namespace {
     bool g_verbose = false;
-    bool g_debug = false;
     
-    template<typename... Args>
-    void log_error(Args... args) {
-        std::cerr << "[ERROR] ";
-        ((std::cerr << args), ...);
-        std::cerr << std::endl;
-    }
-    
-    template<typename... Args>
-    void log_info(Args... args) {
-        std::cout << "[INFO] ";
-        ((std::cout << args), ...);
-        std::cout << std::endl;
-    }
-    
-    template<typename... Args>
-    void log_debug(Args... args) {
-        if (g_debug) {
-            std::cout << "[DEBUG] ";
-            ((std::cout << args), ...);
-            std::cout << std::endl;
-        }
-    }
+    void error(const std::string& msg) { std::cerr << "Error: " << msg << std::endl; }
+    void info(const std::string& msg) { if (g_verbose) std::cout << msg << std::endl; }
 }
 
 namespace ggg {
@@ -68,16 +46,12 @@ public:
             if (arg == "--verbose" || arg == "-v") {
                 verbose = true;
                 g_verbose = true;
-                log_debug("Verbose mode enabled");
             } else if (arg == "--debug" || arg == "-d") {
                 debug = true;
-                verbose = true;  // debug implies verbose
+                verbose = true;
                 g_verbose = true;
-                g_debug = true;
-                log_debug("Debug mode enabled");
             } else if (arg == "--validate" || arg == "--check-format") {
                 validate_only = true;
-                log_info("Validation mode enabled");
             } else if (arg == "--csv") {
                 csv_output = true;
             } else if (arg == "--time-only") {
@@ -89,12 +63,11 @@ public:
                 if (i + 1 < argc) {
                     solver_type = argv[++i];
                     if (solver_type != "reachability" && solver_type != "expansion") {
-                        log_error("Invalid solver type: ", solver_type, ". Valid options: reachability, expansion");
+                        error("Invalid solver: " + solver_type);
                         return 1;
                     }
-                    log_debug("Solver set to: ", solver_type);
                 } else {
-                    log_error("--solver requires a value (reachability or expansion)");
+                    error("--solver requires a value");
                     return 1;
                 }
             } else if (arg == "--time-bound" || arg == "-t") {
@@ -102,16 +75,15 @@ public:
                     try {
                         user_time_bound = std::stoi(argv[++i]);
                         if (user_time_bound <= 0) {
-                            log_error("Time bound must be positive");
+                            error("Time bound must be positive");
                             return 1;
                         }
-                        log_debug("Time bound set to: ", user_time_bound);
                     } catch (const std::exception&) {
-                        log_error("Invalid time bound value: ", argv[i]);
+                        error("Invalid time bound");
                         return 1;
                     }
                 } else {
-                    log_error("--time-bound requires a value");
+                    error("--time-bound requires a value");
                     return 1;
                 }
             } else if (arg.find(".dot") != std::string::npos) {
@@ -120,37 +92,27 @@ public:
         }
         
         if (filename.empty()) {
-            log_error("No input file specified");
+            error("No input file specified");
             print_usage();
             return 1;
         }
         
-        log_debug("Loading game from: ", filename);
-        
-        // Load the game
         if (!manager_->load_from_dot_file(filename)) {
-            log_error("Failed to load game from: ", filename);
+            error("Failed to load game");
             return 1;
         }
         
         if (validate_only) {
             bool valid = manager_->validate_game_structure();
-            if (valid) {
-                log_info("Valid game structure");
-            } else {
-                log_error("Invalid game structure");
-            }
+            std::cout << (valid ? "Valid" : "Invalid") << std::endl;
             return valid ? 0 : 1;
         }
         
-        // Create objective from target vertices
         auto targets = manager_->get_target_vertices();
         if (targets.empty()) {
-            log_error("No target vertices found in game");
+            error("No target vertices found");
             return 1;
         }
-        
-        log_debug("Found ", targets.size(), " target vertices");
         
         objective_ = std::make_shared<ggg::graphs::GGGReachabilityObjective>(
             ggg::graphs::GGGReachabilityObjective::Type::REACHABILITY, targets);
@@ -161,19 +123,16 @@ public:
         int time_bound = user_time_bound > 0 ? user_time_bound : 50;
         
         if (solver_type == "expansion") {
-            solver = std::make_shared<ggg::solvers::GGGTemporalExpansionSolver>(
+            solver = std::make_shared<ggg::solvers::ExpansionSolver>(
                 manager_, objective_, time_bound, verbose);
         } else { // Default to reachability solver
             solver = std::make_shared<ggg::solvers::GGGTemporalReachabilitySolver>(
                 manager_, objective_, time_bound, verbose);
         }
         
-        // Only show solver info in normal output modes
         if (!csv_output && !time_only) {
-            log_info("Solver: ", solver->get_name());
+            info("Solver: " + solver->get_name());
         }
-        log_debug("Graph: ", boost::num_vertices(*manager_->graph()), " vertices, ",
-                                 boost::num_edges(*manager_->graph()), " edges");
         
         // Solve the game
         auto solution = solver->solve(*manager_->graph());
@@ -181,7 +140,7 @@ public:
         // Handle different output modes - statistics depend on solver type
         ggg::solvers::SolverStatistics stats;
         if (solver_type == "expansion") {
-            auto expansion_solver = std::dynamic_pointer_cast<ggg::solvers::GGGTemporalExpansionSolver>(solver);
+            auto expansion_solver = std::dynamic_pointer_cast<ggg::solvers::ExpansionSolver>(solver);
             stats = expansion_solver->get_statistics();
         } else {
             auto reachability_solver = std::dynamic_pointer_cast<ggg::solvers::GGGTemporalReachabilitySolver>(solver);
