@@ -1,0 +1,25 @@
+digraph game_0498_cycle_9 {
+    s0 [name="s0", player=1];
+    s1 [name="s1", player=0];
+    s2 [name="s2", player=1];
+    s3 [name="s3", player=1];
+    s4 [name="s4", player=1];
+    s5 [name="s5", player=1];
+    s6 [name="s6", player=0];
+    s7 [name="s7", player=0];
+    s8 [name="s8", player=1, target=1];
+
+    s0 -> s1 [constraint="time % 6 == 3"];
+    s1 -> s2 [constraint="time == 3 || time == 10 || time == 14 || time == 15 || time == 18 || time == 24"];
+    s2 -> s3 [constraint="time == 3 || time == 11"];
+    s3 -> s4 [constraint="!(time % 3 == 0)"];
+    s4 -> s5 [constraint="time == 5 || time == 11 || time == 18"];
+    s5 -> s6 [constraint="time % 4 == 1"];
+    s6 -> s7 [constraint="time == 12 || time == 14 || time == 15"];
+    s7 -> s8 [constraint="time == 8 || time == 13 || time == 21 || time == 22"];
+    s8 -> s0 [constraint="time == 1 || time == 9 || time == 12 || time == 13"];
+    s5 -> s5 [constraint="time % 3 == 0"];
+    s6 -> s6 [constraint="time % 3 == 0"];
+    s7 -> s7 [constraint="time % 2 == 0"];
+    s7 -> s5 [constraint="time == 1 || time == 6"];
+}

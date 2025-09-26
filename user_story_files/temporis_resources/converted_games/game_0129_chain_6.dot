@@ -1,0 +1,17 @@
+digraph game_0129_chain_6 {
+    s0 [name="s0", player=0];
+    s1 [name="s1", player=1];
+    s2 [name="s2", player=0];
+    s3 [name="s3", player=1];
+    s4 [name="s4", player=0];
+    s5 [name="s5", player=1, target=1];
+
+    s0 -> s1;
+    s1 -> s2 [constraint="time % 5 == 2"];
+    s2 -> s3 [constraint="time == 9 || time == 10"];
+    s3 -> s4 [constraint="time % 5 == 2"];
+    s4 -> s5 [constraint="time % 5 == 3"];
+    s2 -> s0 [constraint="!(time % 3 == 0)"];
+    s4 -> s3 [constraint="!(time % 3 == 0)"];
+    s5 -> s5 [constraint="time % 4 == 0"];
+}

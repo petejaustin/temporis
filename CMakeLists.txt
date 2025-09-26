@@ -6,8 +6,10 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-# Boost policy for modern CMake
-cmake_policy(SET CMP0167 NEW)
+# Boost policy for modern CMake (check if policy exists)
+if(POLICY CMP0167)
+    cmake_policy(SET CMP0167 NEW)
+endif()
 find_package(Boost REQUIRED COMPONENTS graph)
 
 # GGG-integrated temporis executable

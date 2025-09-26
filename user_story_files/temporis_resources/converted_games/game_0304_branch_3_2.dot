@@ -1,0 +1,16 @@
+digraph game_0304_branch_3_2 {
+    s0 [name="s0", player=1];
+    s1 [name="s1", player=0];
+    s2 [name="s2", player=1];
+    s3 [name="s3", player=1];
+    s4 [name="s4", player=0];
+    s5 [name="s5", player=1];
+    s6 [name="s6", player=1, target=1];
+
+    s0 -> s1 [constraint="time == 7 || time == 9"];
+    s0 -> s2 [constraint="time % 5 == 0"];
+    s1 -> s3 [constraint="time % 4 == 3"];
+    s1 -> s4;
+    s2 -> s5 [constraint="time == 6 || time == 10"];
+    s2 -> s6 [constraint="!(time % 3 == 0)"];
+}

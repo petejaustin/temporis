@@ -1,0 +1,19 @@
+digraph game_0765_complex_6 {
+    s0 [name="s0", player=1];
+    s1 [name="s1", player=1];
+    s2 [name="s2", player=1];
+    s3 [name="s3", player=0];
+    s4 [name="s4", player=0];
+    s5 [name="s5", player=1, target=1];
+
+    s0 -> s5 [constraint="!(time % 6 == 0)"];
+    s1 -> s0 [constraint="time % 4 == 1 && time % 3 == 1"];
+    s1 -> s4 [constraint="time % 4 == 3 && time % 4 == 1"];
+    s2 -> s1 [constraint="time == 1 || time == 2 || time == 8 || time == 12 || time == 20"];
+    s2 -> s4;
+    s3 -> s0 [constraint="time == 1 || time == 6"];
+    s3 -> s5 [constraint="time == 5"];
+    s4 -> s0;
+    s4 -> s2;
+    s5 -> s1 [constraint="time == 0 || time == 2 || time == 10 || time == 12 || time == 13"];
+}
