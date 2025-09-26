@@ -1,0 +1,19 @@
+// Complex graph with 6 nodes
+
+node s0: label["start"], owner[0]
+node s1: label["n1"], owner[1]
+node s2: label["c"], owner[0]
+node s3: label["n3"], owner[1]
+node s4: label["e"], owner[1]
+node s5: label["target"], owner[1]
+
+edge s0 -> s2: (not (= (mod t 3) 1))
+edge s0 -> s3: (or (= (mod t 2) 0) (= (mod t 4) 1))
+edge s1 -> s2: (2,23,25)
+edge s3 -> s1: (not (= (mod t 4) 3))
+edge s3 -> s2: (not (= (mod t 2) 1))
+edge s4 -> s1: (or (= (mod t 4) 0) (= (mod t 4) 3))
+edge s4 -> s3
+edge s4 -> s5: (10,13,15,19)
+edge s5 -> s3: (= (mod t 5) 0)
+edge s5 -> s4: (and (= (mod t 3) 2) (= (mod t 5) 1))

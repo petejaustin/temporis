@@ -1,0 +1,82 @@
+// Branching graph with depth 4 and branching factor 3
+
+node s0: label["l0n0"], owner[1]
+node s1: label["l1n0"], owner[1]
+node s2: label["l1n1"], owner[0]
+node s3: label["l1n2"], owner[1]
+node s4: label["l2n0"], owner[1]
+node s5: label["l2n1"], owner[1]
+node s6: label["l2n2"], owner[1]
+node s7: label["l2n3"], owner[0]
+node s8: label["l2n4"], owner[1]
+node s9: label["l2n5"], owner[0]
+node s10: label["l2n6"], owner[1]
+node s11: label["l2n7"], owner[1]
+node s12: label["l2n8"], owner[1]
+node s13: label["l3n0"], owner[1]
+node s14: label["l3n1"], owner[0]
+node s15: label["l3n2"], owner[1]
+node s16: label["l3n3"], owner[1]
+node s17: label["l3n4"], owner[0]
+node s18: label["l3n5"], owner[1]
+node s19: label["l3n6"], owner[1]
+node s20: label["l3n7"], owner[0]
+node s21: label["l3n8"], owner[0]
+node s22: label["l3n9"], owner[0]
+node s23: label["l3n10"], owner[0]
+node s24: label["l3n11"], owner[0]
+node s25: label["l3n12"], owner[0]
+node s26: label["l3n13"], owner[1]
+node s27: label["l3n14"], owner[1]
+node s28: label["l3n15"], owner[0]
+node s29: label["l3n16"], owner[0]
+node s30: label["l3n17"], owner[1]
+node s31: label["l3n18"], owner[0]
+node s32: label["l3n19"], owner[0]
+node s33: label["l3n20"], owner[0]
+node s34: label["l3n21"], owner[1]
+node s35: label["l3n22"], owner[1]
+node s36: label["l3n23"], owner[1]
+node s37: label["l3n24"], owner[0]
+node s38: label["l3n25"], owner[0]
+node s39: label["l3n26"], owner[0]
+
+edge s0 -> s1: (= (mod t 2) 0)
+edge s0 -> s2: (not (= (mod t 4) 0))
+edge s0 -> s3: (1,3,8,9)
+edge s1 -> s4
+edge s1 -> s5: (1,10)
+edge s1 -> s6
+edge s2 -> s7: (= (mod t 2) 0)
+edge s2 -> s8: (3,4)
+edge s2 -> s9: (or (= (mod t 2) 0) (= (mod t 2) 1))
+edge s3 -> s10: (= (mod t 3) 1)
+edge s3 -> s11: (12)
+edge s3 -> s12: (= (mod t 6) 2)
+edge s4 -> s13: (or (= (mod t 3) 0) (= (mod t 3) 1))
+edge s4 -> s14
+edge s4 -> s15: (0,9)
+edge s5 -> s16: (or (= (mod t 3) 0) (= (mod t 3) 1))
+edge s5 -> s17: (not (= (mod t 3) 0))
+edge s5 -> s18
+edge s6 -> s19: (= (mod t 6) 5)
+edge s6 -> s20: (or (= (mod t 4) 0) (= (mod t 4) 1))
+edge s6 -> s21: (= (mod t 6) 4)
+edge s7 -> s22
+edge s7 -> s23
+edge s7 -> s24: (or (= (mod t 2) 0) (= (mod t 2) 1))
+edge s8 -> s25: (= (mod t 4) 0)
+edge s8 -> s26: (= (mod t 6) 5)
+edge s8 -> s27: (or (= (mod t 2) 0) (= (mod t 4) 1))
+edge s9 -> s28: (= (mod t 4) 3)
+edge s9 -> s29: (or (= (mod t 2) 0) (= (mod t 2) 1))
+edge s9 -> s30: (= (mod t 2) 0)
+edge s10 -> s31: (= (mod t 6) 5)
+edge s10 -> s32: (9,10,14)
+edge s10 -> s33: (or (= (mod t 4) 0) (= (mod t 2) 1))
+edge s11 -> s34: (or (= (mod t 4) 0) (= (mod t 4) 1))
+edge s11 -> s35: (= (mod t 6) 2)
+edge s11 -> s36: (3,7)
+edge s12 -> s37: (not (= (mod t 3) 0))
+edge s12 -> s38: (= (mod t 4) 0)
+edge s12 -> s39: (= (mod t 6) 0)

@@ -1,0 +1,16 @@
+// Simple chain graph with 6 nodes
+
+node s0: label["a"], owner[0]
+node s1: label["b"], owner[1]
+node s2: label["c"], owner[0]
+node s3: label["d"], owner[1]
+node s4: label["e"], owner[0]
+node s5: label["f"], owner[1]
+
+edge s0 -> s1: (12,16)
+edge s1 -> s2: (2,6,10,12)
+edge s2 -> s3: (= (mod t 2) 0)
+edge s3 -> s4: (2,11)
+edge s4 -> s5: (= (mod t 5) 3)
+edge s1 -> s0: (not (= (mod t 3) 0))
+edge s4 -> s4: (= (mod t 4) 0)

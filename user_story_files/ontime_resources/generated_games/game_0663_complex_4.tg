@@ -1,0 +1,11 @@
+// Complex graph with 4 nodes
+
+node s0: label["start"], owner[1]
+node s1: label["b"], owner[0]
+node s2: label["c"], owner[0]
+node s3: label["target"], owner[0]
+
+edge s1 -> s2: (not (= (mod t 6) 5))
+edge s1 -> s3: (= (mod t 6) 3)
+edge s2 -> s0: (= (mod t 2) 0)
+edge s3 -> s2

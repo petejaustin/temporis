@@ -1,0 +1,10 @@
+// Branching graph with depth 2 and branching factor 3
+
+node s0: label["l0n0"], owner[0]
+node s1: label["l1n0"], owner[0]
+node s2: label["l1n1"], owner[0]
+node s3: label["l1n2"], owner[1]
+
+edge s0 -> s1: (not (= (mod t 5) 0))
+edge s0 -> s2: (7,8,9,13)
+edge s0 -> s3: (6,12)

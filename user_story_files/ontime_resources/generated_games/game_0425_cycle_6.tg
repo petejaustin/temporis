@@ -1,0 +1,17 @@
+// Cycle graph with 6 nodes
+
+node s0: label["c0"], owner[1]
+node s1: label["c1"], owner[0]
+node s2: label["c2"], owner[0]
+node s3: label["c3"], owner[1]
+node s4: label["c4"], owner[0]
+node s5: label["c5"], owner[0]
+
+edge s0 -> s1: (or (= (mod t 3) 2) (= (mod t 3) 0))
+edge s1 -> s2: (10,17)
+edge s2 -> s3: (= (mod t 3) 0)
+edge s3 -> s4: (= (mod t 2) 1)
+edge s4 -> s5: (= (mod t 2) 0)
+edge s5 -> s0: (not (= (mod t 3) 0))
+edge s3 -> s3: (= (mod t 3) 0)
+edge s4 -> s4: (= (mod t 3) 0)

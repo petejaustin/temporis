@@ -1,0 +1,14 @@
+// Cycle graph with 5 nodes
+
+node s0: label["c0"], owner[0]
+node s1: label["c1"], owner[1]
+node s2: label["c2"], owner[1]
+node s3: label["c3"], owner[0]
+node s4: label["c4"], owner[0]
+
+edge s0 -> s1: (8,24)
+edge s1 -> s2: (3,5,6,7,12,13)
+edge s2 -> s3: (and (= (mod t 2) 0) (not (= (mod t 4) 0)))
+edge s3 -> s4: (= (mod t 3) 1)
+edge s4 -> s0: (or (= (mod t 3) 0) (= (mod t 3) 2))
+edge s0 -> s0: (= (mod t 2) 0)

@@ -1,0 +1,10 @@
+// Simple chain graph with 4 nodes
+
+node s0: label["a"], owner[0]
+node s1: label["b"], owner[1]
+node s2: label["c"], owner[0]
+node s3: label["d"], owner[1]
+
+edge s0 -> s1: (0,13,19)
+edge s1 -> s2: (= (mod t 4) 1)
+edge s2 -> s3: (= (mod t 5) 0)

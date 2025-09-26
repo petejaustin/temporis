@@ -1,0 +1,17 @@
+// Complex graph with 7 nodes
+
+node s0: label["start"], owner[0]
+node s1: label["b"], owner[1]
+node s2: label["c"], owner[1]
+node s3: label["d"], owner[1]
+node s4: label["e"], owner[1]
+node s5: label["f"], owner[0]
+node s6: label["target"], owner[1]
+
+edge s1 -> s4
+edge s2 -> s0: (3,10,16)
+edge s2 -> s5: (or (= (mod t 3) 1) (= (mod t 5) 0))
+edge s4 -> s5: (and (= (mod t 3) 0) (= (mod t 5) 0))
+edge s5 -> s0: (not (= (mod t 5) 2))
+edge s5 -> s1: (and (= (mod t 3) 0) (= (mod t 4) 1))
+edge s6 -> s3: (7)

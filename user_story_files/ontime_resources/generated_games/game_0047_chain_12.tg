@@ -1,0 +1,28 @@
+// Simple chain graph with 12 nodes
+
+node s0: label["a"], owner[0]
+node s1: label["b"], owner[1]
+node s2: label["c"], owner[0]
+node s3: label["d"], owner[1]
+node s4: label["e"], owner[0]
+node s5: label["f"], owner[1]
+node s6: label["g"], owner[0]
+node s7: label["h"], owner[1]
+node s8: label["i"], owner[0]
+node s9: label["j"], owner[1]
+node s10: label["k"], owner[0]
+node s11: label["l"], owner[1]
+
+edge s0 -> s1: (= (mod t 2) 1)
+edge s1 -> s2: (= (mod t 2) 1)
+edge s2 -> s3: (1,2,15,17)
+edge s3 -> s4
+edge s4 -> s5: (= (mod t 4) 1)
+edge s5 -> s6
+edge s6 -> s7
+edge s7 -> s8
+edge s8 -> s9: (= (mod t 3) 2)
+edge s9 -> s10: (= (mod t 5) 3)
+edge s10 -> s11
+edge s0 -> s0: (= (mod t 3) 0)
+edge s9 -> s0: (not (= (mod t 3) 0))

@@ -1,0 +1,16 @@
+// Simple chain graph with 7 nodes
+
+node s0: label["a"], owner[0]
+node s1: label["b"], owner[1]
+node s2: label["c"], owner[0]
+node s3: label["d"], owner[1]
+node s4: label["e"], owner[0]
+node s5: label["f"], owner[1]
+node s6: label["g"], owner[0]
+
+edge s0 -> s1: (7)
+edge s1 -> s2
+edge s2 -> s3: (3)
+edge s3 -> s4: (= (mod t 5) 0)
+edge s4 -> s5: (= (mod t 5) 1)
+edge s5 -> s6

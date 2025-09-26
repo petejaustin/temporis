@@ -1,0 +1,32 @@
+// Cycle graph with 10 nodes
+
+node s0: label["c0"], owner[1]
+node s1: label["c1"], owner[1]
+node s2: label["c2"], owner[0]
+node s3: label["c3"], owner[1]
+node s4: label["c4"], owner[0]
+node s5: label["c5"], owner[1]
+node s6: label["c6"], owner[1]
+node s7: label["c7"], owner[1]
+node s8: label["c8"], owner[1]
+node s9: label["c9"], owner[0]
+
+edge s0 -> s1: (2,14,17)
+edge s1 -> s2: (and (= (mod t 2) 0) (not (= (mod t 4) 0)))
+edge s2 -> s3: (= (mod t 4) 2)
+edge s3 -> s4: (not (= (mod t 6) 0))
+edge s4 -> s5: (0,1,2,12,14,15)
+edge s5 -> s6: (3,10,12,17)
+edge s6 -> s7: (= (mod t 6) 3)
+edge s7 -> s8: (= (mod t 4) 2)
+edge s8 -> s9: (and (= (mod t 2) 0) (not (= (mod t 5) 0)))
+edge s9 -> s0: (3,5,15,21,22)
+edge s0 -> s0: (= (mod t 4) 0)
+edge s1 -> s4: (2,12)
+edge s5 -> s5: (= (mod t 4) 0)
+edge s5 -> s9: (8,14)
+edge s6 -> s6: (= (mod t 2) 0)
+edge s7 -> s7: (= (mod t 4) 0)
+edge s8 -> s8: (= (mod t 4) 0)
+edge s8 -> s6: (0,3,11)
+edge s9 -> s9: (= (mod t 4) 0)

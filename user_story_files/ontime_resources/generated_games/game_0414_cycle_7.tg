@@ -1,0 +1,19 @@
+// Cycle graph with 7 nodes
+
+node s0: label["c0"], owner[1]
+node s1: label["c1"], owner[1]
+node s2: label["c2"], owner[0]
+node s3: label["c3"], owner[0]
+node s4: label["c4"], owner[0]
+node s5: label["c5"], owner[0]
+node s6: label["c6"], owner[0]
+
+edge s0 -> s1: (or (= (mod t 4) 0) (= (mod t 4) 1))
+edge s1 -> s2: (3,5,16)
+edge s2 -> s3: (and (= (mod t 3) 0) (not (= (mod t 4) 0)))
+edge s3 -> s4: (or (= (mod t 5) 3) (= (mod t 5) 0))
+edge s4 -> s5: (3,6,12,22)
+edge s5 -> s6: (2,3,10,12,18)
+edge s6 -> s0: (= (mod t 5) 3)
+edge s2 -> s5: (10)
+edge s5 -> s5: (= (mod t 2) 0)

@@ -1,0 +1,15 @@
+// Cycle graph with 4 nodes
+
+node s0: label["c0"], owner[1]
+node s1: label["c1"], owner[1]
+node s2: label["c2"], owner[1]
+node s3: label["c3"], owner[0]
+
+edge s0 -> s1: (= (mod t 3) 1)
+edge s1 -> s2: (3,4)
+edge s2 -> s3: (= (mod t 6) 4)
+edge s3 -> s0: (not (= (mod t 5) 0))
+edge s0 -> s0: (= (mod t 3) 0)
+edge s2 -> s2: (= (mod t 3) 0)
+edge s3 -> s3: (= (mod t 2) 0)
+edge s3 -> s1: (1,10,11)

@@ -1,0 +1,38 @@
+// Complex graph with 9 nodes
+
+node s0: label["start"], owner[1]
+node s1: label["state1"], owner[0]
+node s2: label["n2"], owner[1]
+node s3: label["state3"], owner[1]
+node s4: label["state4"], owner[1]
+node s5: label["f"], owner[0]
+node s6: label["state6"], owner[1]
+node s7: label["h"], owner[1]
+node s8: label["target"], owner[0]
+
+edge s0 -> s2: (or (= (mod t 2) 0) (= (mod t 2) 1))
+edge s0 -> s6: (not (= (mod t 5) 4))
+edge s0 -> s7: (not (= (mod t 2) 1))
+edge s1 -> s3
+edge s1 -> s4: (not (= (mod t 2) 1))
+edge s1 -> s6: (or (= (mod t 5) 0) (= (mod t 2) 1))
+edge s2 -> s0: (not (= (mod t 5) 4))
+edge s2 -> s4: (or (= (mod t 4) 2) (= (mod t 2) 0))
+edge s2 -> s5: (or (= (mod t 4) 0) (= (mod t 5) 2))
+edge s2 -> s6: (0,3,10,11)
+edge s2 -> s7: (not (= (mod t 3) 1))
+edge s3 -> s0: (0,8,11)
+edge s3 -> s5: (not (= (mod t 5) 0))
+edge s4 -> s5: (= (mod t 3) 2)
+edge s4 -> s7: (not (= (mod t 5) 4))
+edge s4 -> s8: (and (= (mod t 4) 3) (= (mod t 3) 0))
+edge s5 -> s3: (not (= (mod t 2) 1))
+edge s5 -> s4: (9,11,20)
+edge s6 -> s0: (14)
+edge s6 -> s1: (and (= (mod t 3) 1) (= (mod t 5) 1))
+edge s7 -> s1
+edge s7 -> s2: (or (= (mod t 3) 2) (= (mod t 2) 0))
+edge s7 -> s4
+edge s7 -> s6: (= (mod t 3) 2)
+edge s8 -> s1: (and (= (mod t 4) 3) (= (mod t 4) 3))
+edge s8 -> s4: (and (= (mod t 3) 0) (= (mod t 5) 2))

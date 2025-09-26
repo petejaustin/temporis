@@ -1,0 +1,22 @@
+// Cycle graph with 8 nodes
+
+node s0: label["c0"], owner[1]
+node s1: label["c1"], owner[1]
+node s2: label["c2"], owner[0]
+node s3: label["c3"], owner[0]
+node s4: label["c4"], owner[0]
+node s5: label["c5"], owner[1]
+node s6: label["c6"], owner[1]
+node s7: label["c7"], owner[1]
+
+edge s0 -> s1: (= (mod t 2) 1)
+edge s1 -> s2: (= (mod t 3) 2)
+edge s2 -> s3: (and (= (mod t 3) 0) (not (= (mod t 3) 0)))
+edge s3 -> s4: (0,3,5,8,12,24)
+edge s4 -> s5: (8,18,20)
+edge s5 -> s6: (or (= (mod t 4) 2) (= (mod t 4) 0))
+edge s6 -> s7: (13,22)
+edge s7 -> s0: (8,12,16)
+edge s0 -> s0: (= (mod t 2) 0)
+edge s3 -> s0: (5,8)
+edge s7 -> s1: (5)

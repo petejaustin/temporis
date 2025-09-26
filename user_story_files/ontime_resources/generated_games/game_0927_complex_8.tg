@@ -1,0 +1,28 @@
+// Complex graph with 8 nodes
+
+node s0: label["start"], owner[1]
+node s1: label["b"], owner[0]
+node s2: label["c"], owner[0]
+node s3: label["state3"], owner[0]
+node s4: label["e"], owner[0]
+node s5: label["f"], owner[1]
+node s6: label["state6"], owner[0]
+node s7: label["target"], owner[0]
+
+edge s0 -> s2: (= (mod t 7) 2)
+edge s0 -> s3
+edge s0 -> s4
+edge s0 -> s5: (not (= (mod t 2) 1))
+edge s0 -> s6
+edge s1 -> s5: (not (= (mod t 4) 2))
+edge s1 -> s6
+edge s2 -> s3: (0,9,18,19,20)
+edge s2 -> s5: (= (mod t 6) 5)
+edge s2 -> s6: (14,15,16)
+edge s2 -> s7: (and (= (mod t 2) 0) (= (mod t 3) 0))
+edge s4 -> s0: (0)
+edge s4 -> s7: (not (= (mod t 2) 0))
+edge s6 -> s4: (and (= (mod t 4) 0) (= (mod t 5) 1))
+edge s6 -> s7: (not (= (mod t 4) 2))
+edge s7 -> s2: (= (mod t 5) 0)
+edge s7 -> s6: (not (= (mod t 3) 0))

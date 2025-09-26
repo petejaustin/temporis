@@ -1,0 +1,15 @@
+// Complex graph with 6 nodes
+
+node s0: label["start"], owner[1]
+node s1: label["state1"], owner[0]
+node s2: label["n2"], owner[0]
+node s3: label["n3"], owner[0]
+node s4: label["e"], owner[0]
+node s5: label["target"], owner[0]
+
+edge s1 -> s2: (= (mod t 2) 0)
+edge s2 -> s0
+edge s4 -> s1: (or (= (mod t 3) 2) (= (mod t 2) 1))
+edge s5 -> s0
+edge s5 -> s1: (and (= (mod t 3) 2) (= (mod t 5) 2))
+edge s5 -> s2: (or (= (mod t 4) 3) (= (mod t 4) 2))

@@ -1,0 +1,85 @@
+// Complex graph with 15 nodes
+
+node s0: label["start"], owner[1]
+node s1: label["state1"], owner[1]
+node s2: label["state2"], owner[1]
+node s3: label["state3"], owner[1]
+node s4: label["n4"], owner[0]
+node s5: label["n5"], owner[0]
+node s6: label["state6"], owner[1]
+node s7: label["h"], owner[0]
+node s8: label["i"], owner[1]
+node s9: label["n9"], owner[0]
+node s10: label["n10"], owner[0]
+node s11: label["l"], owner[0]
+node s12: label["m"], owner[0]
+node s13: label["state13"], owner[1]
+node s14: label["target"], owner[1]
+
+edge s0 -> s3: (and (= (mod t 3) 1) (= (mod t 4) 2))
+edge s0 -> s5
+edge s0 -> s12: (or (= (mod t 5) 1) (= (mod t 2) 1))
+edge s0 -> s13: (not (= (mod t 3) 2))
+edge s1 -> s4: (not (= (mod t 2) 1))
+edge s1 -> s6: (or (= (mod t 3) 1) (= (mod t 3) 0))
+edge s1 -> s9: (= (mod t 3) 2)
+edge s1 -> s13: (or (= (mod t 4) 0) (= (mod t 4) 2))
+edge s2 -> s0
+edge s2 -> s6
+edge s2 -> s7: (and (= (mod t 2) 1) (= (mod t 5) 2))
+edge s2 -> s8: (= (mod t 5) 2)
+edge s2 -> s11: (and (= (mod t 2) 1) (= (mod t 5) 3))
+edge s2 -> s13: (and (= (mod t 4) 3) (= (mod t 5) 4))
+edge s3 -> s0: (or (= (mod t 2) 0) (= (mod t 3) 0))
+edge s3 -> s5: (not (= (mod t 2) 1))
+edge s3 -> s8: (and (= (mod t 4) 2) (= (mod t 5) 3))
+edge s3 -> s10: (2,8,13,18)
+edge s3 -> s12: (or (= (mod t 5) 0) (= (mod t 4) 3))
+edge s4 -> s1: (and (= (mod t 3) 0) (= (mod t 5) 1))
+edge s4 -> s10: (or (= (mod t 4) 3) (= (mod t 2) 0))
+edge s4 -> s12: (= (mod t 4) 3)
+edge s4 -> s13: (and (= (mod t 4) 0) (= (mod t 5) 0))
+edge s5 -> s1: (9)
+edge s5 -> s4: (4,6,8,13,21)
+edge s5 -> s6: (and (= (mod t 3) 0) (= (mod t 3) 2))
+edge s5 -> s8: (8,10,14)
+edge s5 -> s10: (or (= (mod t 5) 3) (= (mod t 3) 1))
+edge s6 -> s2: (= (mod t 3) 1)
+edge s6 -> s3: (not (= (mod t 4) 3))
+edge s6 -> s4: (or (= (mod t 3) 0) (= (mod t 2) 0))
+edge s6 -> s8: (0,14,21,29)
+edge s7 -> s8: (= (mod t 2) 0)
+edge s7 -> s10: (or (= (mod t 4) 3) (= (mod t 5) 0))
+edge s7 -> s13: (= (mod t 4) 0)
+edge s8 -> s0: (or (= (mod t 2) 1) (= (mod t 5) 4))
+edge s8 -> s1: (and (= (mod t 2) 1) (= (mod t 4) 0))
+edge s8 -> s9: (not (= (mod t 4) 2))
+edge s8 -> s12
+edge s8 -> s13: (or (= (mod t 4) 0) (= (mod t 2) 0))
+edge s9 -> s0
+edge s9 -> s4: (or (= (mod t 2) 1) (= (mod t 5) 0))
+edge s9 -> s6
+edge s9 -> s8: (and (= (mod t 4) 0) (= (mod t 4) 0))
+edge s9 -> s14
+edge s10 -> s0: (or (= (mod t 5) 2) (= (mod t 3) 0))
+edge s10 -> s8
+edge s10 -> s12
+edge s10 -> s14: (or (= (mod t 3) 0) (= (mod t 5) 4))
+edge s11 -> s0: (and (= (mod t 4) 3) (= (mod t 5) 3))
+edge s11 -> s2
+edge s11 -> s4: (7,10,11,12,15)
+edge s11 -> s6: (or (= (mod t 3) 2) (= (mod t 2) 0))
+edge s11 -> s7: (= (mod t 6) 3)
+edge s11 -> s9: (= (mod t 6) 1)
+edge s11 -> s12: (and (= (mod t 2) 0) (= (mod t 4) 0))
+edge s11 -> s14: (and (= (mod t 3) 1) (= (mod t 3) 0))
+edge s12 -> s0: (and (= (mod t 3) 2) (= (mod t 3) 1))
+edge s12 -> s3: (not (= (mod t 4) 1))
+edge s12 -> s9: (= (mod t 6) 1)
+edge s12 -> s11: (= (mod t 2) 0)
+edge s13 -> s0: (or (= (mod t 4) 3) (= (mod t 2) 0))
+edge s13 -> s1: (not (= (mod t 6) 2))
+edge s13 -> s8: (and (= (mod t 3) 2) (= (mod t 4) 3))
+edge s14 -> s2: (and (= (mod t 4) 0) (= (mod t 4) 3))
+edge s14 -> s5: (and (= (mod t 2) 1) (= (mod t 5) 2))
+edge s14 -> s6: (and (= (mod t 2) 1) (= (mod t 5) 1))

@@ -1,0 +1,9 @@
+// Complex graph with 5 nodes
+
+node s0: label["start"], owner[1]
+node s1: label["b"], owner[1]
+node s2: label["n2"], owner[1]
+node s3: label["n3"], owner[1]
+node s4: label["target"], owner[0]
+
+edge s2 -> s4: (or (= (mod t 2) 0) (= (mod t 4) 1))

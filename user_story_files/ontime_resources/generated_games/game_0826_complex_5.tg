@@ -1,0 +1,14 @@
+// Complex graph with 5 nodes
+
+node s0: label["start"], owner[1]
+node s1: label["b"], owner[0]
+node s2: label["state2"], owner[0]
+node s3: label["state3"], owner[1]
+node s4: label["target"], owner[1]
+
+edge s1 -> s0: (and (= (mod t 2) 0) (= (mod t 4) 2))
+edge s1 -> s3: (13,14,24)
+edge s1 -> s4: (not (= (mod t 5) 0))
+edge s2 -> s0: (11)
+edge s4 -> s1: (= (mod t 6) 0)
+edge s4 -> s3: (not (= (mod t 6) 5))
