@@ -1,10 +1,10 @@
 // Cycle graph with 5 nodes
 
-node s0: label["c0"], owner[0]
-node s1: label["c1"], owner[1]
-node s2: label["c2"], owner[0]
-node s3: label["c3"], owner[1]
-node s4: label["c4"], owner[1]
+node s0: label["s0"], owner[0]
+node s1: label["s1"], owner[1]
+node s2: label["s2"], owner[0]
+node s3: label["s3"], owner[1]
+node s4: label["s4"], owner[1]
 
 edge s0 -> s1: (8,11)
 edge s1 -> s2: (= (mod t 6) 4)

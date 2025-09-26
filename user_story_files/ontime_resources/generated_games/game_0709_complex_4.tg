@@ -1,9 +1,9 @@
 // Complex graph with 4 nodes
 
-node s0: label["start"], owner[1]
-node s1: label["state1"], owner[0]
-node s2: label["c"], owner[0]
-node s3: label["target"], owner[0]
+node s0: label["s0"], owner[1]
+node s1: label["s1"], owner[0]
+node s2: label["s2"], owner[0]
+node s3: label["s3"], owner[0]
 
 edge s0 -> s1: (15)
 edge s1 -> s2: (not (= (mod t 2) 1))

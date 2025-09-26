@@ -1,13 +1,13 @@
 // Simple chain graph with 8 nodes
 
-node s0: label["a"], owner[0]
-node s1: label["b"], owner[1]
-node s2: label["c"], owner[0]
-node s3: label["d"], owner[1]
-node s4: label["e"], owner[0]
-node s5: label["f"], owner[1]
-node s6: label["g"], owner[0]
-node s7: label["h"], owner[1]
+node s0: label["s0"], owner[0]
+node s1: label["s1"], owner[1]
+node s2: label["s2"], owner[0]
+node s3: label["s3"], owner[1]
+node s4: label["s4"], owner[0]
+node s5: label["s5"], owner[1]
+node s6: label["s6"], owner[0]
+node s7: label["s7"], owner[1]
 
 edge s0 -> s1: (= (mod t 5) 4)
 edge s1 -> s2: (= (mod t 5) 1)

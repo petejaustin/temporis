@@ -1,8 +1,8 @@
 // Simple chain graph with 3 nodes
 
-node s0: label["a"], owner[0]
-node s1: label["b"], owner[1]
-node s2: label["c"], owner[0]
+node s0: label["s0"], owner[0]
+node s1: label["s1"], owner[1]
+node s2: label["s2"], owner[0]
 
 edge s0 -> s1: (= (mod t 4) 2)
 edge s1 -> s2: (= (mod t 3) 0)

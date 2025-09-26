@@ -1,12 +1,12 @@
 // Cycle graph with 7 nodes
 
-node s0: label["c0"], owner[1]
-node s1: label["c1"], owner[0]
-node s2: label["c2"], owner[0]
-node s3: label["c3"], owner[0]
-node s4: label["c4"], owner[1]
-node s5: label["c5"], owner[0]
-node s6: label["c6"], owner[0]
+node s0: label["s0"], owner[1]
+node s1: label["s1"], owner[0]
+node s2: label["s2"], owner[0]
+node s3: label["s3"], owner[0]
+node s4: label["s4"], owner[1]
+node s5: label["s5"], owner[0]
+node s6: label["s6"], owner[0]
 
 edge s0 -> s1: (or (= (mod t 4) 0) (= (mod t 4) 2))
 edge s1 -> s2: (0,13,15,16,20)

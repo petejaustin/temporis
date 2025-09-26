@@ -1,17 +1,17 @@
 // Complex graph with 12 nodes
 
-node s0: label["start"], owner[1]
-node s1: label["b"], owner[1]
-node s2: label["n2"], owner[1]
-node s3: label["state3"], owner[0]
-node s4: label["n4"], owner[1]
-node s5: label["n5"], owner[0]
-node s6: label["state6"], owner[1]
-node s7: label["n7"], owner[1]
-node s8: label["n8"], owner[0]
-node s9: label["j"], owner[0]
-node s10: label["state10"], owner[1]
-node s11: label["target"], owner[1]
+node s0: label["s0"], owner[1]
+node s1: label["s1"], owner[1]
+node s2: label["s2"], owner[1]
+node s3: label["s3"], owner[0]
+node s4: label["s4"], owner[1]
+node s5: label["s5"], owner[0]
+node s6: label["s6"], owner[1]
+node s7: label["s7"], owner[1]
+node s8: label["s8"], owner[0]
+node s9: label["s9"], owner[0]
+node s10: label["s10"], owner[1]
+node s11: label["s11"], owner[1]
 
 edge s0 -> s1: (not (= (mod t 2) 0))
 edge s0 -> s4: (= (mod t 2) 1)

@@ -1,15 +1,15 @@
 // Complex graph with 10 nodes
 
-node s0: label["start"], owner[1]
-node s1: label["b"], owner[0]
-node s2: label["c"], owner[1]
-node s3: label["n3"], owner[1]
-node s4: label["e"], owner[1]
-node s5: label["state5"], owner[1]
-node s6: label["n6"], owner[0]
-node s7: label["h"], owner[1]
-node s8: label["n8"], owner[0]
-node s9: label["target"], owner[1]
+node s0: label["s0"], owner[1]
+node s1: label["s1"], owner[0]
+node s2: label["s2"], owner[1]
+node s3: label["s3"], owner[1]
+node s4: label["s4"], owner[1]
+node s5: label["s5"], owner[1]
+node s6: label["s6"], owner[0]
+node s7: label["s7"], owner[1]
+node s8: label["s8"], owner[0]
+node s9: label["s9"], owner[1]
 
 edge s0 -> s2
 edge s0 -> s7: (= (mod t 7) 5)

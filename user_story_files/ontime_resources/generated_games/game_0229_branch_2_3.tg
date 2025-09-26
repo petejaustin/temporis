@@ -1,9 +1,9 @@
 // Branching graph with depth 2 and branching factor 3
 
-node s0: label["l0n0"], owner[1]
-node s1: label["l1n0"], owner[1]
-node s2: label["l1n1"], owner[1]
-node s3: label["l1n2"], owner[0]
+node s0: label["s0"], owner[1]
+node s1: label["s1"], owner[1]
+node s2: label["s2"], owner[1]
+node s3: label["s3"], owner[0]
 
 edge s0 -> s1: (= (mod t 3) 1)
 edge s0 -> s2

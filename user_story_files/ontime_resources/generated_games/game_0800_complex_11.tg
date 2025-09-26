@@ -1,16 +1,16 @@
 // Complex graph with 11 nodes
 
-node s0: label["start"], owner[0]
-node s1: label["state1"], owner[1]
-node s2: label["c"], owner[1]
-node s3: label["d"], owner[1]
-node s4: label["n4"], owner[1]
-node s5: label["n5"], owner[1]
-node s6: label["n6"], owner[0]
-node s7: label["h"], owner[0]
-node s8: label["state8"], owner[0]
-node s9: label["state9"], owner[1]
-node s10: label["target"], owner[1]
+node s0: label["s0"], owner[0]
+node s1: label["s1"], owner[1]
+node s2: label["s2"], owner[1]
+node s3: label["s3"], owner[1]
+node s4: label["s4"], owner[1]
+node s5: label["s5"], owner[1]
+node s6: label["s6"], owner[0]
+node s7: label["s7"], owner[0]
+node s8: label["s8"], owner[0]
+node s9: label["s9"], owner[1]
+node s10: label["s10"], owner[1]
 
 edge s0 -> s5: (7,17)
 edge s0 -> s9: (or (= (mod t 5) 1) (= (mod t 5) 3))
