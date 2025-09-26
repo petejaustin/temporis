@@ -4,7 +4,7 @@ digraph game_0138_chain_6 {
     s2 [name="s2", player=0, target=1];
     s3 [name="s3", player=1];
     s4 [name="s4", player=0];
-    s5 [name="s5", player=1, target=1];
+    s5 [name="s5", player=1];
 
     s0 -> s1 [constraint="time == 2 || time == 10 || time == 12 || time == 18"];
     s1 -> s2 [constraint="time == 6 || time == 7 || time == 12 || time == 13 || time == 19"];

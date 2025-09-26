@@ -1,6 +1,6 @@
 digraph game_0876_complex_12 {
     s0 [name="s0", player=0];
-    s1 [name="s1", player=0];
+    s1 [name="s1", player=0, target=1];
     s2 [name="s2", player=1];
     s3 [name="s3", player=1];
     s4 [name="s4", player=1];
@@ -9,8 +9,8 @@ digraph game_0876_complex_12 {
     s7 [name="s7", player=1];
     s8 [name="s8", player=0];
     s9 [name="s9", player=0];
-    s10 [name="s10", player=1];
-    s11 [name="s11", player=1, target=1];
+    s10 [name="s10", player=1, target=1];
+    s11 [name="s11", player=1];
 
     s1 -> s2;
     s1 -> s4 [constraint="!(time % 5 == 1)"];

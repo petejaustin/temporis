@@ -114,39 +114,6 @@ private:
     std::set<Vertex> compute_backwards_temporal_attractor();
 };
 
-// Solver that unrolls temporal graphs into static graphs
-class ExpansionSolver : public Solver<graphs::GGGTemporalGraph, RSSolution<graphs::GGGTemporalGraph>> {
-public:
-    using Graph = graphs::GGGTemporalGraph;
-    using Solution = RSSolution<Graph>;
-    using Vertex = boost::graph_traits<Graph>::vertex_descriptor;
-    
-    using StaticGraph = boost::adjacency_list<boost::setS, boost::vecS, boost::directedS>;
-    using StaticVertex = boost::graph_traits<StaticGraph>::vertex_descriptor;
-
-    std::shared_ptr<graphs::GGGTemporalGameManager> manager_;
-    std::shared_ptr<graphs::GGGReachabilityObjective> objective_;
-    int max_time_;
-    bool verbose_;
-    mutable SolverStatistics stats_;
-    
-    std::map<std::pair<Vertex, int>, StaticVertex> vertex_map_;
-    std::map<StaticVertex, std::pair<Vertex, int>> reverse_map_;
-
-    ExpansionSolver(std::shared_ptr<graphs::GGGTemporalGameManager> manager,
-                    std::shared_ptr<graphs::GGGReachabilityObjective> objective,
-                    int max_time = 50, bool verbose = false);
-
-    Solution solve(const Graph& graph) override;
-    std::string get_name() const override;
-    const SolverStatistics& get_statistics() const { return stats_; }
-
-    std::shared_ptr<StaticGraph> expand_graph(const Graph& temporal_graph);
-    std::set<StaticVertex> create_targets(const StaticGraph& static_graph);
-    std::set<StaticVertex> compute_attractor(const StaticGraph& graph, const std::set<StaticVertex>& targets);
-    Solution convert_back(const std::set<StaticVertex>& winning, const Graph& original);
-};
-
 /**
  * @brief Extended solution type with temporal game statistics
  */

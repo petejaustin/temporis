@@ -2,9 +2,9 @@ digraph game_0687_complex_6 {
     s0 [name="s0", player=1];
     s1 [name="s1", player=1];
     s2 [name="s2", player=1];
-    s3 [name="s3", player=1];
-    s4 [name="s4", player=1];
-    s5 [name="s5", player=0, target=1];
+    s3 [name="s3", player=1, target=1];
+    s4 [name="s4", player=1, target=1];
+    s5 [name="s5", player=0];
 
     s1 -> s0 [constraint="time % 3 == 2 || time % 2 == 1"];
     s1 -> s3;

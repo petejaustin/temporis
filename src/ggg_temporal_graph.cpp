@@ -18,22 +18,24 @@ GGGTemporalVertex GGGTemporalGameManager::add_vertex(const std::string& name, in
 }
 
 std::pair<GGGTemporalEdge, bool> GGGTemporalGameManager::add_edge(
-    GGGTemporalVertex source, GGGTemporalVertex target, const std::string& label, 
-    const PresburgerFormula& constraint) {
-    auto result = ggg::graphs::add_edge(*graph_, source, target, label, constraint);
-    return result;
+    GGGTemporalVertex source, GGGTemporalVertex target, const std::string& label) {
+    return ggg::graphs::add_edge(*graph_, source, target, label);
 }
 
-void GGGTemporalGameManager::set_edge_constraint(GGGTemporalEdge edge, const PresburgerFormula& constraint) {
-    (*graph_)[edge].constraint = constraint;
+void GGGTemporalGameManager::add_edge_constraint(GGGTemporalEdge edge, 
+                                                std::unique_ptr<PresburgerFormula> constraint) {
+    edge_constraints_[edge] = std::move(constraint);
 }
 
 bool GGGTemporalGameManager::is_edge_constraint_satisfied(GGGTemporalEdge edge, int time) const {
-    const auto& constraint = (*graph_)[edge].constraint;
+    auto it = edge_constraints_.find(edge);
+    if (it == edge_constraints_.end()) {
+        return true; // No constraint means always available
+    }
     
     try {
         std::map<std::string, int> variables = {{"time", time}};
-        return constraint.evaluate(variables);
+        return it->second->evaluate(variables);
     } catch (const std::exception&) {
         return false; // If evaluation fails, edge is not available
     }
@@ -49,6 +51,7 @@ int GGGTemporalGameManager::current_time() const {
 
 void GGGTemporalGameManager::clear_graph() {
     graph_ = std::make_shared<GGGTemporalGraph>();
+    edge_constraints_.clear();
     current_time_ = 0;
 }
 
@@ -129,9 +132,10 @@ bool GGGTemporalGameManager::load_from_dot_file(const std::string& filename) {
             
             if (vertex_map.find(source_id) != vertex_map.end() && 
                 vertex_map.find(target_id) != vertex_map.end()) {
-                // Parse constraint and add edge
+                // Add edge and parse constraint
+                auto edge = add_edge(vertex_map[source_id], vertex_map[target_id]);
                 auto constraint = parse_constraint(constraint_str);
-                add_edge(vertex_map[source_id], vertex_map[target_id], "", *constraint);
+                add_edge_constraint(edge.first, std::move(constraint));
             }
         }
     }
@@ -199,7 +203,7 @@ bool GGGReachabilityObjective::has_failed(GGGTemporalVertex vertex, int time) co
 }
 
 // Constraint parsing methods (adapted from PresburgerTemporalDotParser)
-std::shared_ptr<PresburgerFormula> GGGTemporalGameManager::parse_constraint(const std::string& constraint_str) const {
+std::unique_ptr<PresburgerFormula> GGGTemporalGameManager::parse_constraint(const std::string& constraint_str) {
     // Remove whitespace
     std::string cleaned = constraint_str;
     cleaned.erase(std::remove_if(cleaned.begin(), cleaned.end(), ::isspace), cleaned.end());
@@ -227,7 +231,7 @@ std::shared_ptr<PresburgerFormula> GGGTemporalGameManager::parse_constraint(cons
     if (cleaned.starts_with("!")) {
         std::string inner_formula = cleaned.substr(1);
         auto inner = parse_constraint(inner_formula);
-        return PresburgerFormula::not_formula(inner);
+        return PresburgerFormula::not_formula(std::move(inner));
     }
     
     // Parse parenthesized expressions
@@ -271,7 +275,7 @@ std::shared_ptr<PresburgerFormula> GGGTemporalGameManager::parse_constraint(cons
     );
 }
 
-std::shared_ptr<PresburgerFormula> GGGTemporalGameManager::parse_existential_formula(const std::string& formula_str) const {
+std::unique_ptr<PresburgerFormula> GGGTemporalGameManager::parse_existential_formula(const std::string& formula_str) {
     // Extract variable name and inner formula
     std::regex exists_pattern(R"(exists\s+(\w+)\s*:\s*(.+))");
     std::smatch match;
@@ -280,14 +284,14 @@ std::shared_ptr<PresburgerFormula> GGGTemporalGameManager::parse_existential_for
         std::string var_name = match[1].str();
         std::string inner_formula_str = match[2].str();
         auto inner_formula = parse_constraint(inner_formula_str);
-        return PresburgerFormula::exists(var_name, inner_formula);
+        return PresburgerFormula::exists(var_name, std::move(inner_formula));
     }
     
     // Default fallback
     return PresburgerFormula::equal(PresburgerTerm(1), PresburgerTerm(1));
 }
 
-std::shared_ptr<PresburgerFormula> GGGTemporalGameManager::parse_comparison_formula(const std::string& formula_str, const std::string& op, size_t pos) const {
+std::unique_ptr<PresburgerFormula> GGGTemporalGameManager::parse_comparison_formula(const std::string& formula_str, const std::string& op, size_t pos) {
     std::string left_str = formula_str.substr(0, pos);
     std::string right_str = formula_str.substr(pos + op.length());
     
@@ -307,13 +311,13 @@ std::shared_ptr<PresburgerFormula> GGGTemporalGameManager::parse_comparison_form
     } else if (op == "!=") {
         // Implement != as NOT(equal)
         auto equal_formula = PresburgerFormula::equal(*left_term, *right_term);
-        return PresburgerFormula::not_formula(equal_formula);
+        return PresburgerFormula::not_formula(std::move(equal_formula));
     } else {
         return PresburgerFormula::equal(*left_term, *right_term);
     }
 }
 
-std::shared_ptr<PresburgerFormula> GGGTemporalGameManager::parse_logical_formula(const std::string& formula_str, const std::string& op, size_t pos) const {
+std::unique_ptr<PresburgerFormula> GGGTemporalGameManager::parse_logical_formula(const std::string& formula_str, const std::string& op, size_t pos) {
     std::string left_str = formula_str.substr(0, pos);
     std::string right_str = formula_str.substr(pos + op.length());
     
@@ -321,21 +325,21 @@ std::shared_ptr<PresburgerFormula> GGGTemporalGameManager::parse_logical_formula
     auto right_formula = parse_constraint(right_str);
     
     if (op == "&&") {
-        std::vector<std::shared_ptr<PresburgerFormula>> formulas;
-        formulas.push_back(left_formula);
-        formulas.push_back(right_formula);
-        return PresburgerFormula::and_formula(formulas);
+        std::vector<std::unique_ptr<PresburgerFormula>> formulas;
+        formulas.push_back(std::move(left_formula));
+        formulas.push_back(std::move(right_formula));
+        return PresburgerFormula::and_formula(std::move(formulas));
     } else if (op == "||") {
-        std::vector<std::shared_ptr<PresburgerFormula>> formulas;
-        formulas.push_back(left_formula);
-        formulas.push_back(right_formula);
-        return PresburgerFormula::or_formula(formulas);
+        std::vector<std::unique_ptr<PresburgerFormula>> formulas;
+        formulas.push_back(std::move(left_formula));
+        formulas.push_back(std::move(right_formula));
+        return PresburgerFormula::or_formula(std::move(formulas));
     }
     
     return PresburgerFormula::equal(PresburgerTerm(1), PresburgerTerm(1));
 }
 
-std::shared_ptr<PresburgerFormula> GGGTemporalGameManager::parse_modulus_constraint(const std::string& formula_str, size_t mod_pos) const {
+std::unique_ptr<PresburgerFormula> GGGTemporalGameManager::parse_modulus_constraint(const std::string& formula_str, size_t mod_pos) {
     // Parse expressions like "expr mod m == r"
     std::string expr_str = formula_str.substr(0, mod_pos);
     std::string remainder_str = formula_str.substr(mod_pos + 3); // skip "mod"
@@ -356,7 +360,7 @@ std::shared_ptr<PresburgerFormula> GGGTemporalGameManager::parse_modulus_constra
     return PresburgerFormula::modulus(*expr_term, modulus, result);
 }
 
-std::shared_ptr<PresburgerFormula> GGGTemporalGameManager::parse_percent_modulus_constraint(const std::string& formula_str, size_t percent_pos) const {
+std::unique_ptr<PresburgerFormula> GGGTemporalGameManager::parse_percent_modulus_constraint(const std::string& formula_str, size_t percent_pos) {
     // Parse expressions like "expr%m==r"
     std::string expr_str = formula_str.substr(0, percent_pos);
     std::string remainder_str = formula_str.substr(percent_pos + 1); // skip "%"
@@ -377,15 +381,15 @@ std::shared_ptr<PresburgerFormula> GGGTemporalGameManager::parse_percent_modulus
     return PresburgerFormula::modulus(*expr_term, modulus, result);
 }
 
-std::shared_ptr<PresburgerTerm> GGGTemporalGameManager::parse_presburger_term(const std::string& term_str) const {
+std::unique_ptr<PresburgerTerm> GGGTemporalGameManager::parse_presburger_term(const std::string& term_str) {
     // Handle simple constant
     if (std::all_of(term_str.begin(), term_str.end(), [](char c) { return std::isdigit(c) || c == '-'; })) {
-        return std::make_shared<PresburgerTerm>(std::stoi(term_str));
+        return std::make_unique<PresburgerTerm>(std::stoi(term_str));
     }
     
     // Handle simple variable
     if (std::all_of(term_str.begin(), term_str.end(), [](char c) { return std::isalnum(c) || c == '_'; })) {
-        return std::make_shared<PresburgerTerm>(term_str);
+        return std::make_unique<PresburgerTerm>(term_str);
     }
     
     // Handle coefficient * variable (e.g., "2*time")
@@ -396,12 +400,12 @@ std::shared_ptr<PresburgerTerm> GGGTemporalGameManager::parse_presburger_term(co
         
         if (std::all_of(coeff_str.begin(), coeff_str.end(), [](char c) { return std::isdigit(c) || c == '-'; }) &&
             std::all_of(var_str.begin(), var_str.end(), [](char c) { return std::isalnum(c) || c == '_'; })) {
-            return std::make_shared<PresburgerTerm>(var_str, std::stoi(coeff_str));
+            return std::make_unique<PresburgerTerm>(var_str, std::stoi(coeff_str));
         }
     }
     
     // Default to constant 0
-    return std::make_shared<PresburgerTerm>(0);
+    return std::make_unique<PresburgerTerm>(0);
 }
 
 } // namespace graphs

@@ -3,8 +3,8 @@ digraph game_0464_cycle_6 {
     s1 [name="s1", player=0];
     s2 [name="s2", player=1];
     s3 [name="s3", player=1];
-    s4 [name="s4", player=0, target=1];
-    s5 [name="s5", player=0, target=1];
+    s4 [name="s4", player=0];
+    s5 [name="s5", player=0];
 
     s0 -> s1 [constraint="time == 11 || time == 18 || time == 20"];
     s1 -> s2 [constraint="time == 5 || time == 17 || time == 18"];

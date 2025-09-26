@@ -4,7 +4,7 @@ digraph game_0765_complex_6 {
     s2 [name="s2", player=1];
     s3 [name="s3", player=0];
     s4 [name="s4", player=0];
-    s5 [name="s5", player=1, target=1];
+    s5 [name="s5", player=1];
 
     s0 -> s5 [constraint="!(time % 6 == 0)"];
     s1 -> s0 [constraint="time % 4 == 1 && time % 3 == 1"];

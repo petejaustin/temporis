@@ -4,11 +4,33 @@
 #include <iostream>
 #include <iomanip>
 
+// Simple logging helpers for temporis
 namespace {
     bool g_verbose = false;
+    bool g_debug = false;
     
-    void error(const std::string& msg) { std::cerr << "Error: " << msg << std::endl; }
-    void info(const std::string& msg) { if (g_verbose) std::cout << msg << std::endl; }
+    template<typename... Args>
+    void log_error(Args... args) {
+        std::cerr << "[ERROR] ";
+        ((std::cerr << args), ...);
+        std::cerr << std::endl;
+    }
+    
+    template<typename... Args>
+    void log_info(Args... args) {
+        std::cout << "[INFO] ";
+        ((std::cout << args), ...);
+        std::cout << std::endl;
+    }
+    
+    template<typename... Args>
+    void log_debug(Args... args) {
+        if (g_debug) {
+            std::cout << "[DEBUG] ";
+            ((std::cout << args), ...);
+            std::cout << std::endl;
+        }
+    }
 }
 
 namespace ggg {
@@ -38,7 +60,6 @@ public:
         bool time_only = false;
         std::string filename;
         int user_time_bound = -1;
-        std::string solver_type = "reachability"; // Default solver
         
         // Set up logging based on verbosity
         for (int i = 1; i < argc; i++) {
@@ -46,12 +67,16 @@ public:
             if (arg == "--verbose" || arg == "-v") {
                 verbose = true;
                 g_verbose = true;
+                log_debug("Verbose mode enabled");
             } else if (arg == "--debug" || arg == "-d") {
                 debug = true;
-                verbose = true;
+                verbose = true;  // debug implies verbose
                 g_verbose = true;
+                g_debug = true;
+                log_debug("Debug mode enabled");
             } else if (arg == "--validate" || arg == "--check-format") {
                 validate_only = true;
+                log_info("Validation mode enabled");
             } else if (arg == "--csv") {
                 csv_output = true;
             } else if (arg == "--time-only") {
@@ -59,31 +84,21 @@ public:
             } else if (arg == "--help" || arg == "-h") {
                 print_usage();
                 return 0;
-            } else if (arg == "--solver" || arg == "-s") {
-                if (i + 1 < argc) {
-                    solver_type = argv[++i];
-                    if (solver_type != "reachability" && solver_type != "expansion") {
-                        error("Invalid solver: " + solver_type);
-                        return 1;
-                    }
-                } else {
-                    error("--solver requires a value");
-                    return 1;
-                }
             } else if (arg == "--time-bound" || arg == "-t") {
                 if (i + 1 < argc) {
                     try {
                         user_time_bound = std::stoi(argv[++i]);
                         if (user_time_bound <= 0) {
-                            error("Time bound must be positive");
+                            log_error("Time bound must be positive");
                             return 1;
                         }
+                        log_debug("Time bound set to: ", user_time_bound);
                     } catch (const std::exception&) {
-                        error("Invalid time bound");
+                        log_error("Invalid time bound value: ", argv[i]);
                         return 1;
                     }
                 } else {
-                    error("--time-bound requires a value");
+                    log_error("--time-bound requires a value");
                     return 1;
                 }
             } else if (arg.find(".dot") != std::string::npos) {
@@ -92,69 +107,64 @@ public:
         }
         
         if (filename.empty()) {
-            error("No input file specified");
+            log_error("No input file specified");
             print_usage();
             return 1;
         }
         
+        log_debug("Loading game from: ", filename);
+        
+        // Load the game
         if (!manager_->load_from_dot_file(filename)) {
-            error("Failed to load game");
+            log_error("Failed to load game from: ", filename);
             return 1;
         }
         
         if (validate_only) {
             bool valid = manager_->validate_game_structure();
-            std::cout << (valid ? "Valid" : "Invalid") << std::endl;
+            if (valid) {
+                log_info("Valid game structure");
+            } else {
+                log_error("Invalid game structure");
+            }
             return valid ? 0 : 1;
         }
         
+        // Create objective from target vertices
         auto targets = manager_->get_target_vertices();
         if (targets.empty()) {
-            error("No target vertices found");
+            log_error("No target vertices found in game");
             return 1;
         }
+        
+        log_debug("Found ", targets.size(), " target vertices");
         
         objective_ = std::make_shared<ggg::graphs::GGGReachabilityObjective>(
             ggg::graphs::GGGReachabilityObjective::Type::REACHABILITY, targets);
         
-        // Create solver based on user selection
-        std::shared_ptr<ggg::solvers::Solver<ggg::graphs::GGGTemporalGraph, ggg::solvers::RSSolution<ggg::graphs::GGGTemporalGraph>>> solver;
+        // Create and run solver
+        auto solver = std::make_shared<ggg::solvers::GGGTemporalReachabilitySolver>(
+            manager_, objective_, user_time_bound > 0 ? user_time_bound : 50, verbose);
         
-        int time_bound = user_time_bound > 0 ? user_time_bound : 50;
-        
-        if (solver_type == "expansion") {
-            solver = std::make_shared<ggg::solvers::ExpansionSolver>(
-                manager_, objective_, time_bound, verbose);
-        } else { // Default to reachability solver
-            solver = std::make_shared<ggg::solvers::GGGTemporalReachabilitySolver>(
-                manager_, objective_, time_bound, verbose);
-        }
-        
+        // Only show solver info in normal output modes
         if (!csv_output && !time_only) {
-            info("Solver: " + solver->get_name());
+            log_info("Solver: ", solver->get_name());
         }
+        log_debug("Graph: ", boost::num_vertices(*manager_->graph()), " vertices, ",
+                                 boost::num_edges(*manager_->graph()), " edges");
         
         // Solve the game
         auto solution = solver->solve(*manager_->graph());
         
-        // Handle different output modes - statistics depend on solver type
-        ggg::solvers::SolverStatistics stats;
-        if (solver_type == "expansion") {
-            auto expansion_solver = std::dynamic_pointer_cast<ggg::solvers::ExpansionSolver>(solver);
-            stats = expansion_solver->get_statistics();
-        } else {
-            auto reachability_solver = std::dynamic_pointer_cast<ggg::solvers::GGGTemporalReachabilitySolver>(solver);
-            stats = reachability_solver->get_statistics();
-        }
-        
+        // Handle different output modes
         if (csv_output) {
-            output_csv(solution, stats, filename);
+            output_csv(solution, solver->get_statistics(), filename);
         } else if (time_only) {
-            output_time_only(stats);
+            output_time_only(solver->get_statistics());
         } else {
             // Standard output mode
             if (verbose) {
-                output_statistics(stats);
+                output_statistics(solver->get_statistics());
             }
             output_solution(solution, verbose);
         }
@@ -172,16 +182,14 @@ private:
         std::cout << "  -v, --verbose          Enable verbose output\n";
         std::cout << "  -d, --debug            Enable debug output (includes verbose)\n";
         std::cout << "  -t, --time-bound N     Set solver time bound\n";
-        std::cout << "  -s, --solver TYPE      Choose solver (reachability|expansion)\n";
         std::cout << "  --validate             Validate file format only\n";
         std::cout << "  --csv                  Output results in CSV format\n";
         std::cout << "  --time-only            Output only timing information\n";
         std::cout << "  -h, --help             Show this help\n\n";
         std::cout << "EXAMPLES:\n";
-        std::cout << "  temporis game.dot                      # Solve with reachability solver\n";
-        std::cout << "  temporis --solver expansion game.dot   # Solve with expansion solver\n";
-        std::cout << "  temporis --verbose game.dot            # Detailed output\n";
-        std::cout << "  temporis -t 100 game.dot               # Custom time bound\n";
+        std::cout << "  temporis game.dot                 # Solve reachability game\n";
+        std::cout << "  temporis --verbose game.dot       # Detailed output\n";
+        std::cout << "  temporis -t 100 game.dot          # Custom time bound\n";
     }
     
     void output_solution(const ggg::solvers::RSSolution<ggg::graphs::GGGTemporalGraph>& solution, bool verbose) {

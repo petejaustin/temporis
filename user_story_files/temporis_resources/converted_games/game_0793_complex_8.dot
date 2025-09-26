@@ -5,8 +5,8 @@ digraph game_0793_complex_8 {
     s3 [name="s3", player=0];
     s4 [name="s4", player=1];
     s5 [name="s5", player=0];
-    s6 [name="s6", player=1];
-    s7 [name="s7", player=1, target=1];
+    s6 [name="s6", player=1, target=1];
+    s7 [name="s7", player=1];
 
     s0 -> s1;
     s0 -> s3 [constraint="time == 6 || time == 11 || time == 12 || time == 21"];

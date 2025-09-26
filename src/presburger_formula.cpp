@@ -1,99 +1,60 @@
 #include "presburger_formula.hpp"
-#include <iostream>
 
 namespace ggg {
 namespace graphs {
 
-PresburgerFormula::PresburgerFormula()
-    : type_(EQUAL), left_(PresburgerTerm(1)), right_(PresburgerTerm(1)), modulus_(0), remainder_(0) {}
-
 PresburgerFormula::PresburgerFormula(Type t, const PresburgerTerm& l, const PresburgerTerm& r) 
     : type_(t), left_(l), right_(r), modulus_(0), remainder_(0) {}
 
-PresburgerFormula::PresburgerFormula(const PresburgerFormula& other)
-    : type_(other.type_), left_(other.left_), right_(other.right_), 
-      existential_var_(other.existential_var_), modulus_(other.modulus_), remainder_(other.remainder_) {
-    // Deep copy children
-    for (const auto& child : other.children_) {
-        if (child) {
-            children_.push_back(std::make_shared<PresburgerFormula>(*child));
-        } else {
-            children_.push_back(nullptr);
-        }
-    }
+std::unique_ptr<PresburgerFormula> PresburgerFormula::equal(const PresburgerTerm& left, const PresburgerTerm& right) {
+    return std::make_unique<PresburgerFormula>(EQUAL, left, right);
 }
 
-PresburgerFormula& PresburgerFormula::operator=(const PresburgerFormula& other) {
-    if (this != &other) {
-        type_ = other.type_;
-        left_ = other.left_;
-        right_ = other.right_;
-        existential_var_ = other.existential_var_;
-        modulus_ = other.modulus_;
-        remainder_ = other.remainder_;
-        
-        // Deep copy children
-        children_.clear();
-        for (const auto& child : other.children_) {
-            if (child) {
-                children_.push_back(std::make_shared<PresburgerFormula>(*child));
-            } else {
-                children_.push_back(nullptr);
-            }
-        }
-    }
-    return *this;
+std::unique_ptr<PresburgerFormula> PresburgerFormula::greaterequal(const PresburgerTerm& left, const PresburgerTerm& right) {
+    return std::make_unique<PresburgerFormula>(GREATEREQUAL, left, right);
 }
 
-std::shared_ptr<PresburgerFormula> PresburgerFormula::equal(const PresburgerTerm& left, const PresburgerTerm& right) {
-    return std::make_shared<PresburgerFormula>(EQUAL, left, right);
+std::unique_ptr<PresburgerFormula> PresburgerFormula::lessequal(const PresburgerTerm& left, const PresburgerTerm& right) {
+    return std::make_unique<PresburgerFormula>(LESSEQUAL, left, right);
 }
 
-std::shared_ptr<PresburgerFormula> PresburgerFormula::greaterequal(const PresburgerTerm& left, const PresburgerTerm& right) {
-    return std::make_shared<PresburgerFormula>(GREATEREQUAL, left, right);
+std::unique_ptr<PresburgerFormula> PresburgerFormula::greater(const PresburgerTerm& left, const PresburgerTerm& right) {
+    return std::make_unique<PresburgerFormula>(GREATER, left, right);
 }
 
-std::shared_ptr<PresburgerFormula> PresburgerFormula::lessequal(const PresburgerTerm& left, const PresburgerTerm& right) {
-    return std::make_shared<PresburgerFormula>(LESSEQUAL, left, right);
+std::unique_ptr<PresburgerFormula> PresburgerFormula::less(const PresburgerTerm& left, const PresburgerTerm& right) {
+    return std::make_unique<PresburgerFormula>(LESS, left, right);
 }
 
-std::shared_ptr<PresburgerFormula> PresburgerFormula::greater(const PresburgerTerm& left, const PresburgerTerm& right) {
-    return std::make_shared<PresburgerFormula>(GREATER, left, right);
-}
-
-std::shared_ptr<PresburgerFormula> PresburgerFormula::less(const PresburgerTerm& left, const PresburgerTerm& right) {
-    return std::make_shared<PresburgerFormula>(LESS, left, right);
-}
-
-std::shared_ptr<PresburgerFormula> PresburgerFormula::modulus(const PresburgerTerm& expr, int modulus, int remainder) {
-    auto result = std::make_shared<PresburgerFormula>(MODULUS, expr, PresburgerTerm(0));
+std::unique_ptr<PresburgerFormula> PresburgerFormula::modulus(const PresburgerTerm& expr, int modulus, int remainder) {
+    auto result = std::make_unique<PresburgerFormula>(MODULUS, expr, PresburgerTerm(0));
     result->modulus_ = modulus;
     result->remainder_ = remainder;
     return result;
 }
 
-std::shared_ptr<PresburgerFormula> PresburgerFormula::and_formula(std::vector<std::shared_ptr<PresburgerFormula>> formulas) {
-    auto result = std::make_shared<PresburgerFormula>(AND, PresburgerTerm(0), PresburgerTerm(0));
-    result->children_ = formulas;
+std::unique_ptr<PresburgerFormula> PresburgerFormula::and_formula(std::vector<std::unique_ptr<PresburgerFormula>> formulas) {
+    auto result = std::make_unique<PresburgerFormula>(AND, PresburgerTerm(0), PresburgerTerm(0));
+    result->children_ = std::move(formulas);
     return result;
 }
 
-std::shared_ptr<PresburgerFormula> PresburgerFormula::or_formula(std::vector<std::shared_ptr<PresburgerFormula>> formulas) {
-    auto result = std::make_shared<PresburgerFormula>(OR, PresburgerTerm(0), PresburgerTerm(0));
-    result->children_ = formulas;
+std::unique_ptr<PresburgerFormula> PresburgerFormula::or_formula(std::vector<std::unique_ptr<PresburgerFormula>> formulas) {
+    auto result = std::make_unique<PresburgerFormula>(OR, PresburgerTerm(0), PresburgerTerm(0));
+    result->children_ = std::move(formulas);
     return result;
 }
 
-std::shared_ptr<PresburgerFormula> PresburgerFormula::not_formula(std::shared_ptr<PresburgerFormula> formula) {
-    auto result = std::make_shared<PresburgerFormula>(NOT, PresburgerTerm(0), PresburgerTerm(0));
-    result->children_.push_back(formula);
+std::unique_ptr<PresburgerFormula> PresburgerFormula::not_formula(std::unique_ptr<PresburgerFormula> formula) {
+    auto result = std::make_unique<PresburgerFormula>(NOT, PresburgerTerm(0), PresburgerTerm(0));
+    result->children_.push_back(std::move(formula));
     return result;
 }
 
-std::shared_ptr<PresburgerFormula> PresburgerFormula::exists(const std::string& var, std::shared_ptr<PresburgerFormula> formula) {
-    auto result = std::make_shared<PresburgerFormula>(EXISTS, PresburgerTerm(0), PresburgerTerm(0));
+std::unique_ptr<PresburgerFormula> PresburgerFormula::exists(const std::string& var, std::unique_ptr<PresburgerFormula> formula) {
+    auto result = std::make_unique<PresburgerFormula>(EXISTS, PresburgerTerm(0), PresburgerTerm(0));
     result->existential_var_ = var;
-    result->children_.push_back(formula);
+    result->children_.push_back(std::move(formula));
     return result;
 }
 
@@ -198,16 +159,3 @@ int PresburgerFormula::evaluate_term(const PresburgerTerm& term, const std::map<
 
 } // namespace graphs
 } // namespace ggg
-
-// Stream operators for Boost lexical_cast support
-std::ostream& operator<<(std::ostream& os, const ggg::graphs::PresburgerFormula& formula) {
-    os << formula.to_string();
-    return os;
-}
-
-std::istream& operator>>(std::istream& is, ggg::graphs::PresburgerFormula& formula) {
-    // For now, just create a default "true" formula
-    // In practice, this won't be used since we parse constraints differently
-    formula = ggg::graphs::PresburgerFormula();
-    return is;
-}

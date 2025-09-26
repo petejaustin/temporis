@@ -4,7 +4,6 @@
 #include <memory>
 #include <map>
 #include <set>
-#include <optional>
 
 namespace ggg {
 namespace graphs {
@@ -16,8 +15,7 @@ namespace graphs {
     X(int, target)
 
 #define GGG_TEMPORAL_EDGE_FIELDS(X) \
-    X(std::string, label) \
-    X(PresburgerFormula, constraint)
+    X(std::string, label)
 
 #define GGG_TEMPORAL_GRAPH_FIELDS(X) /* none */
 
@@ -41,16 +39,19 @@ using GGGTemporalEdge = GGGTemporalGraph::edge_descriptor;
 class GGGTemporalGameManager {
 private:
     std::shared_ptr<GGGTemporalGraph> graph_;
+    std::map<GGGTemporalEdge, std::unique_ptr<PresburgerFormula>> edge_constraints_;
     int current_time_;
     
     // Constraint parsing methods (adapted from PresburgerTemporalDotParser)
-    std::shared_ptr<PresburgerFormula> parse_constraint(const std::string& constraint_str) const;
-    std::shared_ptr<PresburgerFormula> parse_existential_formula(const std::string& formula_str) const;
-    std::shared_ptr<PresburgerFormula> parse_comparison_formula(const std::string& formula_str, const std::string& op, size_t pos) const;
-    std::shared_ptr<PresburgerFormula> parse_logical_formula(const std::string& formula_str, const std::string& op, size_t pos) const;
-    std::shared_ptr<PresburgerFormula> parse_modulus_constraint(const std::string& formula_str, size_t mod_pos) const;
-    std::shared_ptr<PresburgerFormula> parse_percent_modulus_constraint(const std::string& formula_str, size_t percent_pos) const;
-    std::shared_ptr<PresburgerTerm> parse_presburger_term(const std::string& term_str) const;public:
+    std::unique_ptr<PresburgerFormula> parse_constraint(const std::string& constraint_str);
+    std::unique_ptr<PresburgerFormula> parse_existential_formula(const std::string& formula_str);
+    std::unique_ptr<PresburgerFormula> parse_comparison_formula(const std::string& formula_str, const std::string& op, size_t pos);
+    std::unique_ptr<PresburgerFormula> parse_logical_formula(const std::string& formula_str, const std::string& op, size_t pos);
+    std::unique_ptr<PresburgerFormula> parse_modulus_constraint(const std::string& formula_str, size_t mod_pos);
+    std::unique_ptr<PresburgerFormula> parse_percent_modulus_constraint(const std::string& formula_str, size_t percent_pos);
+    std::unique_ptr<PresburgerTerm> parse_presburger_term(const std::string& term_str);
+
+public:
     GGGTemporalGameManager();
     
     // Graph access methods
@@ -61,11 +62,10 @@ private:
     GGGTemporalVertex add_vertex(const std::string& name, int player, int target = 0);
     std::pair<GGGTemporalEdge, bool> add_edge(GGGTemporalVertex source, 
                                               GGGTemporalVertex target, 
-                                              const std::string& label = "",
-                                              const PresburgerFormula& constraint = PresburgerFormula(PresburgerFormula::EQUAL, PresburgerTerm(1), PresburgerTerm(1)));
+                                              const std::string& label = "");
     
     // Temporal constraint management
-    void set_edge_constraint(GGGTemporalEdge edge, const PresburgerFormula& constraint);
+    void add_edge_constraint(GGGTemporalEdge edge, std::unique_ptr<PresburgerFormula> constraint);
     bool is_edge_constraint_satisfied(GGGTemporalEdge edge, int time) const;
     
     // Time management

@@ -1,9 +1,9 @@
 digraph game_0920_complex_5 {
     s0 [name="s0", player=0];
     s1 [name="s1", player=0];
-    s2 [name="s2", player=1];
+    s2 [name="s2", player=1, target=1];
     s3 [name="s3", player=1];
-    s4 [name="s4", player=0, target=1];
+    s4 [name="s4", player=0];
 
     s2 -> s4;
     s3 -> s1 [constraint="time % 4 == 3 && time % 5 == 1"];

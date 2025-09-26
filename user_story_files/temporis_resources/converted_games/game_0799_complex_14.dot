@@ -1,7 +1,7 @@
 digraph game_0799_complex_14 {
     s0 [name="s0", player=1];
     s1 [name="s1", player=0];
-    s2 [name="s2", player=1, target=1];
+    s2 [name="s2", player=1];
     s3 [name="s3", player=0];
     s4 [name="s4", player=1];
     s5 [name="s5", player=0, target=1];
@@ -12,7 +12,7 @@ digraph game_0799_complex_14 {
     s10 [name="s10", player=0];
     s11 [name="s11", player=0];
     s12 [name="s12", player=1];
-    s13 [name="s13", player=1, target=1];
+    s13 [name="s13", player=1];
 
     s0 -> s12 [constraint="time % 3 == 1"];
     s0 -> s13 [constraint="time % 3 == 2 && time % 4 == 2"];
