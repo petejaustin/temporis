@@ -1,4 +1,5 @@
 #include "presburger_formula.hpp"
+#include <iostream>
 
 namespace ggg {
 namespace graphs {
@@ -128,8 +129,8 @@ bool PresburgerFormula::evaluate(const std::map<std::string, int>& values) const
             return !children_[0]->evaluate(values);
         }
         case EXISTS: {
-            // Simplified existential quantification - try values 0 to 10
-            for (int val = 0; val <= 10; ++val) {
+            // Existential quantification - try values from -10 to 10 to handle negative constraints
+            for (int val = -10; val <= 10; ++val) {
                 std::map<std::string, int> extended_values = values;
                 extended_values[existential_var_] = val;
                 if (children_[0]->evaluate(extended_values)) {

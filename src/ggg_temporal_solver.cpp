@@ -36,11 +36,19 @@ GGGTemporalReachabilitySolver::SolutionType GGGTemporalReachabilitySolver::solve
         if (player0_winning.find(vertex) != player0_winning.end()) {
             solution.set_winning_player(vertex, 0);
             
-            // Build basic strategy: pick first available move at time 0
-            auto moves = manager_->get_available_moves(vertex, 0);
-            if (!moves.empty()) {
-                solution.set_strategy(vertex, moves[0]);
+            // Build strategy: find the time when Player 0 should make a move
+            // For punctual reachability, look for the earliest time with available moves
+            // that lead toward the target
+            bool strategy_found = false;
+            for (int t = 0; t < max_time_ && !strategy_found; ++t) {
+                auto moves = manager_->get_available_moves(vertex, t);
+                if (!moves.empty()) {
+                    // Pick the first available move (could be improved with better heuristics)
+                    solution.set_strategy(vertex, moves[0]);
+                    strategy_found = true;
+                }
             }
+            // If no strategy found, don't set any strategy (indicates staying/no moves)
         } else {
             solution.set_winning_player(vertex, 1);
         }
@@ -62,28 +70,15 @@ std::set<GGGTemporalReachabilitySolver::Vertex> GGGTemporalReachabilitySolver::c
     // Time the graph traversal
     auto traversal_start = std::chrono::high_resolution_clock::now();
     
-    // Start with target vertices as initial attractor
+    // Start with empty attractor for punctual reachability
+    // In punctual reachability, vertices must be actively reachable through gameplay
     std::set<Vertex> current_attractor;
     
-    // Initialize attractor with all target vertices
     auto [vertex_begin, vertex_end] = boost::vertices(*manager_->graph());
-    for (auto vertex_it = vertex_begin; vertex_it != vertex_end; ++vertex_it) {
-        Vertex vertex = *vertex_it;
-        if (objective_->is_target(vertex)) {
-            current_attractor.insert(vertex);
-        }
-    }
     
     if (verbose_) {
         std::cout << "Starting backwards attractor from time " << max_time_ 
-                  << " with " << current_attractor.size() << " target vertices: {";
-        bool first = true;
-        for (auto vertex : current_attractor) {
-            if (!first) std::cout << ", ";
-            std::cout << (*manager_->graph())[vertex].name;
-            first = false;
-        }
-        std::cout << "}\n";
+                  << " with empty initial attractor (punctual reachability)\n";
     }
     
     // Work backwards from max_time to 0
@@ -101,7 +96,9 @@ std::set<GGGTemporalReachabilitySolver::Vertex> GGGTemporalReachabilitySolver::c
             stats_.constraint_evaluations++;
             
             if (moves.empty()) {
-                // No moves available - skip this vertex
+                // No moves available - in punctual reachability, this means the player
+                // cannot actively reach the target set through gameplay, so this vertex
+                // should NOT be in the attractor (even if it's a target vertex)
                 stats_.constraint_failures++;
                 continue;
             }
@@ -109,29 +106,59 @@ std::set<GGGTemporalReachabilitySolver::Vertex> GGGTemporalReachabilitySolver::c
             
             int player = (*manager_->graph())[vertex].player;
             
-            if (player == 0) {
-                // Player 0 (existential): needs AT LEAST ONE edge to current attractor
-                bool has_edge_to_attractor = false;
-                for (auto move : moves) {
-                    if (current_attractor.find(move) != current_attractor.end()) {
-                        has_edge_to_attractor = true;
-                        break;
+            // Special case: if we're at max_time-1, check if moves lead to targets
+            if (time == max_time_ - 1) {
+                if (player == 0) {
+                    // Player 0: needs at least one move to a target
+                    bool has_move_to_target = false;
+                    for (auto move : moves) {
+                        if (objective_->is_target(move)) {
+                            has_move_to_target = true;
+                            break;
+                        }
                     }
-                }
-                if (has_edge_to_attractor) {
-                    new_attractor.insert(vertex);
+                    if (has_move_to_target) {
+                        new_attractor.insert(vertex);
+                    }
+                } else {
+                    // Player 1: all moves must lead to targets (for this to help Player 0)
+                    bool all_moves_to_targets = true;
+                    for (auto move : moves) {
+                        if (!objective_->is_target(move)) {
+                            all_moves_to_targets = false;
+                            break;
+                        }
+                    }
+                    if (all_moves_to_targets) {
+                        new_attractor.insert(vertex);
+                    }
                 }
             } else {
-                // Player 1 (universal): needs ALL EDGES to go to current attractor
-                bool all_edges_to_attractor = true;
-                for (auto move : moves) {
-                    if (current_attractor.find(move) == current_attractor.end()) {
-                        all_edges_to_attractor = false;
-                        break;
+                // Standard attractor computation for earlier times
+                if (player == 0) {
+                    // Player 0 (existential): needs AT LEAST ONE edge to current attractor
+                    bool has_edge_to_attractor = false;
+                    for (auto move : moves) {
+                        if (current_attractor.find(move) != current_attractor.end()) {
+                            has_edge_to_attractor = true;
+                            break;
+                        }
                     }
-                }
-                if (all_edges_to_attractor) {
-                    new_attractor.insert(vertex);
+                    if (has_edge_to_attractor) {
+                        new_attractor.insert(vertex);
+                    }
+                } else {
+                    // Player 1 (universal): needs ALL EDGES to go to current attractor
+                    bool all_edges_to_attractor = true;
+                    for (auto move : moves) {
+                        if (current_attractor.find(move) == current_attractor.end()) {
+                            all_edges_to_attractor = false;
+                            break;
+                        }
+                    }
+                    if (all_edges_to_attractor) {
+                        new_attractor.insert(vertex);
+                    }
                 }
             }
         }

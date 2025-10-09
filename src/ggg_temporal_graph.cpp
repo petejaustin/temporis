@@ -240,6 +240,14 @@ std::unique_ptr<PresburgerFormula> GGGTemporalGameManager::parse_constraint(cons
         return parse_constraint(inner_formula);
     }
     
+    // Parse logical operators FIRST (lower precedence, should be at top level)
+    for (const auto& op : {"||", "&&"}) {
+        auto pos = cleaned.find(op);
+        if (pos != std::string::npos) {
+            return parse_logical_formula(cleaned, op, pos);
+        }
+    }
+    
     // Parse modulus constraints: expr%m==r or expr mod m == r
     auto mod_pos = cleaned.find("mod");
     if (mod_pos != std::string::npos) {
@@ -252,19 +260,11 @@ std::unique_ptr<PresburgerFormula> GGGTemporalGameManager::parse_constraint(cons
         return parse_percent_modulus_constraint(cleaned, percent_pos);
     }
     
-    // Parse comparison operators
+    // Parse comparison operators AFTER logical operators (higher precedence)
     for (const auto& op : {">=", "<=", ">", "<", "==", "!="}) {
         auto pos = cleaned.find(op);
         if (pos != std::string::npos) {
             return parse_comparison_formula(cleaned, op, pos);
-        }
-    }
-    
-    // Parse logical operators
-    for (const auto& op : {"&&", "||"}) {
-        auto pos = cleaned.find(op);
-        if (pos != std::string::npos) {
-            return parse_logical_formula(cleaned, op, pos);
         }
     }
     
@@ -277,7 +277,8 @@ std::unique_ptr<PresburgerFormula> GGGTemporalGameManager::parse_constraint(cons
 
 std::unique_ptr<PresburgerFormula> GGGTemporalGameManager::parse_existential_formula(const std::string& formula_str) {
     // Extract variable name and inner formula
-    std::regex exists_pattern(R"(exists\s+(\w+)\s*:\s*(.+))");
+    // Support both 'exists x: ...' and 'exists x. ...' syntax
+    std::regex exists_pattern(R"(exists(\w+)[:.]\s*(.+))");
     std::smatch match;
     
     if (std::regex_match(formula_str, match, exists_pattern)) {
