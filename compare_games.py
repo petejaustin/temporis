@@ -91,9 +91,9 @@ def run_ontime(game_file: str, targets: str, time_bound: int = 10000) -> GameRes
     except Exception as e:
         return GameResult(False, error=str(e))
 
-def run_temporis(game_file: str) -> TemporisResult:
+def run_temporis(game_file: str, time_bound: int = 10000) -> TemporisResult:
     """Run temporis solver and parse results."""
-    cmd = ["./temporis", game_file]
+    cmd = ["./temporis", "-t", str(time_bound), game_file]
     
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30, cwd="/home/pete/temporis")
@@ -102,34 +102,36 @@ def run_temporis(game_file: str) -> TemporisResult:
             return TemporisResult(False, error=result.stderr)
         
         # Parse temporis output format:
-        # Player 0:
-        # Winning regions: 
-        #   {}
-        # Player 1:
-        # Winning regions:
-        #   {s0, s1}
+        # Winning Regions:
+        #   s0: Player 1
+        #   s1: Player 1
+        #   target: Player 1
         output = result.stdout.strip()
         p0_region = set()
         p1_region = set()
         
-        # Split by "Player" to get sections
-        player_sections = re.split(r'Player (\d+):', output)
+        # Look for the "Winning Regions:" section
+        lines = output.split('\n')
+        in_winning_section = False
         
-        for i in range(1, len(player_sections), 2):
-            player_num = int(player_sections[i])
-            player_section = player_sections[i+1] if i+1 < len(player_sections) else ""
-            
-            # Extract winning regions from this player's section
-            regions_match = re.search(r'Winning regions:\s*\{([^}]*)\}', player_section)
-            if regions_match:
-                nodes_str = regions_match.group(1).strip()
-                if nodes_str:
-                    # Split by comma and clean up
-                    nodes = [node.strip() for node in nodes_str.split(',') if node.strip()]
-                    if player_num == 0:
-                        p0_region = set(nodes)
-                    elif player_num == 1:
-                        p1_region = set(nodes)
+        for line in lines:
+            line = line.strip()
+            if line == "Winning Regions:":
+                in_winning_section = True
+                continue
+            elif in_winning_section and line.startswith('='):
+                # End of winning regions section
+                break
+            elif in_winning_section and ':' in line:
+                # Extract node and player: "s0: Player 1" -> node="s0", player=1
+                parts = line.split(':')
+                if len(parts) >= 2:
+                    node = parts[0].strip()
+                    player_part = parts[1].strip()
+                    if "Player 0" in player_part:
+                        p0_region.add(node)
+                    elif "Player 1" in player_part:
+                        p1_region.add(node)
         
         return TemporisResult(True, p0_region, p1_region)
     
@@ -160,7 +162,7 @@ def compare_games(ontime_file: str, temporis_file: str, targets: str, time_bound
     
     # Run temporis
     print("Running temporis...", end=" ", flush=True)
-    temporis_result = run_temporis(temporis_file)
+    temporis_result = run_temporis(temporis_file, time_bound)
     if temporis_result.success:
         print(f"✓")
     else:
