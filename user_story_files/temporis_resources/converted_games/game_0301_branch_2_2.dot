@@ -1,8 +1,0 @@
-digraph game_0301_branch_2_2 {
-    s0 [name="s0", player=1, target=1];
-    s1 [name="s1", player=1, target=1];
-    s2 [name="s2", player=0];
-
-    s0 -> s1 [constraint="!(time % 4 == 0)"];
-    s0 -> s2 [constraint="time == 7 || time == 8 || time == 12"];
-}

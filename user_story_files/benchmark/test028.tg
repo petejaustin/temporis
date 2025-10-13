@@ -1,0 +1,67 @@
+// Benchmark game 28 - 20 vertices
+node v0: owner[1]
+node v1: owner[0]
+node v2: owner[1]
+node v3: owner[1]
+node v4: owner[1]
+node v5: owner[1]
+node v6: owner[1]
+node v7: owner[0]
+node v8: owner[0]
+node v9: owner[0]
+node v10: owner[1]
+node v11: owner[1]
+node v12: owner[1]
+node v13: owner[1]
+node v14: owner[1]
+node v15: owner[0]
+node v16: owner[0]
+node v17: owner[1]
+node v18: owner[0]
+node v19: owner[1]
+
+edge v0 -> v5
+edge v1 -> v16: (= t 16)
+edge v2 -> v18
+edge v3 -> v6: (<= t 11)
+edge v4 -> v1
+edge v5 -> v14
+edge v6 -> v11: (>= t 5)
+edge v7 -> v11: (>= t 9)
+edge v8 -> v12: (= (mod t 2) 0)
+edge v9 -> v7: (= t 19)
+edge v10 -> v14
+edge v11 -> v15: (= (mod t 4) 2)
+edge v12 -> v5: (>= t 5)
+edge v13 -> v2
+edge v14 -> v12
+edge v15 -> v18: (>= t 4)
+edge v16 -> v7: (= (mod t 3) 1)
+edge v17 -> v13: (= (mod t 2) 1)
+edge v18 -> v4: (= (mod t 6) 0)
+edge v19 -> v7
+edge v9 -> v8: (= t 12)
+edge v11 -> v14
+edge v14 -> v9: (= (mod t 6) 3)
+edge v18 -> v3
+edge v11 -> v17: (= (mod t 6) 2)
+edge v9 -> v3: (= t 10)
+edge v8 -> v10: (<= t 13)
+edge v9 -> v6
+edge v7 -> v1: (>= t 13)
+edge v19 -> v12: (= (mod t 3) 2)
+edge v0 -> v15: (or (= (mod t 3) 1) (= (mod t 4) 2))
+edge v1 -> v18: (>= t 10)
+edge v6 -> v10: (>= t 4)
+edge v17 -> v15: (<= t 16)
+edge v16 -> v9: (>= t 14)
+edge v17 -> v5
+edge v15 -> v4: (>= t 12)
+edge v17 -> v5: (<= t 15)
+edge v2 -> v7: (= t 9)
+edge v13 -> v10: (= t 18)
+edge v9 -> v14: (<= t 20)
+edge v1 -> v18: (= (mod t 6) 0)
+edge v15 -> v6: (= (mod t 5) 4)
+edge v9 -> v13
+edge v4 -> v4: (or (= (mod t 4) 1) (= (mod t 3) 1))

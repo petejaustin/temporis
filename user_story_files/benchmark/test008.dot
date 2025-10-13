@@ -1,0 +1,32 @@
+// Benchmark game 8 - 10 vertices
+digraph G {
+    v0 [name="v0", player=1];
+    v1 [name="v1", player=1];
+    v2 [name="v2", player=1];
+    v3 [name="v3", player=1];
+    v4 [name="v4", player=1];
+    v5 [name="v5", player=1, target=1];
+    v6 [name="v6", player=0];
+    v7 [name="v7", player=1];
+    v8 [name="v8", player=0];
+    v9 [name="v9", player=0];
+
+    v0 -> v1 [constraint="time >= 11"];
+    v1 -> v0 [constraint="time >= 4"];
+    v2 -> v3 [constraint="time >= 10"];
+    v3 -> v2;
+    v4 -> v7 [constraint="time % 6 == 1"];
+    v5 -> v7 [constraint="time % 4 == 1"];
+    v6 -> v9 [constraint="time % 2 == 0"];
+    v7 -> v4;
+    v8 -> v0 [constraint="time <= 23"];
+    v9 -> v6 [constraint="time == 6"];
+    v1 -> v9 [constraint="time % 3 == 0"];
+    v4 -> v9 [constraint="time >= 13"];
+    v9 -> v0 [constraint="time == 13"];
+    v5 -> v1 [constraint="time % 4 == 0"];
+    v6 -> v7;
+    v5 -> v7 [constraint="time >= 7"];
+    v2 -> v8 [constraint="(time % 4 == 1) || (time % 4 == 1)"];
+    v9 -> v4 [constraint="time == 7"];
+}

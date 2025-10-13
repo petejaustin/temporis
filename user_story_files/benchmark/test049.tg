@@ -1,0 +1,104 @@
+// Benchmark game 49 - 40 vertices
+node v0: owner[1]
+node v1: owner[0]
+node v2: owner[1]
+node v3: owner[0]
+node v4: owner[0]
+node v5: owner[1]
+node v6: owner[0]
+node v7: owner[0]
+node v8: owner[1]
+node v9: owner[1]
+node v10: owner[1]
+node v11: owner[1]
+node v12: owner[0]
+node v13: owner[0]
+node v14: owner[0]
+node v15: owner[1]
+node v16: owner[0]
+node v17: owner[1]
+node v18: owner[1]
+node v19: owner[0]
+node v20: owner[0]
+node v21: owner[0]
+node v22: owner[0]
+node v23: owner[0]
+node v24: owner[1]
+node v25: owner[0]
+node v26: owner[1]
+node v27: owner[0]
+node v28: owner[0]
+node v29: owner[0]
+node v30: owner[1]
+node v31: owner[0]
+node v32: owner[1]
+node v33: owner[1]
+node v34: owner[0]
+node v35: owner[0]
+node v36: owner[0]
+node v37: owner[0]
+node v38: owner[1]
+node v39: owner[0]
+
+edge v0 -> v24: (>= t 15)
+edge v1 -> v15: (= t 7)
+edge v2 -> v12
+edge v3 -> v26
+edge v4 -> v0: (= t 6)
+edge v5 -> v4
+edge v6 -> v6: (>= t 14)
+edge v7 -> v10: (>= t 1)
+edge v8 -> v26: (= (mod t 4) 2)
+edge v9 -> v35: (= (mod t 6) 1)
+edge v10 -> v34: (= t 13)
+edge v11 -> v7
+edge v12 -> v6: (= t 5)
+edge v13 -> v0: (= t 10)
+edge v14 -> v0: (= t 14)
+edge v15 -> v14
+edge v16 -> v17: (= (mod t 4) 0)
+edge v17 -> v4: (<= t 18)
+edge v18 -> v19: (>= t 8)
+edge v19 -> v6: (>= t 13)
+edge v20 -> v36
+edge v21 -> v6: (= (mod t 5) 1)
+edge v22 -> v21
+edge v23 -> v20: (and (>= t 2) (<= t 20))
+edge v24 -> v1: (= (mod t 6) 3)
+edge v25 -> v24: (= (mod t 3) 2)
+edge v26 -> v37: (>= t 1)
+edge v27 -> v14
+edge v28 -> v7: (= t 13)
+edge v29 -> v15: (= (mod t 2) 0)
+edge v30 -> v23: (= t 6)
+edge v31 -> v9: (= t 20)
+edge v32 -> v2
+edge v33 -> v38: (or (= (mod t 3) 0) (= (mod t 4) 1))
+edge v34 -> v2: (= (mod t 5) 2)
+edge v35 -> v1
+edge v36 -> v21: (= t 6)
+edge v37 -> v34
+edge v38 -> v15: (>= t 12)
+edge v39 -> v14: (= (mod t 5) 4)
+edge v20 -> v11: (= t 0)
+edge v4 -> v31
+edge v12 -> v3: (= (mod t 3) 0)
+edge v8 -> v5
+edge v35 -> v13
+edge v5 -> v27: (>= t 5)
+edge v10 -> v12
+edge v11 -> v38
+edge v18 -> v36: (= t 20)
+edge v12 -> v17: (<= t 20)
+edge v5 -> v23: (= t 5)
+edge v30 -> v28: (= t 19)
+edge v27 -> v9: (>= t 13)
+edge v30 -> v1: (>= t 7)
+edge v5 -> v19: (= (mod t 3) 2)
+edge v11 -> v16: (= t 9)
+edge v29 -> v18: (= t 19)
+edge v30 -> v4: (= t 15)
+edge v12 -> v9: (<= t 5)
+edge v0 -> v32: (>= t 6)
+edge v31 -> v25: (<= t 17)
+edge v23 -> v24: (= t 20)

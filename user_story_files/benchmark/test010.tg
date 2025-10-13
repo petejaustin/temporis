@@ -1,0 +1,31 @@
+// Benchmark game 10 - 10 vertices
+node v0: owner[1]
+node v1: owner[0]
+node v2: owner[0]
+node v3: owner[0]
+node v4: owner[1]
+node v5: owner[0]
+node v6: owner[1]
+node v7: owner[1]
+node v8: owner[1]
+node v9: owner[1]
+
+edge v0 -> v9
+edge v1 -> v1: (<= t 11)
+edge v2 -> v3
+edge v3 -> v1
+edge v4 -> v2: (= (mod t 3) 0)
+edge v5 -> v6: (= t 19)
+edge v6 -> v7
+edge v7 -> v3
+edge v8 -> v4: (>= t 8)
+edge v9 -> v1: (= (mod t 4) 1)
+edge v6 -> v1: (= (mod t 3) 1)
+edge v2 -> v1
+edge v4 -> v9: (>= t 10)
+edge v4 -> v7
+edge v4 -> v6: (<= t 21)
+edge v8 -> v7: (= t 19)
+edge v0 -> v6: (>= t 10)
+edge v4 -> v0
+edge v9 -> v9: (and (>= t 5) (<= t 24))

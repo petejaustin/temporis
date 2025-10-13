@@ -1,9 +1,0 @@
-// Complex graph with 4 nodes
-
-node s0: label["s0"], owner[0]
-node s1: label["s1"], owner[1]
-node s2: label["s2"], owner[0]
-node s3: label["s3"], owner[0]
-
-edge s2 -> s0: (and (= (mod t 3) 0) (= (mod t 3) 1))
-edge s2 -> s1
