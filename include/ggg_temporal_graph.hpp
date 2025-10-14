@@ -20,15 +20,16 @@ namespace graphs {
 #define GGG_TEMPORAL_GRAPH_FIELDS(X) /* none */
 
 // Define the graph type using GGG's macro system
-DEFINE_GAME_GRAPH(GGGTemporal, GGG_TEMPORAL_VERTEX_FIELDS, GGG_TEMPORAL_EDGE_FIELDS, GGG_TEMPORAL_GRAPH_FIELDS)
+DEFINE_GAME_GRAPH(GGG_TEMPORAL_VERTEX_FIELDS, GGG_TEMPORAL_EDGE_FIELDS, GGG_TEMPORAL_GRAPH_FIELDS)
 
 #undef GGG_TEMPORAL_VERTEX_FIELDS
 #undef GGG_TEMPORAL_EDGE_FIELDS
 #undef GGG_TEMPORAL_GRAPH_FIELDS
 
 // Type aliases for convenience
-using GGGTemporalVertex = GGGTemporalGraph::vertex_descriptor;
-using GGGTemporalEdge = GGGTemporalGraph::edge_descriptor;
+using GGGTemporalGraph = Graph;
+using GGGTemporalVertex = Graph::vertex_descriptor;
+using GGGTemporalEdge = Graph::edge_descriptor;
 
 /**
  * @brief Enhanced manager for GGG-style temporal games using GGG infrastructure

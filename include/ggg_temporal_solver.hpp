@@ -59,10 +59,10 @@ struct SolverStatistics {
  * Implements the standard GGG Solver interface while providing specialized
  * temporal game solving capabilities with Presburger arithmetic constraints.
  */
-class GGGTemporalReachabilitySolver : public Solver<graphs::GGGTemporalGraph, RSSolution<graphs::GGGTemporalGraph>> {
+class GGGTemporalReachabilitySolver : public Solver<graphs::GGGTemporalGraph, solutions::RSSolution<graphs::GGGTemporalGraph>> {
 public:
     using GraphType = graphs::GGGTemporalGraph;
-    using SolutionType = RSSolution<GraphType>;
+    using SolutionType = solutions::RSSolution<GraphType>;
     using Vertex = typename boost::graph_traits<GraphType>::vertex_descriptor;
 
 private:
@@ -117,7 +117,7 @@ private:
 /**
  * @brief Extended solution type with temporal game statistics
  */
-class GGGTemporalReachabilitySolution : public RSSolution<graphs::GGGTemporalGraph> {
+class GGGTemporalReachabilitySolution : public solutions::RSSolution<graphs::GGGTemporalGraph> {
 private:
     std::map<std::string, std::string> statistics_;
     

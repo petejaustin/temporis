@@ -192,7 +192,7 @@ private:
         std::cout << "  temporis -t 100 game.dot          # Custom time bound\n";
     }
     
-    void output_solution(const ggg::solvers::RSSolution<ggg::graphs::GGGTemporalGraph>& solution, bool verbose) {
+    void output_solution(const ggg::solutions::RSSolution<ggg::graphs::GGGTemporalGraph>& solution, bool verbose) {
         std::cout << "\n=== Solution ===\n";
         std::cout << "Status: " << (solution.is_solved() ? "Solved" : "Unsolved") << std::endl;
         std::cout << "Valid: " << (solution.is_valid() ? "Yes" : "No") << std::endl;
@@ -255,7 +255,7 @@ private:
         std::cout << std::endl;
     }
 
-    void output_csv(const ggg::solvers::RSSolution<ggg::graphs::GGGTemporalGraph>& solution, 
+    void output_csv(const ggg::solutions::RSSolution<ggg::graphs::GGGTemporalGraph>& solution, 
                     const ggg::solvers::SolverStatistics& stats, 
                     const std::string& filename) {
         // Extract filename without path and extension for solver identification
