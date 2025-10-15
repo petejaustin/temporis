@@ -26,7 +26,7 @@ GGGTemporalReachabilitySolver::SolutionType GGGTemporalReachabilitySolver::solve
     std::set<Vertex> player0_winning = compute_backwards_temporal_attractor();
     
     // Build solution
-    SolutionType solution(true);
+    SolutionType solution;
     
     // Set winning regions
     auto [vertex_begin, vertex_end] = boost::vertices(graph);

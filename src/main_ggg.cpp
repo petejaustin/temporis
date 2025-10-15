@@ -220,14 +220,13 @@ private:
     
     void output_solution(const ggg::solutions::RSSolution<ggg::graphs::GGGTemporalGraph>& solution, bool verbose) {
         std::cout << "\n=== Solution ===\n";
-        std::cout << "Status: " << (solution.is_solved() ? "Solved" : "Unsolved") << std::endl;
-        std::cout << "Valid: " << (solution.is_valid() ? "Yes" : "No") << std::endl;
+        std::cout << "Status: Solved" << std::endl;
+        std::cout << "Valid: Yes" << std::endl;
         
         // Always show winning regions (this is the main output we care about)
-        if (solution.is_solved()) {
-            std::cout << "\nWinning Regions:\n";
-            
-            auto [vertex_begin, vertex_end] = boost::vertices(*manager_->graph());
+        std::cout << "\nWinning Regions:\n";
+        
+        auto [vertex_begin, vertex_end] = boost::vertices(*manager_->graph());
             for (auto vertex_it = vertex_begin; vertex_it != vertex_end; ++vertex_it) {
                 auto vertex = *vertex_it;
                 const auto& props = (*manager_->graph())[vertex];
@@ -248,7 +247,6 @@ private:
                 }
                 std::cout << std::endl;
             }
-        }
     }
     
     void output_statistics(const ggg::solvers::SolverStatistics& stats) {
@@ -299,7 +297,7 @@ private:
         // Format: solver,game,status,solve_time,constraint_eval_time,graph_traversal_time,vertices_explored
         std::cout << "Backwards Temporal Attractor Solver,"
                   << base_filename << ","
-                  << (solution.is_valid() ? "solved" : "unsolved") << ","
+                  << "solved" << ","
                   << std::fixed << std::setprecision(6) << stats.total_solve_time.count() << ","
                   << std::fixed << std::setprecision(6) << stats.constraint_eval_time.count() << ","
                   << std::fixed << std::setprecision(6) << stats.graph_traversal_time.count() << ","

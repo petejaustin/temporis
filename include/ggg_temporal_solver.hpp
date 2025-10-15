@@ -123,8 +123,6 @@ private:
     
 public:
     GGGTemporalReachabilitySolution() = default;
-    explicit GGGTemporalReachabilitySolution(bool solved, bool valid = true) 
-        : RSSolution<graphs::GGGTemporalGraph>(solved, valid) {}
     
     /**
      * @brief Add a statistic to the solution
