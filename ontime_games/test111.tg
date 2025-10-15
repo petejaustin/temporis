@@ -1,0 +1,281 @@
+// Benchmark game 111 - 80 vertices
+// time_bound: 12
+// targets: v60,v31,v29,v69,v44,v9,v40,v58,v54,v36,v53,v63,v4
+node v0: owner[1]
+node v1: owner[1]
+node v2: owner[0]
+node v3: owner[1]
+node v4: owner[0]
+node v5: owner[0]
+node v6: owner[0]
+node v7: owner[0]
+node v8: owner[0]
+node v9: owner[1]
+node v10: owner[1]
+node v11: owner[0]
+node v12: owner[1]
+node v13: owner[1]
+node v14: owner[1]
+node v15: owner[1]
+node v16: owner[1]
+node v17: owner[1]
+node v18: owner[0]
+node v19: owner[0]
+node v20: owner[0]
+node v21: owner[0]
+node v22: owner[0]
+node v23: owner[0]
+node v24: owner[0]
+node v25: owner[1]
+node v26: owner[1]
+node v27: owner[1]
+node v28: owner[1]
+node v29: owner[0]
+node v30: owner[1]
+node v31: owner[0]
+node v32: owner[0]
+node v33: owner[0]
+node v34: owner[0]
+node v35: owner[1]
+node v36: owner[0]
+node v37: owner[1]
+node v38: owner[1]
+node v39: owner[1]
+node v40: owner[1]
+node v41: owner[0]
+node v42: owner[0]
+node v43: owner[1]
+node v44: owner[1]
+node v45: owner[0]
+node v46: owner[1]
+node v47: owner[1]
+node v48: owner[1]
+node v49: owner[1]
+node v50: owner[0]
+node v51: owner[0]
+node v52: owner[1]
+node v53: owner[1]
+node v54: owner[1]
+node v55: owner[1]
+node v56: owner[1]
+node v57: owner[1]
+node v58: owner[0]
+node v59: owner[1]
+node v60: owner[1]
+node v61: owner[0]
+node v62: owner[1]
+node v63: owner[1]
+node v64: owner[0]
+node v65: owner[1]
+node v66: owner[1]
+node v67: owner[1]
+node v68: owner[1]
+node v69: owner[0]
+node v70: owner[1]
+node v71: owner[0]
+node v72: owner[1]
+node v73: owner[0]
+node v74: owner[0]
+node v75: owner[1]
+node v76: owner[0]
+node v77: owner[0]
+node v78: owner[0]
+node v79: owner[1]
+
+edge v0 -> v7: (= (mod t 6) 0)
+edge v1 -> v77: (= (mod t 6) 5)
+edge v2 -> v26: (and (>= t 4) (<= t 19))
+edge v3 -> v55: (= t 1)
+edge v4 -> v22: (>= t 6)
+edge v5 -> v65: (or (= (mod t 4) 1) (= (mod t 5) 2))
+edge v6 -> v44: (= t 7)
+edge v7 -> v26: (>= t 10)
+edge v8 -> v19
+edge v9 -> v79: (or (= (mod t 3) 1) (= (mod t 4) 0))
+edge v10 -> v43
+edge v11 -> v43: (>= t 14)
+edge v12 -> v67: (<= t 25)
+edge v13 -> v17: (= t 17)
+edge v14 -> v69
+edge v15 -> v25: (>= t 5)
+edge v16 -> v18: (= t 12)
+edge v17 -> v14: (= (mod t 5) 1)
+edge v18 -> v65: (<= t 17)
+edge v19 -> v74: (<= t 13)
+edge v20 -> v61: (= t 5)
+edge v21 -> v27: (= (mod t 2) 0)
+edge v22 -> v71: (= t 8)
+edge v23 -> v60: (= (mod t 5) 1)
+edge v24 -> v52: (= (mod t 6) 1)
+edge v25 -> v15: (>= t 3)
+edge v26 -> v22: (>= t 5)
+edge v27 -> v11: (>= t 12)
+edge v28 -> v22: (<= t 12)
+edge v29 -> v17: (= (mod t 2) 1)
+edge v30 -> v23: (= t 18)
+edge v31 -> v32: (<= t 8)
+edge v32 -> v64: (= t 10)
+edge v33 -> v47
+edge v34 -> v69: (= (mod t 4) 1)
+edge v35 -> v10
+edge v36 -> v0
+edge v37 -> v29: (= t 7)
+edge v38 -> v3
+edge v39 -> v20: (= (mod t 5) 3)
+edge v40 -> v24: (= t 9)
+edge v41 -> v78
+edge v42 -> v57: (= (mod t 6) 3)
+edge v43 -> v46: (= t 13)
+edge v44 -> v64: (= (mod t 5) 1)
+edge v45 -> v11
+edge v46 -> v46
+edge v47 -> v53
+edge v48 -> v69: (= t 17)
+edge v49 -> v40: (= t 20)
+edge v50 -> v26
+edge v51 -> v49
+edge v52 -> v67: (>= t 9)
+edge v53 -> v22
+edge v54 -> v73
+edge v55 -> v46: (= (mod t 3) 2)
+edge v56 -> v76: (>= t 11)
+edge v57 -> v37: (= t 6)
+edge v58 -> v50
+edge v59 -> v50
+edge v60 -> v2: (<= t 14)
+edge v61 -> v49
+edge v62 -> v60
+edge v63 -> v50: (or (= (mod t 2) 0) (= (mod t 3) 2))
+edge v64 -> v51: (= t 1)
+edge v65 -> v65: (>= t 5)
+edge v66 -> v63
+edge v67 -> v10: (= (mod t 5) 1)
+edge v68 -> v32: (<= t 12)
+edge v69 -> v4
+edge v70 -> v12
+edge v71 -> v12: (= t 7)
+edge v72 -> v48: (= t 4)
+edge v73 -> v67
+edge v74 -> v40: (= t 9)
+edge v75 -> v0: (= (mod t 4) 3)
+edge v76 -> v78: (<= t 17)
+edge v77 -> v19
+edge v78 -> v73: (= t 3)
+edge v79 -> v0: (= (mod t 6) 3)
+edge v10 -> v4: (= t 13)
+edge v5 -> v7
+edge v49 -> v0
+edge v75 -> v2: (= (mod t 5) 2)
+edge v78 -> v42
+edge v79 -> v13: (<= t 17)
+edge v17 -> v39
+edge v3 -> v53: (= t 15)
+edge v69 -> v69
+edge v60 -> v28: (>= t 3)
+edge v9 -> v55: (= t 5)
+edge v35 -> v19: (<= t 21)
+edge v73 -> v24: (= t 8)
+edge v1 -> v58
+edge v8 -> v1: (= (mod t 3) 2)
+edge v66 -> v47
+edge v31 -> v3: (and (>= t 1) (<= t 21))
+edge v55 -> v56
+edge v69 -> v43
+edge v28 -> v25: (>= t 8)
+edge v10 -> v32: (= t 10)
+edge v45 -> v32: (>= t 2)
+edge v21 -> v72: (<= t 22)
+edge v21 -> v37: (>= t 10)
+edge v22 -> v20
+edge v23 -> v64: (and (>= t 2) (<= t 20))
+edge v23 -> v6: (= (mod t 4) 1)
+edge v14 -> v56: (<= t 22)
+edge v0 -> v15: (or (= (mod t 4) 1) (= (mod t 3) 1))
+edge v5 -> v41: (>= t 8)
+edge v29 -> v17
+edge v76 -> v8
+edge v76 -> v37
+edge v31 -> v21: (= t 5)
+edge v62 -> v32: (= (mod t 3) 0)
+edge v71 -> v29: (= (mod t 4) 2)
+edge v6 -> v29: (= t 12)
+edge v45 -> v32
+edge v74 -> v75
+edge v71 -> v45: (>= t 1)
+edge v24 -> v28: (and (>= t 5) (<= t 16))
+edge v36 -> v71: (= t 7)
+edge v16 -> v75: (= (mod t 6) 2)
+edge v2 -> v42: (and (>= t 5) (<= t 25))
+edge v65 -> v63: (= (mod t 4) 0)
+edge v40 -> v15: (= (mod t 3) 1)
+edge v62 -> v21
+edge v78 -> v6: (= t 9)
+edge v32 -> v60: (= (mod t 3) 2)
+edge v13 -> v9: (= t 15)
+edge v32 -> v1
+edge v32 -> v45: (= t 16)
+edge v35 -> v67: (= t 15)
+edge v26 -> v61
+edge v35 -> v76: (= t 12)
+edge v0 -> v56
+edge v50 -> v48: (>= t 13)
+edge v37 -> v60
+edge v18 -> v0: (= (mod t 6) 0)
+edge v24 -> v55: (= (mod t 3) 2)
+edge v19 -> v45: (>= t 3)
+edge v68 -> v74: (= (mod t 2) 1)
+edge v27 -> v74
+edge v46 -> v14: (= t 4)
+edge v50 -> v77: (>= t 6)
+edge v61 -> v56: (= t 13)
+edge v53 -> v71
+edge v71 -> v6
+edge v12 -> v54
+edge v60 -> v66
+edge v40 -> v19
+edge v70 -> v8
+edge v31 -> v62: (= t 8)
+edge v20 -> v78: (>= t 9)
+edge v29 -> v78
+edge v26 -> v79: (>= t 6)
+edge v30 -> v76: (= t 12)
+edge v5 -> v66: (= (mod t 4) 1)
+edge v23 -> v76: (>= t 14)
+edge v59 -> v30
+edge v3 -> v11
+edge v79 -> v77: (= t 9)
+edge v58 -> v42
+edge v62 -> v25: (= (mod t 5) 3)
+edge v4 -> v35: (>= t 10)
+edge v5 -> v73: (or (= (mod t 2) 1) (= (mod t 4) 1))
+edge v43 -> v73: (= t 14)
+edge v29 -> v78: (= t 1)
+edge v25 -> v32
+edge v60 -> v26: (<= t 17)
+edge v69 -> v74
+edge v6 -> v66: (<= t 5)
+edge v37 -> v14: (>= t 8)
+edge v40 -> v54: (= (mod t 4) 1)
+edge v4 -> v60: (<= t 10)
+edge v13 -> v64: (= (mod t 6) 3)
+edge v58 -> v8: (= (mod t 5) 4)
+edge v75 -> v12: (= t 16)
+edge v59 -> v23
+edge v31 -> v39: (>= t 2)
+edge v4 -> v33: (= (mod t 4) 3)
+edge v71 -> v53: (= t 3)
+edge v18 -> v49: (= t 15)
+edge v20 -> v70: (>= t 9)
+edge v18 -> v75: (>= t 3)
+edge v62 -> v71: (= (mod t 6) 4)
+edge v46 -> v21
+edge v74 -> v8: (= (mod t 5) 0)
+edge v67 -> v37
+edge v44 -> v71: (>= t 15)
+edge v47 -> v24: (= t 7)
+edge v7 -> v35
+edge v53 -> v26
+edge v41 -> v47: (= (mod t 5) 0)
+edge v63 -> v15: (= t 19)
+edge v32 -> v32: (= (mod t 2) 1)
+edge v39 -> v0

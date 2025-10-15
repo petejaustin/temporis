@@ -1,0 +1,35 @@
+// Benchmark game 12 - 10 vertices
+// time_bound: 9
+// targets: v2
+node v0: owner[1]
+node v1: owner[0]
+node v2: owner[1]
+node v3: owner[0]
+node v4: owner[0]
+node v5: owner[1]
+node v6: owner[0]
+node v7: owner[1]
+node v8: owner[0]
+node v9: owner[1]
+
+edge v0 -> v2
+edge v1 -> v4: (= t 12)
+edge v2 -> v1: (<= t 22)
+edge v3 -> v6: (and (>= t 8) (<= t 23))
+edge v4 -> v0: (= (mod t 3) 2)
+edge v5 -> v4: (and (>= t 7) (<= t 16))
+edge v6 -> v1: (= t 9)
+edge v7 -> v0
+edge v8 -> v0
+edge v9 -> v5: (= t 7)
+edge v8 -> v6: (= (mod t 3) 0)
+edge v2 -> v1: (= (mod t 5) 4)
+edge v3 -> v7: (<= t 9)
+edge v3 -> v7: (= (mod t 5) 2)
+edge v0 -> v7: (<= t 22)
+edge v2 -> v1: (= t 11)
+edge v9 -> v4: (= (mod t 5) 2)
+edge v7 -> v4
+edge v6 -> v7
+edge v6 -> v9: (= t 9)
+edge v4 -> v0: (and (>= t 5) (<= t 15))

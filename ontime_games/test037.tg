@@ -1,0 +1,81 @@
+// Benchmark game 37 - 30 vertices
+// time_bound: 8
+// targets: v26,v13,v29,v23
+node v0: owner[0]
+node v1: owner[1]
+node v2: owner[1]
+node v3: owner[0]
+node v4: owner[0]
+node v5: owner[0]
+node v6: owner[1]
+node v7: owner[1]
+node v8: owner[0]
+node v9: owner[1]
+node v10: owner[1]
+node v11: owner[1]
+node v12: owner[0]
+node v13: owner[0]
+node v14: owner[1]
+node v15: owner[1]
+node v16: owner[1]
+node v17: owner[0]
+node v18: owner[0]
+node v19: owner[0]
+node v20: owner[1]
+node v21: owner[1]
+node v22: owner[1]
+node v23: owner[1]
+node v24: owner[0]
+node v25: owner[0]
+node v26: owner[1]
+node v27: owner[0]
+node v28: owner[1]
+node v29: owner[1]
+
+edge v0 -> v16
+edge v1 -> v23: (= (mod t 6) 4)
+edge v2 -> v0
+edge v3 -> v21: (= t 11)
+edge v4 -> v2: (or (= (mod t 2) 1) (= (mod t 4) 2))
+edge v5 -> v17: (>= t 10)
+edge v6 -> v19: (= t 19)
+edge v7 -> v3: (<= t 14)
+edge v8 -> v22: (<= t 6)
+edge v9 -> v8: (= t 15)
+edge v10 -> v28
+edge v11 -> v14: (>= t 5)
+edge v12 -> v6: (= (mod t 3) 0)
+edge v13 -> v11: (>= t 13)
+edge v14 -> v6: (<= t 19)
+edge v15 -> v16
+edge v16 -> v15: (<= t 9)
+edge v17 -> v6: (= t 15)
+edge v18 -> v23: (<= t 14)
+edge v19 -> v24: (= t 3)
+edge v20 -> v26: (and (>= t 3) (<= t 18))
+edge v21 -> v23
+edge v22 -> v12: (>= t 9)
+edge v23 -> v3
+edge v24 -> v29
+edge v25 -> v27: (= (mod t 2) 1)
+edge v26 -> v14: (<= t 8)
+edge v27 -> v16: (>= t 12)
+edge v28 -> v9
+edge v29 -> v24: (= t 6)
+edge v10 -> v6
+edge v8 -> v17: (= t 14)
+edge v21 -> v3
+edge v5 -> v8
+edge v19 -> v17: (= (mod t 3) 2)
+edge v11 -> v17: (= t 4)
+edge v22 -> v25
+edge v7 -> v5
+edge v19 -> v28: (= t 14)
+edge v1 -> v4
+edge v28 -> v21
+edge v12 -> v1
+edge v12 -> v5: (>= t 15)
+edge v18 -> v20: (>= t 12)
+edge v14 -> v19: (= t 10)
+edge v26 -> v6: (>= t 11)
+edge v25 -> v17

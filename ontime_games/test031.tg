@@ -1,0 +1,103 @@
+// Benchmark game 31 - 30 vertices
+// time_bound: 7
+// targets: v16,v2,v25,v5,v13
+node v0: owner[0]
+node v1: owner[1]
+node v2: owner[1]
+node v3: owner[0]
+node v4: owner[0]
+node v5: owner[0]
+node v6: owner[0]
+node v7: owner[0]
+node v8: owner[1]
+node v9: owner[0]
+node v10: owner[1]
+node v11: owner[1]
+node v12: owner[1]
+node v13: owner[0]
+node v14: owner[0]
+node v15: owner[1]
+node v16: owner[0]
+node v17: owner[1]
+node v18: owner[1]
+node v19: owner[0]
+node v20: owner[0]
+node v21: owner[0]
+node v22: owner[1]
+node v23: owner[0]
+node v24: owner[1]
+node v25: owner[1]
+node v26: owner[1]
+node v27: owner[0]
+node v28: owner[1]
+node v29: owner[0]
+
+edge v0 -> v12
+edge v1 -> v7: (<= t 15)
+edge v2 -> v10: (= t 6)
+edge v3 -> v24: (= (mod t 5) 4)
+edge v4 -> v26: (>= t 11)
+edge v5 -> v0
+edge v6 -> v11: (= t 20)
+edge v7 -> v19: (<= t 12)
+edge v8 -> v1: (= (mod t 4) 3)
+edge v9 -> v29: (>= t 2)
+edge v10 -> v12
+edge v11 -> v23
+edge v12 -> v29: (= (mod t 4) 3)
+edge v13 -> v15
+edge v14 -> v28: (= (mod t 4) 0)
+edge v15 -> v3
+edge v16 -> v24: (= (mod t 2) 0)
+edge v17 -> v6: (= (mod t 3) 2)
+edge v18 -> v13: (>= t 4)
+edge v19 -> v17: (>= t 15)
+edge v20 -> v23: (>= t 11)
+edge v21 -> v26: (<= t 9)
+edge v22 -> v0: (= t 10)
+edge v23 -> v1
+edge v24 -> v1
+edge v25 -> v8: (= (mod t 6) 1)
+edge v26 -> v29
+edge v27 -> v12: (= t 12)
+edge v28 -> v13: (= t 12)
+edge v29 -> v21
+edge v0 -> v20: (>= t 2)
+edge v24 -> v23: (= (mod t 2) 1)
+edge v29 -> v16
+edge v25 -> v21: (= t 2)
+edge v9 -> v24: (<= t 17)
+edge v12 -> v26: (= (mod t 5) 1)
+edge v17 -> v7
+edge v12 -> v25: (>= t 9)
+edge v9 -> v20
+edge v21 -> v28: (<= t 25)
+edge v11 -> v0: (= (mod t 6) 1)
+edge v3 -> v1
+edge v19 -> v12: (= (mod t 2) 1)
+edge v6 -> v23: (>= t 12)
+edge v11 -> v6: (= t 20)
+edge v27 -> v16
+edge v5 -> v7: (= (mod t 4) 1)
+edge v3 -> v5: (= (mod t 6) 0)
+edge v27 -> v24: (<= t 22)
+edge v14 -> v20: (= (mod t 4) 0)
+edge v8 -> v3
+edge v18 -> v15: (or (= (mod t 4) 0) (= (mod t 3) 1))
+edge v19 -> v2: (<= t 15)
+edge v15 -> v14: (= t 9)
+edge v22 -> v18
+edge v18 -> v11: (>= t 7)
+edge v5 -> v0: (= t 7)
+edge v22 -> v23: (= (mod t 4) 2)
+edge v4 -> v21: (>= t 15)
+edge v15 -> v14: (= t 9)
+edge v15 -> v17
+edge v20 -> v19
+edge v8 -> v27: (>= t 15)
+edge v17 -> v6
+edge v28 -> v20
+edge v2 -> v28
+edge v16 -> v20
+edge v18 -> v18: (= t 18)
+edge v6 -> v29

@@ -60,6 +60,8 @@ class BenchmarkGameGenerator:
         
         # Create .tg format (ontime)
         tg_content = f"// Benchmark game {game_id} - {num_nodes} vertices\n"
+        tg_content += f"// time_bound: {time_bound}\n"
+        tg_content += f"// targets: {','.join(targets)}\n"
         for name, owner in nodes:
             tg_content += f"node {name}: owner[{owner}]\n"
         tg_content += "\n"
