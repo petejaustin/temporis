@@ -106,17 +106,41 @@ public:
             }
         }
         
-        if (filename.empty()) {
-            log_error("No input file specified");
-            print_usage();
-            return 1;
+        // Handle input: either from file or stdin
+        std::string game_content;
+        bool using_stdin = filename.empty();
+        
+        if (using_stdin) {
+            log_debug("Reading game from stdin");
+            // Read entire input from stdin
+            std::string line;
+            while (std::getline(std::cin, line)) {
+                game_content += line + "\n";
+            }
+            
+            if (game_content.empty()) {
+                log_error("No input provided via stdin");
+                print_usage();
+                return 1;
+            }
+        } else {
+            log_debug("Loading game from file: ", filename);
         }
         
-        log_debug("Loading game from: ", filename);
+        // Load the game (either from file or from string content)
+        bool load_success;
+        if (using_stdin) {
+            load_success = manager_->load_from_dot_string(game_content);
+        } else {
+            load_success = manager_->load_from_dot_file(filename);
+        }
         
-        // Load the game
-        if (!manager_->load_from_dot_file(filename)) {
-            log_error("Failed to load game from: ", filename);
+        if (!load_success) {
+            if (using_stdin) {
+                log_error("Failed to parse game from stdin");
+            } else {
+                log_error("Failed to load game from: ", filename);
+            }
             return 1;
         }
         
@@ -177,7 +201,8 @@ private:
         std::cout << "Temporis - GGG-Compatible Presburger Temporal Reachability Solver\n";
         std::cout << "==================================================================\n\n";
         std::cout << "USAGE:\n";
-        std::cout << "  temporis [OPTIONS] <input_file.dot>\n\n";
+        std::cout << "  temporis [OPTIONS] [input_file.dot]       # Read from file\n";
+        std::cout << "  temporis [OPTIONS] < input_file.dot       # Read from stdin\n\n";
         std::cout << "OPTIONS:\n";
         std::cout << "  -v, --verbose          Enable verbose output\n";
         std::cout << "  -d, --debug            Enable debug output (includes verbose)\n";
@@ -190,6 +215,7 @@ private:
         std::cout << "  temporis game.dot                 # Solve reachability game\n";
         std::cout << "  temporis --verbose game.dot       # Detailed output\n";
         std::cout << "  temporis -t 100 game.dot          # Custom time bound\n";
+        std::cout << "  cat game.dot | temporis --time-only # Read from stdin\n";
     }
     
     void output_solution(const ggg::solutions::RSSolution<ggg::graphs::GGGTemporalGraph>& solution, bool verbose) {

@@ -3,6 +3,7 @@
 #include <boost/graph/graph_traits.hpp>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <regex>
 #include <algorithm>
 
@@ -125,6 +126,62 @@ bool GGGTemporalGameManager::load_from_dot_file(const std::string& filename) {
             }
         }
         // Parse constraint edges (now with full constraint parsing)
+        else if (std::regex_search(line, match, constraint_pattern)) {
+            std::string source_id = match[1].str();
+            std::string target_id = match[2].str();
+            std::string constraint_str = match[3].str();
+            
+            if (vertex_map.find(source_id) != vertex_map.end() && 
+                vertex_map.find(target_id) != vertex_map.end()) {
+                // Add edge and parse constraint
+                auto edge = add_edge(vertex_map[source_id], vertex_map[target_id]);
+                auto constraint = parse_constraint(constraint_str);
+                add_edge_constraint(edge.first, std::move(constraint));
+            }
+        }
+    }
+    
+    return true;
+}
+
+bool GGGTemporalGameManager::load_from_dot_string(const std::string& dot_content) {
+    // Parse DOT content from string instead of file
+    clear_graph();
+    
+    std::istringstream stream(dot_content);
+    std::string line;
+    std::map<std::string, GGGTemporalVertex> vertex_map;
+    
+    // Regex patterns for parsing (same as load_from_dot_file)
+    std::regex vertex_pattern(R"(\s*(\w+)\s*\[\s*name\s*=\s*\"([^\"]+)\"\s*,\s*player\s*=\s*(\d+)(?:\s*,\s*target\s*=\s*(\d+))?\s*\]\s*;)");
+    std::regex edge_pattern(R"(\s*(\w+)\s*->\s*(\w+)(?:\s*\[\s*label\s*=\s*\"([^\"]*)\"\s*\])?\s*;)");
+    std::regex constraint_pattern(R"(\s*(\w+)\s*->\s*(\w+)\s*\[\s*constraint\s*=\s*\"([^\"]+)\"\s*\]\s*;)");
+    
+    while (std::getline(stream, line)) {
+        std::smatch match;
+        
+        // Parse vertex definitions
+        if (std::regex_search(line, match, vertex_pattern)) {
+            std::string vertex_id = match[1].str();
+            std::string vertex_name = match[2].str();
+            int player = std::stoi(match[3].str());
+            int target = (match.size() > 4 && !match[4].str().empty()) ? std::stoi(match[4].str()) : 0;
+            
+            GGGTemporalVertex vertex = add_vertex(vertex_name, player, target);
+            vertex_map[vertex_id] = vertex;
+        }
+        // Parse edge definitions
+        else if (std::regex_search(line, match, edge_pattern)) {
+            std::string source_id = match[1].str();
+            std::string target_id = match[2].str();
+            std::string label = match.size() > 3 ? match[3].str() : "";
+            
+            if (vertex_map.find(source_id) != vertex_map.end() && 
+                vertex_map.find(target_id) != vertex_map.end()) {
+                add_edge(vertex_map[source_id], vertex_map[target_id], label);
+            }
+        }
+        // Parse constraint edges
         else if (std::regex_search(line, match, constraint_pattern)) {
             std::string source_id = match[1].str();
             std::string target_id = match[2].str();

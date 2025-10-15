@@ -82,6 +82,7 @@ public:
     
     // Integration with existing parsers
     bool load_from_dot_file(const std::string& filename);
+    bool load_from_dot_string(const std::string& dot_content);
     bool validate_game_structure() const;
 };
 
