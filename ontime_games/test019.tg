@@ -1,70 +1,57 @@
 // Benchmark game 19 - 20 vertices
-// time_bound: 9
-// targets: v14,v17,v10
+// time_bound: 6
+// targets: v19
 node v0: owner[0]
-node v1: owner[0]
+node v1: owner[1]
 node v2: owner[0]
-node v3: owner[0]
-node v4: owner[0]
+node v3: owner[1]
+node v4: owner[1]
 node v5: owner[1]
 node v6: owner[1]
 node v7: owner[1]
-node v8: owner[0]
+node v8: owner[1]
 node v9: owner[1]
-node v10: owner[0]
+node v10: owner[1]
 node v11: owner[1]
 node v12: owner[1]
 node v13: owner[0]
-node v14: owner[0]
-node v15: owner[0]
-node v16: owner[1]
+node v14: owner[1]
+node v15: owner[1]
+node v16: owner[0]
 node v17: owner[1]
 node v18: owner[1]
 node v19: owner[1]
 
-edge v0 -> v8: (= (mod t 3) 0)
-edge v1 -> v8: (= (mod t 3) 1)
-edge v2 -> v9: (>= t 12)
-edge v3 -> v15: (= t 11)
-edge v4 -> v17: (<= t 13)
-edge v5 -> v9
-edge v6 -> v17: (= t 12)
-edge v7 -> v11: (and (>= t 5) (<= t 15))
-edge v8 -> v9: (or (= (mod t 3) 1) (= (mod t 5) 1))
-edge v9 -> v6
-edge v10 -> v17
-edge v11 -> v17: (= (mod t 3) 0)
-edge v12 -> v19: (>= t 4)
-edge v13 -> v7
-edge v14 -> v16
-edge v15 -> v7
-edge v16 -> v13: (= t 15)
-edge v17 -> v3: (= (mod t 3) 0)
-edge v18 -> v17: (or (= (mod t 4) 1) (= (mod t 4) 2))
-edge v19 -> v6: (>= t 5)
-edge v10 -> v9: (= (mod t 2) 0)
-edge v17 -> v1: (<= t 10)
-edge v13 -> v5: (<= t 6)
-edge v12 -> v15
-edge v9 -> v1
-edge v18 -> v19
-edge v10 -> v9: (= t 20)
-edge v17 -> v16: (= t 4)
-edge v16 -> v14
-edge v3 -> v10
-edge v14 -> v8: (>= t 1)
-edge v10 -> v9: (= (mod t 3) 0)
-edge v19 -> v12: (>= t 9)
-edge v10 -> v2: (= t 3)
-edge v5 -> v4: (= t 7)
-edge v0 -> v8: (= t 14)
-edge v8 -> v10: (= t 18)
-edge v0 -> v8: (= (mod t 3) 0)
-edge v3 -> v14: (= t 12)
-edge v16 -> v9: (= (mod t 4) 2)
-edge v19 -> v7
-edge v4 -> v15
-edge v19 -> v11: (= t 17)
-edge v15 -> v17: (>= t 14)
-edge v6 -> v7: (= (mod t 6) 0)
-edge v16 -> v14: (= (mod t 4) 0)
+edge v0 -> v1
+edge v1 -> v7
+edge v2 -> v0: (= (mod t 5) 2)
+edge v3 -> v4: (>= t 4)
+edge v4 -> v18
+edge v5 -> v15
+edge v6 -> v10: (< t 15)
+edge v7 -> v15
+edge v8 -> v11: (= (mod t 5) 1)
+edge v9 -> v17
+edge v10 -> v1
+edge v11 -> v2
+edge v12 -> v1
+edge v13 -> v13: (= (mod t 3) 0)
+edge v14 -> v4: (= (mod t 5) 2)
+edge v15 -> v1
+edge v16 -> v19
+edge v17 -> v15: (= (mod t 5) 0)
+edge v18 -> v0
+edge v19 -> v8
+edge v0 -> v16
+edge v13 -> v5
+edge v3 -> v3
+edge v16 -> v4
+edge v7 -> v6
+edge v19 -> v16
+edge v8 -> v12
+edge v2 -> v11
+edge v12 -> v14
+edge v18 -> v7
+edge v7 -> v9
+edge v2 -> v1
+edge v2 -> v12

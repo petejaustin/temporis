@@ -1,30 +1,32 @@
 // Benchmark game 7 - 10 vertices
+// time_bound: 9
+// targets: v6
 digraph G {
     v0 [name="v0", player=1];
-    v1 [name="v1", player=1];
-    v2 [name="v2", player=0];
-    v3 [name="v3", player=1];
+    v1 [name="v1", player=0];
+    v2 [name="v2", player=1];
+    v3 [name="v3", player=0];
     v4 [name="v4", player=1];
-    v5 [name="v5", player=0];
-    v6 [name="v6", player=1];
-    v7 [name="v7", player=0];
-    v8 [name="v8", player=1, target=1];
+    v5 [name="v5", player=1];
+    v6 [name="v6", player=0, target=1];
+    v7 [name="v7", player=1];
+    v8 [name="v8", player=1];
     v9 [name="v9", player=1];
 
     v0 -> v2;
-    v1 -> v2 [constraint="time >= 2"];
-    v2 -> v6 [constraint="time == 17"];
-    v3 -> v7 [constraint="time == 6"];
-    v4 -> v6 [constraint="time == 18"];
-    v5 -> v0 [constraint="time <= 23"];
-    v6 -> v6 [constraint="time == 11"];
-    v7 -> v4 [constraint="time >= 14"];
-    v8 -> v6 [constraint="time % 6 == 4"];
-    v9 -> v3 [constraint="time == 8"];
-    v6 -> v7;
-    v5 -> v6 [constraint="time >= 14"];
-    v7 -> v2 [constraint="(time >= 7) && (time <= 24)"];
-    v9 -> v0;
-    v6 -> v2 [constraint="time <= 10"];
-    v0 -> v4 [constraint="time == 6"];
+    v1 -> v8;
+    v2 -> v4;
+    v3 -> v8;
+    v4 -> v7;
+    v5 -> v9 [constraint="t >= 1"];
+    v6 -> v4;
+    v7 -> v3;
+    v8 -> v9;
+    v9 -> v6;
+    v5 -> v2;
+    v5 -> v4;
+    v9 -> v4;
+    v8 -> v0;
+    v8 -> v3;
+    v1 -> v3;
 }

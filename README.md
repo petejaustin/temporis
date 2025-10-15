@@ -48,53 +48,111 @@ cat input_file.dot | ./build/temporis --time-only
 ### Core Solver
 - **`build/temporis`** - Main temporal solver executable
 - **`src/`** - C++ source code for the temporal solver
-- **`include/`** - Header files and GGG integration
 
-### Game Generation
-- **`generate_temporal_games.py`** - Generate 150 benchmark games (15 each for 10-100 vertices)
-  ```bash
-  python3 generate_temporal_games.py
-  # Creates temporis_games/ (DOT format) and ontime_games/ (TG format)
-  ```
+### Game Generation and Benchmarking
+- **`generate_benchmark_games.py`** - Generate 150 benchmark games for both temporis and ontime
+- **`temporis_games/`** - 150 DOT format games for temporis (test001.dot - test150.dot)
+- **`ontime_games/`** - 150 TG format games for ontime (test001.tg - test150.tg)
+- **`consolidate_temporal_results.py`** - Combine results from multiple temporal solvers
 
-### Benchmarking Scripts
-- **`benchmark_temporal_solvers.py`** - Legacy benchmarker for temporis and ontime
-  ```bash
-  python3 benchmark_temporal_solvers.py
-  # Benchmarks both solvers, saves to temporal_results/
-  ```
+### Benchmark Results
+- **`temporis_results/`** - Individual temporis benchmark results and JSON summary
+- **`ontime_results/`** - Individual ontime benchmark results and JSON summary  
+- **`combined_temporal_analysis.json`** - Consolidated analysis of both solvers
+- **`temporal_plots/`** - Performance visualization plots (PNG files)
 
-### Result Analysis
-- **`consolidate_temporal_results.py`** - Combine separate benchmark results
-  ```bash
-  python3 consolidate_temporal_results.py temporis_results/consolidated_results.json ontime_results/consolidated_results.json combined_analysis.json
-  # Creates unified analysis with performance comparison
-  ```
+### Legacy Scripts (for reference)
+- **`benchmark_temporal_solvers.py`** - Previous benchmark script (superseded by GGG scripts)
+- **`convert_tg_to_dot.py`** - Converter between TG and DOT formats
+- **`generate_games.py`** - Legacy game generator (superseded by generate_benchmark_games.py)
 
-### Visualization
-Uses GGG visualization scripts on consolidated results:
+## 🔄 Complete Benchmarking Workflow
+
+### Step 1: Generate Benchmark Games
+Generate 150 games each for temporis and ontime (15 games per vertex count from 10 to 100):
+
 ```bash
-# Performance by vertex count (scalability)
-python3 /path/to/ggg/extra/scripts/plot_time_by_vertex_count.py combined_analysis.json --output-dir plots/
-
-# Performance by game index  
-python3 /path/to/ggg/extra/scripts/plot_time_by_game_index.py combined_analysis.json --output-dir plots/
+python3 generate_benchmark_games.py
 ```
 
-### Game Directories
-- **`temporis_games/`** - 150 DOT format games for temporis (generated)
-- **`ontime_games/`** - 150 TG format games for ontime (generated) 
-- **`temporal_games/`** - Legacy mixed format directory
+This creates:
+- **150 temporis games**: `temporis_games/test001.dot` through `test150.dot`
+- **150 ontime games**: `ontime_games/test001.tg` through `test150.tg`
+- Each game includes embedded time bounds and target information
 
-### Results Directories
-- **`temporis_results/`** - Temporis-only benchmark results
-- **`ontime_results/`** - Ontime-only benchmark results
-- **`temporal_comparison_plots/`** - Generated visualization plots
+### Step 2: Run Individual Solver Benchmarks
+Use the GGG benchmark script to test each solver:
 
-## 🔧 Complete Benchmarking Workflow
-
-### 1. Generate Games
 ```bash
+# Benchmark temporis on DOT games
+python3 /home/pete/ggg/extra/scripts/benchmark.py temporis_games/ /home/pete/temporis/build/temporis --results-dir temporis_results --output temporis_benchmark.json
+
+# Benchmark ontime on TG games  
+python3 /home/pete/ggg/extra/scripts/benchmark.py ontime_games/ /home/pete/ontime/target/release/ontime --results-dir ontime_results --output ontime_benchmark.json
+```
+
+### Step 3: Consolidate and Analyze Results
+Combine results from both solvers for comparative analysis:
+
+```bash
+python3 consolidate_temporal_results.py temporis_results/temporis_benchmark.json ontime_results/ontime_benchmark.json combined_temporal_analysis.json
+```
+
+### Step 4: Generate Visualizations
+Create performance plots using GGG plotting scripts:
+
+```bash
+# Plot performance by game index
+python3 /home/pete/ggg/extra/scripts/plot_time_by_game_index.py combined_temporal_analysis.json --output-dir temporal_plots --title "Temporis vs Ontime: Performance by Game Index"
+
+# Plot scalability by vertex count
+python3 /home/pete/ggg/extra/scripts/plot_time_by_vertex_count.py combined_temporal_analysis.json --output-dir temporal_plots --title "Temporis vs Ontime: Performance by Vertex Count"
+```
+
+## 📊 Expected Results
+
+After running the complete workflow, you should have:
+
+### Performance Summary
+- **Temporis**: 150/150 games solved (100% success rate)
+- **Ontime**: 150/150 games solved (100% success rate)
+- **Average Performance**: Temporis ~0.002s, Ontime ~0.0035s per game
+
+### Generated Files
+1. **Game Directories**: 
+   - `temporis_games/` (150 DOT files)
+   - `ontime_games/` (150 TG files)
+
+2. **Benchmark Results**:
+   - `temporis_results/temporis_benchmark.json`
+   - `ontime_results/ontime_benchmark.json` 
+   - `combined_temporal_analysis.json`
+
+3. **Visualizations**:
+   - `temporal_plots/individual_game_performance.png`
+   - `temporal_plots/scalability_by_vertex_count.png`
+
+## 🎯 Key Features of the Benchmarking System
+
+### Embedded Metadata
+Games include time bounds and targets directly in file comments:
+```bash
+// Benchmark game 1 - 10 vertices
+// time_bound: 10
+// targets: v1
+```
+
+### Cross-Solver Compatibility
+- **Temporis** automatically extracts time bounds from DOT file comments
+- **Ontime** extracts time bounds and targets from TG file comments
+- Both work seamlessly with GGG benchmark infrastructure
+
+### Reproducible Results
+- Fixed random seed (42) ensures consistent game generation
+- Structured game sizes: 15 games each for 10, 20, 30, ..., 100 vertices
+- Comprehensive logging and result tracking
+
+## 🔧 Algorithm Implementation
 python3 generate_temporal_games.py
 # Creates 150 games in two formats:
 # - temporis_games/*.dot (for temporis solver)

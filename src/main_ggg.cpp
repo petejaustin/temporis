@@ -3,6 +3,8 @@
 #include "libggg/utils/solver_wrapper.hpp"
 #include <iostream>
 #include <iomanip>
+#include <fstream>
+#include <sstream>
 
 // Simple logging helpers for temporis
 namespace {
@@ -50,6 +52,29 @@ private:
 public:
     TemporalReachabilityExecutor() 
         : manager_(std::make_shared<ggg::graphs::GGGTemporalGameManager>()) {}
+    
+    // Extract time bound from DOT content comments
+    int extract_time_bound_from_content(const std::string& content) {
+        std::istringstream stream(content);
+        std::string line;
+        
+        while (std::getline(stream, line)) {
+            // Look for time_bound comment
+            if (line.find("// time_bound:") != std::string::npos) {
+                size_t pos = line.find("// time_bound:");
+                std::string time_bound_str = line.substr(pos + 14); // Skip "// time_bound:"
+                
+                // Extract the number
+                std::istringstream iss(time_bound_str);
+                int time_bound;
+                if (iss >> time_bound && time_bound > 0) {
+                    log_debug("Extracted time bound from content: ", time_bound);
+                    return time_bound;
+                }
+            }
+        }
+        return -1; // Not found
+    }
     
     int run(int argc, char* argv[]) {
         // Parse command line arguments
@@ -123,8 +148,32 @@ public:
                 print_usage();
                 return 1;
             }
+            
+            // Extract time bound from content if not provided via command line
+            if (user_time_bound <= 0) {
+                int extracted_time_bound = extract_time_bound_from_content(game_content);
+                if (extracted_time_bound > 0) {
+                    user_time_bound = extracted_time_bound;
+                    log_debug("Using time bound from file content: ", user_time_bound);
+                }
+            }
         } else {
             log_debug("Loading game from file: ", filename);
+            
+            // Extract time bound from file content if not provided via command line
+            if (user_time_bound <= 0) {
+                std::ifstream file(filename);
+                if (file.is_open()) {
+                    std::string file_content((std::istreambuf_iterator<char>(file)),
+                                           std::istreambuf_iterator<char>());
+                    int extracted_time_bound = extract_time_bound_from_content(file_content);
+                    if (extracted_time_bound > 0) {
+                        user_time_bound = extracted_time_bound;
+                        log_debug("Using time bound from file content: ", user_time_bound);
+                    }
+                    file.close();
+                }
+            }
         }
         
         // Load the game (either from file or from string content)

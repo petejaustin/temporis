@@ -1,246 +1,183 @@
 #!/usr/bin/env python3
 """
-Benchmark Game Generator
-Generates 150 temporal games for performance testing: 15 games each for sizes 10-100 vertices
-Uses flat directory structure in /benchmark/
+Generate temporal games for benchmarking temporis and ontime solvers.
+Creates 150 games total: 15 games each for vertex counts 10, 20, 30, ..., 100
 """
 
-import random
 import os
-from typing import List, Tuple
+import random
+import shutil
 
-class BenchmarkGameGenerator:
-    def __init__(self):
-        self.node_counter = 0
-        
-    def generate_node_name(self, index: int) -> str:
-        return f"v{index}"
+def generate_temporis_game(vertices, game_id):
+    """Generate a DOT format game for temporis"""
+    # Generate random time bound (5 to vertices//2)
+    time_bound = random.randint(5, max(10, vertices // 2))
     
-    def generate_benchmark_game(self, num_nodes: int, game_id: int) -> Tuple[str, str, int]:
-        """Generate a benchmark game with specified number of nodes"""
-        
-        # Reset for this game
-        nodes = []
-        
-        # Create nodes with random owners
-        for i in range(num_nodes):
-            name = self.generate_node_name(i)
-            owner = random.randint(0, 1)
-            nodes.append((name, owner))
-        
-        # Select 10-20% of nodes as targets (at least 1)
-        target_ratio = random.uniform(0.1, 0.2)
-        num_targets = max(1, int(num_nodes * target_ratio))
-        target_indices = random.sample(range(num_nodes), num_targets)
-        targets = [nodes[i][0] for i in target_indices]
-        
-        # Generate edges - approximately 1.5x to 3x the number of nodes
-        edge_multiplier = random.uniform(1.5, 3.0)
-        num_edges = int(num_nodes * edge_multiplier)
-        
-        edges = []
-        node_names = [n[0] for n in nodes]
-        
-        # Ensure connectivity: each node has at least one outgoing edge
-        for i, (node_name, _) in enumerate(nodes):
-            # Add at least one edge to a random target
-            target_node = random.choice(node_names)
-            constraint = self._generate_temporal_constraint()
-            edges.append((node_name, target_node, constraint))
-        
-        # Add additional random edges
-        for _ in range(num_edges - num_nodes):
-            src = random.choice(node_names)
-            dst = random.choice(node_names)
-            constraint = self._generate_temporal_constraint()
-            edges.append((src, dst, constraint))
-        
-        # Generate reasonable time bound (scales with graph size)
-        time_bound = random.randint(max(5, num_nodes // 10), max(10, num_nodes // 5))
-        
-        # Create .tg format (ontime)
-        tg_content = f"// Benchmark game {game_id} - {num_nodes} vertices\n"
-        tg_content += f"// time_bound: {time_bound}\n"
-        tg_content += f"// targets: {','.join(targets)}\n"
-        for name, owner in nodes:
-            tg_content += f"node {name}: owner[{owner}]\n"
-        tg_content += "\n"
-        for src, dst, constraint in edges:
-            if constraint:
-                tg_content += f"edge {src} -> {dst}: {constraint}\n"
-            else:
-                tg_content += f"edge {src} -> {dst}\n"
-        
-        # Create .dot format (temporis)
-        dot_content = f"// Benchmark game {game_id} - {num_nodes} vertices\n"
-        dot_content += "digraph G {\n"
-        for name, owner in nodes:
-            is_target = name in targets
-            if is_target:
-                dot_content += f'    {name} [name="{name}", player={owner}, target=1];\n'
-            else:
-                dot_content += f'    {name} [name="{name}", player={owner}];\n'
-        dot_content += "\n"
-        for src, dst, constraint in edges:
-            if constraint:
-                temporis_constraint = self._convert_constraint_to_temporis(constraint)
-                dot_content += f'    {src} -> {dst} [constraint="{temporis_constraint}"];\n'
-            else:
-                dot_content += f'    {src} -> {dst};\n'
-        dot_content += "}\n"
-        
-        return tg_content, dot_content, time_bound
+    # Pick a random target vertex
+    target = f"v{random.randint(0, vertices-1)}"
     
-    def _generate_temporal_constraint(self) -> str:
-        """Generate a random temporal constraint in ontime format"""
-        constraint_types = [
-            None,  # No constraint (30% chance)
-            "equality",
-            "modulo", 
-            "greater_equal",
-            "less_equal",
-            "complex"
-        ]
-        
-        # Weight towards simpler constraints for performance
-        weights = [0.3, 0.2, 0.2, 0.15, 0.1, 0.05]
-        constraint_type = random.choices(constraint_types, weights=weights)[0]
-        
-        if constraint_type is None:
-            return None
-        elif constraint_type == "equality":
-            time = random.randint(0, 20)
-            return f"(= t {time})"
-        elif constraint_type == "modulo":
-            mod = random.randint(2, 6)
-            val = random.randint(0, mod-1)
-            return f"(= (mod t {mod}) {val})"
-        elif constraint_type == "greater_equal":
-            time = random.randint(1, 15)
-            return f"(>= t {time})"
-        elif constraint_type == "less_equal":
-            time = random.randint(5, 25)
-            return f"(<= t {time})"
-        elif constraint_type == "complex":
-            # More complex constraints for stress testing
-            if random.random() < 0.5:
-                mod1, val1 = random.randint(2, 4), random.randint(0, 1)
-                mod2, val2 = random.randint(3, 5), random.randint(0, 2)
-                return f"(or (= (mod t {mod1}) {val1}) (= (mod t {mod2}) {val2}))"
-            else:
-                t1, t2 = random.randint(1, 10), random.randint(15, 25)
-                return f"(and (>= t {t1}) (<= t {t2}))"
-        
-        return None
+    # Start DOT file
+    content = f"// Benchmark game {game_id} - {vertices} vertices\n"
+    content += f"// time_bound: {time_bound}\n"
+    content += f"// targets: {target}\n"
+    content += "digraph G {\n"
     
-    def _convert_constraint_to_temporis(self, ontime_constraint: str) -> str:
-        """Convert ontime constraint format to temporis format"""
-        if not ontime_constraint:
-            return ""
-        
-        constraint = ontime_constraint
-        
-        # Handle simple cases first
-        if constraint.startswith("(= t "):
-            # (= t 5) -> time == 5
-            return constraint.replace("(= t ", "time == ").replace(")", "")
-        elif constraint.startswith("(>= t "):
-            # (>= t 5) -> time >= 5
-            return constraint.replace("(>= t ", "time >= ").replace(")", "")
-        elif constraint.startswith("(<= t "):
-            # (<= t 5) -> time <= 5
-            return constraint.replace("(<= t ", "time <= ").replace(")", "")
-        elif constraint.startswith("(= (mod t "):
-            # (= (mod t 3) 1) -> time % 3 == 1
-            import re
-            match = re.match(r'\(= \(mod t (\d+)\) (\d+)\)', constraint)
-            if match:
-                mod_val, result = match.groups()
-                return f"time % {mod_val} == {result}"
-        elif constraint.startswith("(or "):
-            # (or (= (mod t 2) 0) (= (mod t 3) 1)) -> (time % 2 == 0) || (time % 3 == 1)
-            import re
-            inner = constraint[4:-1]  # Remove "(or " and ")"
-            parts = []
-            if "(= (mod t" in inner:
-                mod_parts = re.findall(r'\(= \(mod t (\d+)\) (\d+)\)', inner)
-                for mod_val, result in mod_parts:
-                    parts.append(f"time % {mod_val} == {result}")
-            if parts:
-                return "(" + ") || (".join(parts) + ")"
-        elif constraint.startswith("(and "):
-            # (and (>= t 1) (<= t 10)) -> (time >= 1) && (time <= 10)
-            import re
-            inner = constraint[5:-1]  # Remove "(and " and ")"
-            parts = []
-            ge_match = re.search(r'\(>= t (\d+)\)', inner)
-            le_match = re.search(r'\(<= t (\d+)\)', inner)
-            if ge_match:
-                parts.append(f"time >= {ge_match.group(1)}")
-            if le_match:
-                parts.append(f"time <= {le_match.group(1)}")
-            if parts:
-                return "(" + ") && (".join(parts) + ")"
-        
-        # Fallback: return simplified version
-        return constraint.replace("(", "").replace(")", "").replace("= t", "time ==").replace(">= t", "time >=").replace("<= t", "time <=")
+    # Add vertices
+    for i in range(vertices):
+        player = random.randint(0, 1)
+        if f"v{i}" == target:
+            content += f'    v{i} [name="v{i}", player={player}, target=1];\n'
+        else:
+            content += f'    v{i} [name="v{i}", player={player}];\n'
+    
+    content += "\n"
+    
+    # Add edges (ensure connectivity)
+    edges_added = set()
+    
+    # First ensure every vertex has at least one outgoing edge
+    for i in range(vertices):
+        target_vertex = random.randint(0, vertices-1)
+        if (i, target_vertex) not in edges_added:
+            # Generate temporal constraint occasionally
+            if random.random() < 0.3:  # 30% chance of constraint
+                constraint_type = random.choice([">=", "<", "mod"])
+                if constraint_type == ">=":
+                    val = random.randint(1, 5)
+                    constraint = f't >= {val}'
+                elif constraint_type == "<":
+                    val = random.randint(5, 15)
+                    constraint = f't < {val}'
+                else:  # mod
+                    mod_val = random.randint(2, 5)
+                    remainder = random.randint(0, mod_val-1)
+                    constraint = f't mod {mod_val} == {remainder}'
+                
+                content += f'    v{i} -> v{target_vertex} [constraint="{constraint}"];\n'
+            else:
+                content += f'    v{i} -> v{target_vertex};\n'
+            edges_added.add((i, target_vertex))
+    
+    # Add some additional random edges
+    extra_edges = random.randint(vertices // 2, vertices)
+    for _ in range(extra_edges):
+        src = random.randint(0, vertices-1)
+        dst = random.randint(0, vertices-1)
+        if (src, dst) not in edges_added:
+            content += f'    v{src} -> v{dst};\n'
+            edges_added.add((src, dst))
+    
+    content += "}\n"
+    return content
 
-def generate_all_benchmark_games():
-    """Generate all benchmark games in flat directory structure"""
+def generate_ontime_game(vertices, game_id):
+    """Generate a TG format game for ontime"""
+    # Generate random time bound (5 to vertices//2)
+    time_bound = random.randint(5, max(10, vertices // 2))
     
-    generator = BenchmarkGameGenerator()
+    # Pick a random target vertex
+    target = f"v{random.randint(0, vertices-1)}"
     
-    # Create benchmark directory
-    benchmark_dir = "/home/pete/temporis/benchmark"
-    os.makedirs(benchmark_dir, exist_ok=True)
+    # Start TG file
+    content = f"// Benchmark game {game_id} - {vertices} vertices\n"
+    content += f"// time_bound: {time_bound}\n"
+    content += f"// targets: {target}\n"
     
-    # Clean existing files
-    for file in os.listdir(benchmark_dir):
-        if file.startswith("test"):
-            os.remove(os.path.join(benchmark_dir, file))
+    # Add nodes
+    for i in range(vertices):
+        owner = random.randint(0, 1)  # 0 or 1 for ontime
+        content += f'node v{i}: owner[{owner}]\n'
     
-    sizes = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    content += "\n"
     
-    print("Generating benchmark games with flat directory structure...")
-    print("=" * 60)
+    # Add edges (ensure connectivity)
+    edges_added = set()
+    
+    # First ensure every vertex has at least one outgoing edge
+    for i in range(vertices):
+        target_vertex = random.randint(0, vertices-1)
+        if (i, target_vertex) not in edges_added:
+            # Generate temporal constraint occasionally
+            if random.random() < 0.3:  # 30% chance of constraint
+                constraint_type = random.choice([">=", "<", "mod"])
+                if constraint_type == ">=":
+                    val = random.randint(1, 5)
+                    constraint = f'(>= t {val})'
+                elif constraint_type == "<":
+                    val = random.randint(5, 15)
+                    constraint = f'(< t {val})'
+                else:  # mod
+                    mod_val = random.randint(2, 5)
+                    remainder = random.randint(0, mod_val-1)
+                    constraint = f'(= (mod t {mod_val}) {remainder})'
+                
+                content += f'edge v{i} -> v{target_vertex}: {constraint}\n'
+            else:
+                content += f'edge v{i} -> v{target_vertex}\n'
+            edges_added.add((i, target_vertex))
+    
+    # Add some additional random edges
+    extra_edges = random.randint(vertices // 2, vertices)
+    for _ in range(extra_edges):
+        src = random.randint(0, vertices-1)
+        dst = random.randint(0, vertices-1)
+        if (src, dst) not in edges_added:
+            content += f'edge v{src} -> v{dst}\n'
+            edges_added.add((src, dst))
+    
+    return content
+
+def main():
+    """Generate benchmark games for both solvers"""
+    # Set random seed for reproducible results
+    random.seed(42)
+    
+    # Create directories
+    temporis_dir = "temporis_games"
+    ontime_dir = "ontime_games"
+    
+    # Clean and create directories
+    for directory in [temporis_dir, ontime_dir]:
+        if os.path.exists(directory):
+            shutil.rmtree(directory)
+        os.makedirs(directory)
+    
+    # Generate games: 15 games each for vertex counts 10, 20, 30, ..., 100
+    vertex_counts = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    games_per_size = 15
+    
+    print("Generating 150 temporal benchmark games...")
+    print("=" * 55)
     
     game_id = 1
-    total_games = len(sizes) * 15
+    total_games = len(vertex_counts) * games_per_size
     
-    for size in sizes:
-        print(f"Generating {size:3d} vertex games... ", end="", flush=True)
+    for vertices in vertex_counts:
+        print(f"Generating {vertices:3d} vertex games... ", end="", flush=True)
         
-        for i in range(15):
-            tg_content, dot_content, time_bound = generator.generate_benchmark_game(size, game_id)
+        for i in range(games_per_size):
+            # Generate temporis game (.dot)
+            temporis_content = generate_temporis_game(vertices, game_id)
+            temporis_file = f"{temporis_dir}/test{game_id:03d}.dot"
+            with open(temporis_file, 'w') as f:
+                f.write(temporis_content)
             
-            # Write .tg file for ontime
-            tg_filename = f"{benchmark_dir}/test{game_id:03d}.tg"
-            with open(tg_filename, 'w') as f:
-                f.write(tg_content)
-            
-            # Write .dot file for temporis  
-            dot_filename = f"{benchmark_dir}/test{game_id:03d}.dot"
-            with open(dot_filename, 'w') as f:
-                f.write(dot_content)
-            
-            # Write metadata
-            meta_filename = f"{benchmark_dir}/test{game_id:03d}.meta"
-            with open(meta_filename, 'w') as f:
-                f.write(f"game_id: {game_id}\n")
-                f.write(f"vertices: {size}\n") 
-                f.write(f"time_bound: {time_bound}\n")
+            # Generate ontime game (.tg)
+            ontime_content = generate_ontime_game(vertices, game_id)
+            ontime_file = f"{ontime_dir}/test{game_id:03d}.tg"
+            with open(ontime_file, 'w') as f:
+                f.write(ontime_content)
             
             game_id += 1
         
         print("✓")
     
-    print("=" * 60)
-    print(f"Generated {total_games} benchmark games in flat structure")
-    print(f"Sizes: {sizes}")
-    print(f"Files created in {benchmark_dir}/")
-    print(f"  - test001.tg/dot/meta through test150.tg/dot/meta")
+    print("=" * 55)
+    print(f"Generated {total_games} temporal benchmark games")
+    print(f"Vertex counts: {vertex_counts} ({games_per_size} games each)")
+    print(f"Temporis games (.dot): {temporis_dir}/")
+    print(f"Ontime games (.tg):    {ontime_dir}/")
+    print(f"  - test001.dot/.tg through test{total_games:03d}.dot/.tg")
 
 if __name__ == "__main__":
-    # Set random seed for reproducible benchmarks
-    random.seed(42)
-    generate_all_benchmark_games()
+    main()
