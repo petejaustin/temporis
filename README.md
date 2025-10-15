@@ -47,6 +47,46 @@ make
 ./temporis ../input-files/invalid_test.dot
 ```
 
+## 🚦 Common Workflows
+
+### Complete Benchmarking Workflow
+```bash
+# 1. Generate benchmark games
+python generate_temporal_games.py
+
+# 2. Run comprehensive benchmarks
+python benchmark_temporal_solvers.py temporal_games/ --results-dir temporal_results
+
+# 3. Generate visualizations
+python /home/pete/ggg/extra/scripts/plot_by_game_index.py temporal_results/all_results.json --output-dir temporal_plots --title "Temporal Solvers Performance"
+python /home/pete/ggg/extra/scripts/plot_by_vertex_count.py temporal_results/all_results.json --output-dir temporal_plots --title "Temporal Solvers Scalability"
+
+# Results: temporal_plots/ contains performance visualizations
+```
+
+### Large-Scale Benchmarking 
+```bash
+# 1. Generate full 150-game benchmark suite
+python generate_games.py
+
+# 2. Run benchmarks with extended timeout
+python benchmark_temporal_solvers.py benchmark/ --results-dir full_results --timeout 300
+
+# 3. Analyze results with GGG plotting tools
+```
+
+### Development Testing
+```bash
+# 1. Test solver on specific game
+./temporis temporal_games/test001.dot
+
+# 2. Debug with verbose output
+./temporis --verbose --debug temporal_games/test001.dot
+
+# 3. Quick performance check
+./temporis --time-only temporal_games/test001.dot
+```
+
 ## 🏛️ Architecture
 
 ### GGG-Integrated Components
@@ -308,7 +348,117 @@ Time 5:
 ```
 
 
-## 🔧 Dependencies
+## �️ Utility Scripts
+
+### Game Generation Scripts
+
+#### `generate_games.py`
+**Full benchmark game generator** - Creates comprehensive benchmark suites with 150 games across 10 vertex sizes.
+
+```bash
+# Generate 150 games (15 each for 10, 20, 30, ..., 100 vertices)
+python generate_games.py
+
+# Outputs to benchmark/ directory:
+# - test001.tg, test001.dot, test001.meta
+# - test002.tg, test002.dot, test002.meta
+# - ... (150 games total)
+```
+
+**File formats:**
+- `.tg` files: Ontime solver format with temporal constraints
+- `.dot` files: Temporis solver format (DOT graph with constraint annotations) 
+- `.meta` files: Game metadata (game_id, vertices, time_bound)
+
+#### `generate_temporal_games.py`
+**Custom game generator** - Creates smaller, targeted benchmark sets for development and testing.
+
+```bash
+# Generate 15 games (3 each for 10, 15, 20, 25, 30 vertices)
+python generate_temporal_games.py
+
+# Outputs to temporal_games/ directory with same file format as above
+```
+
+### Benchmarking Scripts
+
+#### `benchmark_temporal_solvers.py`
+**Comprehensive temporal solver benchmarker** - Tests both temporis and ontime solvers on generated games.
+
+```bash
+# Basic usage - benchmark all games in directory
+python benchmark_temporal_solvers.py temporal_games/ --results-dir temporal_results
+
+# With custom timeout
+python benchmark_temporal_solvers.py temporal_games/ --results-dir results --timeout 60
+
+# Help
+python benchmark_temporal_solvers.py --help
+```
+
+**Features:**
+- Runs both temporis and ontime solvers on all games
+- Extracts targets from .dot files for ontime solver
+- Uses time bounds from .meta files  
+- Creates consolidated JSON results (no individual files)
+- Comprehensive error handling and timeout support
+- Detailed progress reporting and statistics
+
+**Output format (consolidated JSON):**
+```json
+[
+  {
+    "solver": "temporis",
+    "game": "test001", 
+    "status": "success",
+    "time": 0.000061,
+    "output": "...",
+    "vertices": 10,
+    "time_bound": 5,
+    "timestamp": 1760528385.811435
+  },
+  {
+    "solver": "ontime",
+    "game": "test001",
+    "status": "success", 
+    "time": 0.003112,
+    "output": "W_5 = {\"v3\"}\nW_0 = {\"v4\", \"v3\", \"v0\", \"v9\"}",
+    "vertices": 10,
+    "time_bound": 5,
+    "timestamp": 1760528385.814879
+  }
+]
+```
+
+### Utility Scripts
+
+#### `convert_tg_to_dot.py` 
+**Format converter** - Converts ontime .tg format to temporis .dot format.
+
+```bash
+# Convert a single .tg file to .dot
+python convert_tg_to_dot.py input.tg output.dot
+
+# Useful for adapting ontime games for temporis solver
+```
+
+## 📊 Visualization
+
+The benchmark results can be visualized using GGG's plotting scripts:
+
+```bash
+# Generate individual game performance plot
+python /home/pete/ggg/extra/scripts/plot_by_game_index.py temporal_results/all_results.json --output-dir temporal_plots --title "Temporal Solvers - Individual Game Performance"
+
+# Generate scalability plot
+python /home/pete/ggg/extra/scripts/plot_by_vertex_count.py temporal_results/all_results.json --output-dir temporal_plots --title "Temporal Solvers - Scalability by Vertex Count"
+```
+
+**Generated plots:**
+- `individual_game_performance.png`: Performance on each individual game
+- `scalability_by_vertex_count.png`: How performance scales with game size
+
+## �🔧 Dependencies
 
 - **GGG Library**: Game Graph Gym framework (sibling directory)
   - **⚠️ Compatibility**: Tested with GGG version from September 19th, 2025
