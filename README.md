@@ -1,17 +1,18 @@
-# GGG Temporis: Presburger Temporal Reachability Solver
+# GGG Temporis: Temporal Reachability Solver & Benchmarking Suite
 
-A **GGG-native temporal game solver** implementing **Presburger arithmetic constraints** with **existential quantifiers**. Fully integrated with the Game Graph Gym framework using native data structures and solver interfaces.
+A **GGG-native temporal game solver** implementing **Presburger arithmetic constraints** with **existential quantifiers**. Includes comprehensive benchmarking scripts, game generation tools, and visualization capabilities.
 
 ## 🌟 Features
 
-- **🎮 GGG Integration**: Native `Solver<GraphType, SolutionType>` implementation
+- **🎮 GGG Integration**: Native `Solver<GraphType, SolutionType>` implementation with stdin support
 - **🧮 Presburger Constraints**: Full support for linear arithmetic over integers  
 - **∃ Existential Quantifiers**: Express complex mathematical relationships with unlimited variables
 - **🔢 Multi-Variable Support**: Constraints with multiple temporal and quantified variables
 - **📝 DOT Format Input**: Standard graph format with custom temporal annotations
-- **📊 Multiple Output Formats**: Standard, CSV, and time-only output for different use cases
+- **📊 Multiple Output Formats**: Standard, CSV, and time-only output for benchmarking
 - **⚡ Professional Build System**: Modern CMake with GGG dependency management
-- **🧪 Comprehensive Testing**: Multiple constraint scenarios included
+- **🧪 Comprehensive Benchmarking**: Full integration with GGG benchmark infrastructure
+- **📈 Visualization Tools**: Performance analysis and comparison plotting
 
 ## 🚀 Quick Start
 
@@ -20,6 +21,8 @@ A **GGG-native temporal game solver** implementing **Presburger arithmetic const
 - C++20 compatible compiler
 - CMake 3.20+
 - Boost Graph Library
+- Python 3.7+ (for benchmarking scripts)
+- matplotlib (for visualizations)
 
 ### Build
 ```bash
@@ -28,23 +31,139 @@ cmake ..
 make
 ```
 
-### Run Examples
+### Basic Usage
 ```bash
-# Test temporal constraints
-./temporis ../input-files/simple_constraint_test.dot
-./temporis ../input-files/spec_test.dot
+# Solve a temporal reachability game
+./build/temporis input_file.dot
 
-# Verbose output for debugging
-./temporis --verbose ../input-files/spec_test_commented.dot
+# Time-only output (for benchmarking)
+./build/temporis --time-only input_file.dot
 
-# CSV output for benchmarking
-./temporis --csv ../input-files/spec_test.dot
+# Read from stdin (GGG benchmark compatibility)
+cat input_file.dot | ./build/temporis --time-only
+```
 
-# Time-only output for performance analysis
-./temporis --time-only ../input-files/simple_constraint_test.dot
+## 📁 Directory Structure and Scripts
 
-# Invalid constraint testing
-./temporis ../input-files/invalid_test.dot
+### Core Solver
+- **`build/temporis`** - Main temporal solver executable
+- **`src/`** - C++ source code for the temporal solver
+- **`include/`** - Header files and GGG integration
+
+### Game Generation
+- **`generate_temporal_games.py`** - Generate 150 benchmark games (15 each for 10-100 vertices)
+  ```bash
+  python3 generate_temporal_games.py
+  # Creates temporis_games/ (DOT format) and ontime_games/ (TG format)
+  ```
+
+### Benchmarking Scripts
+- **`benchmark_temporal_solvers.py`** - Legacy benchmarker for temporis and ontime
+  ```bash
+  python3 benchmark_temporal_solvers.py
+  # Benchmarks both solvers, saves to temporal_results/
+  ```
+
+### Result Analysis
+- **`consolidate_temporal_results.py`** - Combine separate benchmark results
+  ```bash
+  python3 consolidate_temporal_results.py temporis_results/consolidated_results.json ontime_results/consolidated_results.json combined_analysis.json
+  # Creates unified analysis with performance comparison
+  ```
+
+### Visualization
+Uses GGG visualization scripts on consolidated results:
+```bash
+# Performance by vertex count (scalability)
+python3 /path/to/ggg/extra/scripts/plot_time_by_vertex_count.py combined_analysis.json --output-dir plots/
+
+# Performance by game index  
+python3 /path/to/ggg/extra/scripts/plot_time_by_game_index.py combined_analysis.json --output-dir plots/
+```
+
+### Game Directories
+- **`temporis_games/`** - 150 DOT format games for temporis (generated)
+- **`ontime_games/`** - 150 TG format games for ontime (generated) 
+- **`temporal_games/`** - Legacy mixed format directory
+
+### Results Directories
+- **`temporis_results/`** - Temporis-only benchmark results
+- **`ontime_results/`** - Ontime-only benchmark results
+- **`temporal_comparison_plots/`** - Generated visualization plots
+
+## 🔧 Complete Benchmarking Workflow
+
+### 1. Generate Games
+```bash
+python3 generate_temporal_games.py
+# Creates 150 games in two formats:
+# - temporis_games/*.dot (for temporis solver)
+# - ontime_games/*.tg (for ontime solver)
+```
+
+### 2. Run Individual Benchmarks
+```bash
+# Benchmark temporis on DOT games
+python3 /path/to/ggg/extra/scripts/benchmark.py temporis_games/ ./build/temporis --results-dir temporis_results
+
+# Benchmark ontime on TG games  
+python3 /path/to/ggg/extra/scripts/benchmark.py ontime_games/ /path/to/ontime/target/release/ontime --results-dir ontime_results
+```
+
+### 3. Consolidate Results
+```bash
+python3 consolidate_temporal_results.py temporis_results/consolidated_results.json ontime_results/consolidated_results.json combined_temporal_analysis.json
+```
+
+### 4. Generate Visualizations
+```bash
+# Scalability analysis
+python3 /path/to/ggg/extra/scripts/plot_time_by_vertex_count.py combined_temporal_analysis.json --output-dir temporal_comparison_plots --title "Temporis vs Ontime: Scalability"
+
+# Game-by-game performance
+python3 /path/to/ggg/extra/scripts/plot_time_by_game_index.py combined_temporal_analysis.json --output-dir temporal_comparison_plots --title "Temporis vs Ontime: Individual Games"
+```
+
+## 🧪 GGG Benchmark Integration
+
+Temporis is fully compatible with the GGG benchmarking infrastructure:
+
+```bash
+# Use temporis with any GGG benchmark script
+python3 /path/to/ggg/extra/scripts/benchmark.py game_directory/ ./build/temporis
+
+# Compare with other GGG solvers
+python3 /path/to/ggg/extra/scripts/benchmark.py games/ ./build/temporis /path/to/ggg/build/bin/ggg_parity_solver_recursive
+```
+
+### Supported GGG Benchmark Flags
+- `--time-only` - Output only execution time
+- `--csv` - CSV format output
+- `--solver-name` - Display solver name
+- Stdin input support for pipeline integration
+
+## 📊 Game Format Details
+
+### DOT Format (Temporis)
+```dot
+// Benchmark game with embedded metadata
+// time_bound: 8
+// targets: v0,v3
+digraph G {
+    v0 [name="v0", player=0, target=1];
+    v1 [name="v1", player=1];
+    v0 -> v1 [constraint="x >= 2"];
+}
+```
+
+### TG Format (Ontime Compatibility)  
+```
+// Benchmark game with embedded metadata
+// time_bound: 8
+// targets: v0,v3
+node v0: owner[0]
+node v1: owner[1]
+edge v0 -> v1: x >= 2
 ```
 
 ## 🚦 Common Workflows
@@ -369,6 +488,69 @@ python generate_games.py
 - `.tg` files: Ontime solver format with temporal constraints
 - `.dot` files: Temporis solver format (DOT graph with constraint annotations) 
 - `.meta` files: Game metadata (game_id, vertices, time_bound)
+
+## 📈 Performance Analysis Features
+
+### Consolidated Analysis
+The `consolidate_temporal_results.py` script provides comprehensive comparative analysis:
+
+```bash
+python3 consolidate_temporal_results.py temporis_results.json ontime_results.json analysis.json
+```
+
+**Output includes:**
+- Individual solver performance statistics
+- Comparative speed analysis (e.g., "temporis is 3.31x faster than ontime")
+- Performance breakdown by vertex count
+- Success rates and failure analysis
+- GGG-compatible JSON for visualization tools
+
+### Visualization Integration
+Full compatibility with GGG visualization infrastructure:
+
+```bash
+# Scalability by vertex count
+python3 /path/to/ggg/extra/scripts/plot_time_by_vertex_count.py analysis.json --output-dir plots/
+
+# Individual game performance
+python3 /path/to/ggg/extra/scripts/plot_time_by_game_index.py analysis.json --output-dir plots/
+```
+
+**Generated plots:**
+- `scalability_by_vertex_count.png` - Performance scaling analysis
+- `individual_game_performance.png` - Game-by-game comparison
+
+## 🔧 Recent Enhancements
+
+### GGG API Compatibility (October 2025)
+- **Updated for GGG `solution-valid` branch**: Fixed compatibility with new solution API
+- **Removed deprecated methods**: No longer uses `is_solved()` and `is_valid()` methods
+- **Simplified constructors**: Updated `RSSolution` usage for new GGG interface
+
+### Enhanced Benchmarking Infrastructure
+- **Separate game directories**: `temporis_games/` and `ontime_games/` for format-specific benchmarks
+- **Embedded metadata**: Time bounds and targets included directly in game files
+- **Stdin compatibility**: Full support for GGG benchmark script pipelines
+- **Format detection**: Automatic parameter extraction from game file content
+
+### Cross-Solver Integration
+- **Ontime compatibility**: Updated ontime solver to work with GGG benchmark infrastructure
+- **Unified analysis**: Consolidated benchmarking across different temporal solvers
+- **Standardized output**: Compatible JSON format for all GGG visualization tools
+
+## 📋 Summary
+
+The GGG Temporis project provides a **complete temporal reachability solving ecosystem** with:
+
+✅ **Native GGG integration** with modern C++20 implementation  
+✅ **Comprehensive Presburger arithmetic** supporting all mathematical operations  
+✅ **Professional benchmarking suite** with 150 generated test games  
+✅ **Cross-solver compatibility** with ontime and other temporal solvers  
+✅ **Advanced visualization** using GGG plotting infrastructure  
+✅ **Performance analysis** with detailed comparative metrics  
+✅ **Production-ready toolchain** for temporal game research and development
+
+The system serves as both a **research tool** for temporal game theory and a **benchmarking platform** for comparing different temporal reachability algorithms.
 
 #### `generate_temporal_games.py`
 **Custom game generator** - Creates smaller, targeted benchmark sets for development and testing.
