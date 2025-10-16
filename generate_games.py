@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Generate temporal games for benchmarking temporis and ontime solvers.
-Creates 150 games total: 15 games each for vertex counts 10, 20, 30, ..., 100
+Creates 15000 games total: 15 games each for vertex counts 10, 20, 30, ..., 1000
 """
 
 import os
@@ -142,29 +142,30 @@ def main():
             shutil.rmtree(directory)
         os.makedirs(directory)
     
-    # Generate games: 15 games each for vertex counts 10, 20, 30, ..., 100
-    vertex_counts = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    # Generate games: 15 games each for vertex counts 10, 20, 30, ..., 1000
+    vertex_counts = list(range(10, 1010, 10))  # [10, 20, 30, ..., 1000]
     games_per_size = 15
     
-    print("Generating 150 temporal benchmark games...")
+    print("Generating 15000 temporal benchmark games...")
     print("=" * 55)
     
     game_id = 1
     total_games = len(vertex_counts) * games_per_size
     
-    for vertices in vertex_counts:
-        print(f"Generating {vertices:3d} vertex games... ", end="", flush=True)
+    for idx, vertices in enumerate(vertex_counts):
+        progress = (idx + 1) / len(vertex_counts) * 100
+        print(f"[{progress:5.1f}%] Generating {vertices:4d} vertex games... ", end="", flush=True)
         
         for i in range(games_per_size):
             # Generate temporis game (.dot)
             temporis_content = generate_temporis_game(vertices, game_id)
-            temporis_file = f"{temporis_dir}/test{game_id:03d}.dot"
+            temporis_file = f"{temporis_dir}/test{game_id:05d}.dot"
             with open(temporis_file, 'w') as f:
                 f.write(temporis_content)
             
             # Generate ontime game (.tg)
             ontime_content = generate_ontime_game(vertices, game_id)
-            ontime_file = f"{ontime_dir}/test{game_id:03d}.tg"
+            ontime_file = f"{ontime_dir}/test{game_id:05d}.tg"
             with open(ontime_file, 'w') as f:
                 f.write(ontime_content)
             
@@ -174,10 +175,10 @@ def main():
     
     print("=" * 55)
     print(f"Generated {total_games} temporal benchmark games")
-    print(f"Vertex counts: {vertex_counts} ({games_per_size} games each)")
+    print(f"Vertex counts: 10-1000 in steps of 10 ({games_per_size} games each)")
     print(f"Temporis games (.dot): {temporis_dir}/")
     print(f"Ontime games (.tg):    {ontime_dir}/")
-    print(f"  - test001.dot/.tg through test{total_games:03d}.dot/.tg")
+    print(f"  - test001.dot/.tg through test{total_games:05d}.dot/.tg")
 
 if __name__ == "__main__":
     main()

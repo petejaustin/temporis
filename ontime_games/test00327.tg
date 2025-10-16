@@ -1,0 +1,568 @@
+// Benchmark game 327 - 220 vertices
+// time_bound: 30
+// targets: v42
+node v0: owner[1]
+node v1: owner[1]
+node v2: owner[1]
+node v3: owner[1]
+node v4: owner[1]
+node v5: owner[0]
+node v6: owner[1]
+node v7: owner[1]
+node v8: owner[1]
+node v9: owner[0]
+node v10: owner[1]
+node v11: owner[0]
+node v12: owner[0]
+node v13: owner[0]
+node v14: owner[0]
+node v15: owner[1]
+node v16: owner[1]
+node v17: owner[1]
+node v18: owner[1]
+node v19: owner[0]
+node v20: owner[0]
+node v21: owner[0]
+node v22: owner[1]
+node v23: owner[0]
+node v24: owner[0]
+node v25: owner[0]
+node v26: owner[1]
+node v27: owner[1]
+node v28: owner[1]
+node v29: owner[1]
+node v30: owner[1]
+node v31: owner[0]
+node v32: owner[0]
+node v33: owner[1]
+node v34: owner[0]
+node v35: owner[1]
+node v36: owner[0]
+node v37: owner[0]
+node v38: owner[0]
+node v39: owner[0]
+node v40: owner[1]
+node v41: owner[0]
+node v42: owner[0]
+node v43: owner[1]
+node v44: owner[0]
+node v45: owner[0]
+node v46: owner[0]
+node v47: owner[1]
+node v48: owner[0]
+node v49: owner[0]
+node v50: owner[0]
+node v51: owner[1]
+node v52: owner[0]
+node v53: owner[0]
+node v54: owner[0]
+node v55: owner[0]
+node v56: owner[1]
+node v57: owner[1]
+node v58: owner[0]
+node v59: owner[0]
+node v60: owner[1]
+node v61: owner[0]
+node v62: owner[0]
+node v63: owner[1]
+node v64: owner[0]
+node v65: owner[1]
+node v66: owner[0]
+node v67: owner[0]
+node v68: owner[1]
+node v69: owner[0]
+node v70: owner[0]
+node v71: owner[1]
+node v72: owner[0]
+node v73: owner[0]
+node v74: owner[0]
+node v75: owner[1]
+node v76: owner[1]
+node v77: owner[1]
+node v78: owner[1]
+node v79: owner[1]
+node v80: owner[0]
+node v81: owner[1]
+node v82: owner[0]
+node v83: owner[0]
+node v84: owner[1]
+node v85: owner[1]
+node v86: owner[1]
+node v87: owner[0]
+node v88: owner[1]
+node v89: owner[1]
+node v90: owner[1]
+node v91: owner[1]
+node v92: owner[1]
+node v93: owner[1]
+node v94: owner[0]
+node v95: owner[0]
+node v96: owner[1]
+node v97: owner[0]
+node v98: owner[0]
+node v99: owner[1]
+node v100: owner[1]
+node v101: owner[1]
+node v102: owner[1]
+node v103: owner[0]
+node v104: owner[0]
+node v105: owner[0]
+node v106: owner[1]
+node v107: owner[0]
+node v108: owner[1]
+node v109: owner[0]
+node v110: owner[1]
+node v111: owner[0]
+node v112: owner[0]
+node v113: owner[0]
+node v114: owner[1]
+node v115: owner[0]
+node v116: owner[1]
+node v117: owner[1]
+node v118: owner[1]
+node v119: owner[0]
+node v120: owner[1]
+node v121: owner[1]
+node v122: owner[1]
+node v123: owner[0]
+node v124: owner[0]
+node v125: owner[1]
+node v126: owner[0]
+node v127: owner[0]
+node v128: owner[1]
+node v129: owner[0]
+node v130: owner[0]
+node v131: owner[0]
+node v132: owner[0]
+node v133: owner[0]
+node v134: owner[0]
+node v135: owner[1]
+node v136: owner[1]
+node v137: owner[1]
+node v138: owner[1]
+node v139: owner[0]
+node v140: owner[0]
+node v141: owner[0]
+node v142: owner[0]
+node v143: owner[1]
+node v144: owner[0]
+node v145: owner[1]
+node v146: owner[0]
+node v147: owner[0]
+node v148: owner[0]
+node v149: owner[0]
+node v150: owner[0]
+node v151: owner[0]
+node v152: owner[0]
+node v153: owner[1]
+node v154: owner[0]
+node v155: owner[1]
+node v156: owner[1]
+node v157: owner[0]
+node v158: owner[0]
+node v159: owner[0]
+node v160: owner[0]
+node v161: owner[0]
+node v162: owner[0]
+node v163: owner[1]
+node v164: owner[1]
+node v165: owner[0]
+node v166: owner[0]
+node v167: owner[1]
+node v168: owner[0]
+node v169: owner[0]
+node v170: owner[1]
+node v171: owner[1]
+node v172: owner[1]
+node v173: owner[0]
+node v174: owner[0]
+node v175: owner[1]
+node v176: owner[1]
+node v177: owner[1]
+node v178: owner[1]
+node v179: owner[0]
+node v180: owner[0]
+node v181: owner[0]
+node v182: owner[1]
+node v183: owner[0]
+node v184: owner[1]
+node v185: owner[1]
+node v186: owner[0]
+node v187: owner[1]
+node v188: owner[0]
+node v189: owner[0]
+node v190: owner[0]
+node v191: owner[1]
+node v192: owner[1]
+node v193: owner[1]
+node v194: owner[0]
+node v195: owner[1]
+node v196: owner[0]
+node v197: owner[1]
+node v198: owner[1]
+node v199: owner[1]
+node v200: owner[1]
+node v201: owner[1]
+node v202: owner[1]
+node v203: owner[1]
+node v204: owner[0]
+node v205: owner[0]
+node v206: owner[0]
+node v207: owner[1]
+node v208: owner[0]
+node v209: owner[1]
+node v210: owner[0]
+node v211: owner[0]
+node v212: owner[0]
+node v213: owner[1]
+node v214: owner[0]
+node v215: owner[1]
+node v216: owner[1]
+node v217: owner[0]
+node v218: owner[1]
+node v219: owner[1]
+
+edge v0 -> v165: (= (mod t 4) 0)
+edge v1 -> v106: (>= t 2)
+edge v2 -> v189: (>= t 4)
+edge v3 -> v211: (< t 13)
+edge v4 -> v134
+edge v5 -> v165
+edge v6 -> v4: (>= t 2)
+edge v7 -> v75
+edge v8 -> v142
+edge v9 -> v169
+edge v10 -> v195
+edge v11 -> v26
+edge v12 -> v89
+edge v13 -> v34: (< t 14)
+edge v14 -> v2
+edge v15 -> v73
+edge v16 -> v159
+edge v17 -> v162: (>= t 3)
+edge v18 -> v92: (>= t 4)
+edge v19 -> v137: (>= t 1)
+edge v20 -> v26
+edge v21 -> v140
+edge v22 -> v91
+edge v23 -> v110
+edge v24 -> v121
+edge v25 -> v53: (< t 12)
+edge v26 -> v62
+edge v27 -> v153
+edge v28 -> v38
+edge v29 -> v46
+edge v30 -> v89: (= (mod t 4) 3)
+edge v31 -> v148
+edge v32 -> v179: (= (mod t 5) 1)
+edge v33 -> v158
+edge v34 -> v118: (= (mod t 4) 2)
+edge v35 -> v15
+edge v36 -> v103
+edge v37 -> v1: (>= t 5)
+edge v38 -> v178
+edge v39 -> v208
+edge v40 -> v108: (= (mod t 4) 2)
+edge v41 -> v0
+edge v42 -> v77
+edge v43 -> v160
+edge v44 -> v119: (>= t 5)
+edge v45 -> v59
+edge v46 -> v182
+edge v47 -> v29
+edge v48 -> v2
+edge v49 -> v13: (< t 15)
+edge v50 -> v188: (= (mod t 5) 1)
+edge v51 -> v187
+edge v52 -> v36
+edge v53 -> v218
+edge v54 -> v123: (= (mod t 2) 1)
+edge v55 -> v103: (= (mod t 3) 2)
+edge v56 -> v182
+edge v57 -> v140: (>= t 5)
+edge v58 -> v185: (< t 8)
+edge v59 -> v99
+edge v60 -> v107: (< t 8)
+edge v61 -> v104
+edge v62 -> v95
+edge v63 -> v26
+edge v64 -> v148
+edge v65 -> v40: (= (mod t 2) 0)
+edge v66 -> v129
+edge v67 -> v128
+edge v68 -> v117: (>= t 1)
+edge v69 -> v52
+edge v70 -> v5
+edge v71 -> v199
+edge v72 -> v48: (>= t 2)
+edge v73 -> v133
+edge v74 -> v89
+edge v75 -> v74
+edge v76 -> v63: (>= t 2)
+edge v77 -> v3
+edge v78 -> v75
+edge v79 -> v213: (< t 5)
+edge v80 -> v35
+edge v81 -> v190
+edge v82 -> v101
+edge v83 -> v122
+edge v84 -> v119
+edge v85 -> v102: (>= t 3)
+edge v86 -> v180: (>= t 5)
+edge v87 -> v216
+edge v88 -> v147: (< t 9)
+edge v89 -> v36
+edge v90 -> v174: (= (mod t 3) 1)
+edge v91 -> v19: (>= t 1)
+edge v92 -> v74: (= (mod t 5) 0)
+edge v93 -> v204: (= (mod t 2) 0)
+edge v94 -> v95
+edge v95 -> v195
+edge v96 -> v211
+edge v97 -> v188
+edge v98 -> v109: (< t 10)
+edge v99 -> v182
+edge v100 -> v118: (< t 12)
+edge v101 -> v206
+edge v102 -> v25
+edge v103 -> v42
+edge v104 -> v155
+edge v105 -> v23: (< t 8)
+edge v106 -> v2: (= (mod t 2) 1)
+edge v107 -> v77
+edge v108 -> v116
+edge v109 -> v87
+edge v110 -> v47: (< t 11)
+edge v111 -> v123: (>= t 2)
+edge v112 -> v174
+edge v113 -> v24: (= (mod t 4) 0)
+edge v114 -> v201
+edge v115 -> v145
+edge v116 -> v207
+edge v117 -> v67
+edge v118 -> v219
+edge v119 -> v96
+edge v120 -> v69: (< t 10)
+edge v121 -> v159
+edge v122 -> v192: (>= t 4)
+edge v123 -> v85
+edge v124 -> v125
+edge v125 -> v153
+edge v126 -> v154
+edge v127 -> v178
+edge v128 -> v188
+edge v129 -> v141
+edge v130 -> v210
+edge v131 -> v0: (= (mod t 3) 1)
+edge v132 -> v213: (= (mod t 2) 1)
+edge v133 -> v4
+edge v134 -> v112
+edge v135 -> v39
+edge v136 -> v61
+edge v137 -> v51
+edge v138 -> v57: (= (mod t 5) 2)
+edge v139 -> v186
+edge v140 -> v109
+edge v141 -> v42
+edge v142 -> v180: (>= t 2)
+edge v143 -> v112: (< t 10)
+edge v144 -> v199: (< t 6)
+edge v145 -> v184: (= (mod t 5) 1)
+edge v146 -> v73
+edge v147 -> v193
+edge v148 -> v135
+edge v149 -> v35
+edge v150 -> v85
+edge v151 -> v75
+edge v152 -> v2
+edge v153 -> v66
+edge v154 -> v186: (>= t 4)
+edge v155 -> v20
+edge v156 -> v53: (< t 14)
+edge v157 -> v73
+edge v158 -> v12: (= (mod t 4) 1)
+edge v159 -> v217
+edge v160 -> v121
+edge v161 -> v139: (= (mod t 5) 3)
+edge v162 -> v83
+edge v163 -> v59: (>= t 2)
+edge v164 -> v151
+edge v165 -> v205
+edge v166 -> v216
+edge v167 -> v38: (< t 8)
+edge v168 -> v91
+edge v169 -> v214
+edge v170 -> v63
+edge v171 -> v137
+edge v172 -> v155
+edge v173 -> v155: (>= t 4)
+edge v174 -> v143
+edge v175 -> v142
+edge v176 -> v105
+edge v177 -> v198
+edge v178 -> v93
+edge v179 -> v192
+edge v180 -> v120
+edge v181 -> v148
+edge v182 -> v106: (>= t 5)
+edge v183 -> v187
+edge v184 -> v113
+edge v185 -> v9
+edge v186 -> v93
+edge v187 -> v103: (>= t 3)
+edge v188 -> v138: (< t 11)
+edge v189 -> v46
+edge v190 -> v61: (>= t 2)
+edge v191 -> v133
+edge v192 -> v48
+edge v193 -> v33
+edge v194 -> v88
+edge v195 -> v142: (= (mod t 4) 3)
+edge v196 -> v116
+edge v197 -> v9
+edge v198 -> v145
+edge v199 -> v12
+edge v200 -> v114
+edge v201 -> v150
+edge v202 -> v178
+edge v203 -> v197: (< t 13)
+edge v204 -> v4
+edge v205 -> v101
+edge v206 -> v195: (< t 8)
+edge v207 -> v171
+edge v208 -> v124
+edge v209 -> v14
+edge v210 -> v125
+edge v211 -> v152: (< t 14)
+edge v212 -> v122
+edge v213 -> v57
+edge v214 -> v53: (= (mod t 2) 0)
+edge v215 -> v5
+edge v216 -> v114
+edge v217 -> v60: (< t 9)
+edge v218 -> v21
+edge v219 -> v21
+edge v155 -> v44
+edge v34 -> v130
+edge v6 -> v201
+edge v120 -> v53
+edge v114 -> v188
+edge v70 -> v29
+edge v136 -> v160
+edge v26 -> v97
+edge v87 -> v66
+edge v30 -> v214
+edge v188 -> v171
+edge v146 -> v120
+edge v38 -> v78
+edge v159 -> v203
+edge v216 -> v59
+edge v90 -> v60
+edge v172 -> v202
+edge v147 -> v182
+edge v91 -> v120
+edge v54 -> v160
+edge v184 -> v121
+edge v68 -> v125
+edge v11 -> v144
+edge v142 -> v219
+edge v13 -> v61
+edge v207 -> v204
+edge v68 -> v58
+edge v98 -> v46
+edge v197 -> v107
+edge v168 -> v178
+edge v112 -> v154
+edge v43 -> v149
+edge v72 -> v74
+edge v166 -> v60
+edge v195 -> v74
+edge v46 -> v163
+edge v69 -> v200
+edge v126 -> v159
+edge v213 -> v59
+edge v72 -> v154
+edge v168 -> v35
+edge v76 -> v82
+edge v2 -> v141
+edge v29 -> v32
+edge v26 -> v23
+edge v117 -> v19
+edge v153 -> v198
+edge v21 -> v77
+edge v11 -> v102
+edge v99 -> v102
+edge v122 -> v36
+edge v70 -> v160
+edge v80 -> v219
+edge v62 -> v14
+edge v4 -> v200
+edge v158 -> v190
+edge v202 -> v37
+edge v26 -> v68
+edge v171 -> v136
+edge v110 -> v158
+edge v154 -> v90
+edge v105 -> v176
+edge v187 -> v67
+edge v103 -> v49
+edge v98 -> v87
+edge v109 -> v154
+edge v179 -> v161
+edge v152 -> v97
+edge v217 -> v41
+edge v113 -> v133
+edge v123 -> v9
+edge v196 -> v54
+edge v58 -> v43
+edge v217 -> v61
+edge v213 -> v191
+edge v116 -> v12
+edge v175 -> v72
+edge v39 -> v188
+edge v161 -> v54
+edge v144 -> v176
+edge v134 -> v168
+edge v143 -> v124
+edge v69 -> v212
+edge v93 -> v4
+edge v45 -> v118
+edge v76 -> v177
+edge v156 -> v165
+edge v118 -> v183
+edge v86 -> v44
+edge v159 -> v108
+edge v176 -> v123
+edge v19 -> v168
+edge v115 -> v93
+edge v56 -> v34
+edge v63 -> v65
+edge v52 -> v25
+edge v71 -> v152
+edge v66 -> v122
+edge v148 -> v150
+edge v15 -> v181
+edge v216 -> v29
+edge v202 -> v5
+edge v185 -> v6
+edge v126 -> v207
+edge v4 -> v55
+edge v208 -> v151
+edge v143 -> v92
+edge v46 -> v173
+edge v182 -> v121
+edge v177 -> v73
+edge v120 -> v179
+edge v214 -> v211
+edge v37 -> v119
+edge v34 -> v213
+edge v164 -> v187
+edge v136 -> v2
+edge v86 -> v17
+edge v112 -> v215
+edge v173 -> v137
+edge v103 -> v105
+edge v201 -> v109
+edge v6 -> v9
+edge v142 -> v67
+edge v8 -> v125
