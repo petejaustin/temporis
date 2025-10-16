@@ -21,16 +21,28 @@ add_executable(temporis
     src/ggg_temporal_solver.cpp
 )
 
-# Modern CMake target configuration
-target_include_directories(temporis PRIVATE 
-    ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/../ggg/include
+# Static expansion temporis executable (for research)
+add_executable(temporis_static_expansion
+    src/main_static_expansion.cpp
+    src/presburger_term.cpp
+    src/presburger_formula.cpp
+    src/ggg_temporal_graph.cpp
+    src/static_expansion_solver.cpp
 )
 
-target_link_libraries(temporis PRIVATE ${Boost_LIBRARIES})
-
-target_compile_features(temporis PRIVATE cxx_std_20)
+# Common configuration for both executables
+foreach(target temporis temporis_static_expansion)
+    target_include_directories(${target} PRIVATE 
+        ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/../ggg/include
+    )
+    
+    target_link_libraries(${target} PRIVATE ${Boost_LIBRARIES})
+    
+    target_compile_features(${target} PRIVATE cxx_std_20)
+endforeach()
 
 # Build information
 message(STATUS "GGG Temporis - Build type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "Output: ${CMAKE_BINARY_DIR}/temporis")
+message(STATUS "Standard temporis: ${CMAKE_BINARY_DIR}/temporis")
+message(STATUS "Static expansion temporis: ${CMAKE_BINARY_DIR}/temporis_static_expansion")

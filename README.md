@@ -1,6 +1,6 @@
-# GGG Temporis: Temporal Reachability Solver & Benchmarking Suite
+# GGG Temporis: Multi-Algorithm Temporal Reachability Solver & Benchmarking Suite
 
-A **GGG-native temporal game solver** implementing **Presburger arithmetic constraints** with **existential quantifiers**. Includes comprehensive benchmarking scripts, game generation tools, and visualization capabilities.
+A **GGG-native temporal game solver** implementing **multiple solving algorithms** for **Presburger arithmetic constraints** with **existential quantifiers**. Features both backwards temporal attractor and static expansion approaches with comprehensive benchmarking capabilities.
 
 ## 🌟 Features
 
@@ -9,6 +9,7 @@ A **GGG-native temporal game solver** implementing **Presburger arithmetic const
 - **∃ Existential Quantifiers**: Express complex mathematical relationships with unlimited variables
 - **🔢 Multi-Variable Support**: Constraints with multiple temporal and quantified variables
 - **📝 DOT Format Input**: Standard graph format with custom temporal annotations
+- **🧠 Multiple Algorithms**: Backwards temporal attractor and static expansion approaches
 - **📊 Multiple Output Formats**: Standard, CSV, and time-only output for benchmarking
 - **⚡ Professional Build System**: Modern CMake with GGG dependency management
 - **🧪 Comprehensive Benchmarking**: Full integration with GGG benchmark infrastructure
@@ -31,7 +32,13 @@ cmake ..
 make
 ```
 
+This creates two executables:
+- **`build/temporis`** - Standard GGG-compatible temporal solver 
+- **`build/temporis_static_expansion`** - Static expansion solver for research
+
 ### Basic Usage
+
+#### Standard Temporal Solver (`temporis`)
 ```bash
 # Solve a temporal reachability game
 ./build/temporis input_file.dot
@@ -43,11 +50,31 @@ make
 cat input_file.dot | ./build/temporis --time-only
 ```
 
+#### Static Expansion Solver (`temporis_static_expansion`)
+```bash
+# Solve using static expansion algorithm
+./build/temporis_static_expansion input_file.dot
+
+# Verbose output with expansion statistics
+./build/temporis_static_expansion --verbose input_file.dot
+
+# Time-only output for benchmarking
+./build/temporis_static_expansion --time-only input_file.dot
+
+# Read from stdin
+cat input_file.dot | ./build/temporis_static_expansion --time-only
+```
+
 ## 📁 Directory Structure and Scripts
 
-### Core Solver
-- **`build/temporis`** - Main temporal solver executable
-- **`src/`** - C++ source code for the temporal solver
+### Core Solvers
+- **`build/temporis`** - Standard GGG-compatible temporal solver (backwards algorithm)
+- **`build/temporis_static_expansion`** - Static expansion solver for research
+- **`src/main_ggg.cpp`** - Main executable for standard temporis solver
+- **`src/main_static_expansion.cpp`** - Main executable for static expansion solver
+- **`src/ggg_temporal_solver.cpp`** - Backwards temporal attractor solver implementation
+- **`src/static_expansion_solver.cpp`** - Static expansion solver implementation
+- **`src/`** - Other C++ source code (constraints, graph management)
 
 ### Game Generation and Benchmarking
 - **`generate_benchmark_games.py`** - Generate 150 benchmark games for both temporis and ontime
@@ -153,6 +180,133 @@ Games include time bounds and targets directly in file comments:
 - Comprehensive logging and result tracking
 
 ## 🔧 Algorithm Implementation
+
+Temporis provides two distinct algorithms for solving temporal reachability games:
+
+### 1. Backwards Temporal Attractor (`--algorithm backwards`)
+
+**Implementation**: `src/ggg_temporal_solver.cpp`
+**Executable**: Both `temporis` (default) and `temporis_multi`
+
+- **Approach**: Works backwards from maximum time to time 0
+- **Method**: Computes temporal attractors layer by layer, respecting Presburger constraints
+- **Advantages**: Memory efficient, direct temporal reasoning
+- **Performance**: Fast on most problems, O(T × V × E) time complexity
+- **Use Case**: Standard temporal game solving, production use
+
+```cpp
+// Core algorithm pseudocode
+for time = max_time-1 down to 0:
+    for each vertex v:
+        if player[v] == 0: // Existential player
+            if ∃ edge (v,u) where constraint_satisfied(edge, time) && u ∈ current_attractor:
+                add v to new_attractor
+        else: // Universal player  
+            if ∀ edges (v,u) where constraint_satisfied(edge, time) → u ∈ current_attractor:
+                add v to new_attractor
+```
+
+### 2. Static Expansion (`--algorithm static_expansion`)
+
+**Implementation**: `src/static_expansion_solver.cpp`
+**Executable**: `temporis_static_expansion`
+
+- **Approach**: Statically expands temporal graph into conventional graph, then uses GGG attractor computation
+- **Method**: Creates (vertex, time) pairs for all time layers, adds edges based on temporal constraints
+- **Advantages**: Leverages proven GGG attractor algorithms, separates temporal and game logic
+- **Performance**: Higher memory usage, O(T × V) vertices and O(T × E) edges in expanded graph
+- **Use Case**: Research, algorithm comparison, validation
+
+```cpp
+// Core algorithm pseudocode
+1. Static Expansion:
+   for time = 0 to max_time:
+       for each vertex v:
+           create expanded_vertex(v, time)
+   
+   for time = 0 to max_time-1:
+       for each edge (u,v):
+           if constraint_satisfied(edge, time):
+               add_edge(expanded_vertex(u,time), expanded_vertex(v,time+1))
+
+2. GGG Attractor Computation:
+   target_set = {expanded_vertex(target, max_time) for target in targets}
+   attractor = compute_attractor(expanded_graph, target_set, player=0)
+
+3. Solution Extraction:
+   for each vertex v:
+       if expanded_vertex(v, 0) ∈ attractor:
+           solution[v] = Player_0_wins
+```
+
+### Algorithm Comparison
+
+| Feature | Backwards Attractor | Static Expansion |
+|---------|-------------------|------------------|
+| **Memory Usage** | O(V) | O(T × V) |
+| **Time Complexity** | O(T × V × E) | O(T × E + GGG_Attractor(T×V, T×E)) |
+| **Constraint Evaluation** | Per time layer | Pre-computed during expansion |
+| **GGG Integration** | Custom temporal solver | Standard GGG attractor |
+| **Debugging** | Temporal-specific output | Standard graph analysis tools |
+| **Performance** | Generally faster | Higher overhead, useful for validation |
+
+## 🔬 Algorithm Benchmarking
+
+You can benchmark the two algorithms against each other using both executables:
+
+### Quick Algorithm Comparison
+```bash
+# Test both algorithms on the same game
+./build/temporis --time-only game.dot
+./build/temporis_static_expansion --time-only game.dot
+
+# Detailed comparison with statistics
+./build/temporis --verbose game.dot
+./build/temporis_static_expansion --verbose game.dot
+```
+
+### Systematic Algorithm Benchmarking
+```bash
+# Create a simple benchmark script
+echo "Backwards Algorithm:"
+for game in temporis_games/test*.dot; do
+    time=$(./build/temporis --time-only "$game")
+    echo "$(basename "$game"): $time seconds"
+done
+
+echo "Static Expansion Algorithm:"
+for game in temporis_games/test*.dot; do
+    time=$(./build/temporis_static_expansion --time-only "$game")
+    echo "$(basename "$game"): $time seconds"
+done
+```
+
+### Expected Performance Characteristics
+
+**Backwards Temporal Attractor:**
+- **Memory**: Low (works on original graph)
+- **Speed**: Fast on most problems
+- **Scalability**: Good for large time bounds
+- **Best for**: Production use, memory-constrained environments
+
+**Static Expansion:**
+- **Memory**: High (T × V vertices in expanded graph)
+- **Speed**: Slower due to expansion overhead
+- **Scalability**: Limited by available memory for large T or V
+- **Best for**: Research, validation, debugging complex temporal constraints
+
+### Sample Performance (10-vertex game, time bound 10)
+```
+Backwards Algorithm (temporis):
+  Solve time: 0.000059s
+  Memory: ~10 vertices processed
+
+Static Expansion Algorithm (temporis_static_expansion):
+  Solve time: 0.000233s
+  Memory: ~110 vertices in expanded graph (10 × 11 time layers)
+  Expansion time: 0.000180s
+  Attractor time: 0.000053s
+```
 python3 generate_temporal_games.py
 # Creates 150 games in two formats:
 # - temporis_games/*.dot (for temporis solver)
@@ -709,6 +863,10 @@ python /home/pete/ggg/extra/scripts/plot_by_vertex_count.py temporal_results/all
 
 ## 🎯 Command Line Options
 
+### Standard Temporis Solver (`temporis`)
+
+GGG-compatible temporal solver using backwards temporal attractor algorithm.
+
 ```bash
 temporis [OPTIONS] <input_file.dot>
 
@@ -727,4 +885,34 @@ EXAMPLES:
   temporis -t 100 game.dot          # Custom time bound
   temporis --csv game.dot           # CSV output for benchmarking
   temporis --time-only game.dot     # Just solve time in seconds
+```
+
+### Static Expansion Solver (`temporis_static_expansion`)
+
+Dedicated static expansion solver for research and validation.
+
+```bash
+temporis_static_expansion [OPTIONS] [input_file.dot]
+
+OPTIONS:
+  -h, --help                        Show this help message
+  -v, --verbose                     Enable verbose output with expansion statistics
+  --debug                           Enable debug output
+  --validate                        Enable solution validation
+  --csv                             Output in CSV format for benchmarking
+  --time-only                       Output only solve time in seconds
+  --time-bound TIME                 Set time bound (default: 50)
+
+ALGORITHM:
+  Static expansion with GGG attractor computation:
+  1. Creates (vertex, time) pairs for all time layers
+  2. Adds edges based on temporal constraints
+  3. Uses GGG attractor computation on expanded graph
+  4. Extracts solution from vertices at time 0
+
+EXAMPLES:
+  temporis_static_expansion game.dot                    # Basic solve
+  temporis_static_expansion --verbose game.dot         # With expansion statistics
+  temporis_static_expansion --time-only game.dot       # Benchmark timing
+  cat game.dot | temporis_static_expansion             # Read from stdin
 ```
