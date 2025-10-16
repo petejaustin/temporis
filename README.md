@@ -44,4 +44,4 @@ digraph G {
 - C++20 compatible compiler
 - CMake 3.20+
 - Boost Graph Library
-- GGG library (for integration)
+- GGG library (for integration, URL https://github.com/gamegraphgym/ggg)
