@@ -30,6 +30,15 @@ add_executable(temporis_static_expansion
     src/static_expansion_solver.cpp
 )
 
+# Set output directory for solvers
+set_target_properties(temporis PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/temporis_solvers
+)
+
+set_target_properties(temporis_static_expansion PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/temporis_solvers
+)
+
 # Common configuration for both executables
 foreach(target temporis temporis_static_expansion)
     target_include_directories(${target} PRIVATE 
@@ -44,5 +53,6 @@ endforeach()
 
 # Build information
 message(STATUS "GGG Temporis - Build type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "Standard temporis: ${CMAKE_BINARY_DIR}/temporis")
-message(STATUS "Static expansion temporis: ${CMAKE_BINARY_DIR}/temporis_static_expansion")
+message(STATUS "Solvers output directory: ${CMAKE_BINARY_DIR}/temporis_solvers")
+message(STATUS "Standard temporis: ${CMAKE_BINARY_DIR}/temporis_solvers/temporis")
+message(STATUS "Static expansion temporis: ${CMAKE_BINARY_DIR}/temporis_solvers/temporis_static_expansion")
