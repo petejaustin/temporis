@@ -10,12 +10,12 @@ namespace graphs {
 
 // --- Define property field lists as macros for GGGTemporal graph ---
 #define GGG_TEMPORAL_VERTEX_FIELDS(X) \
-    X(std::string, name)                      \
-    X(int, player)                            \
-    X(int, target)
+    X(std::string, name, "")                  \
+    X(int, player, -1)                        \
+    X(int, target, 0)
 
 #define GGG_TEMPORAL_EDGE_FIELDS(X) \
-    X(std::string, label)
+    X(std::string, label, "")
 
 #define GGG_TEMPORAL_GRAPH_FIELDS(X) /* none */
 
