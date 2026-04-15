@@ -238,7 +238,9 @@ public:
         
         // Handle different output modes
         if (time_only_) {
-            std::cout << std::fixed << std::setprecision(6) << solve_time_seconds << std::endl;
+            // Output in "Time to solve: X ms" format expected by ggg benchmark scripts
+            double ms = solve_time_seconds * 1000.0;
+            std::cout << "Time to solve: " << std::fixed << std::setprecision(3) << ms << " ms" << std::endl;
             return;
         }
         

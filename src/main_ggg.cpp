@@ -354,8 +354,9 @@ private:
     }
 
     void output_time_only(const ggg::solvers::SolverStatistics& stats) {
-        // Output only the total solve time (used by benchmark tools)
-        std::cout << std::fixed << std::setprecision(6) << stats.total_solve_time.count() << std::endl;
+        // Output in "Time to solve: X ms" format expected by ggg benchmark scripts
+        double ms = stats.total_solve_time.count() * 1000.0;
+        std::cout << "Time to solve: " << std::fixed << std::setprecision(3) << ms << " ms" << std::endl;
     }
 };
 
