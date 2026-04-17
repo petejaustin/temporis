@@ -12,6 +12,12 @@ if(POLICY CMP0167)
 endif()
 find_package(Boost REQUIRED COMPONENTS graph)
 
+# GGG include directory; default matches the expected sibling-directory layout
+# (temporis/ next to ggg/), but can be overridden with -DGGG_INCLUDE_DIR=...
+set(GGG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/../ggg/include"
+    CACHE PATH "Path to the GGG (libggg) include directory")
+message(STATUS "Using GGG headers from: ${GGG_INCLUDE_DIR}")
+
 # GGG-integrated temporis executable
 add_executable(temporis
     src/main_ggg.cpp
@@ -43,7 +49,7 @@ set_target_properties(temporis_static_expansion PROPERTIES
 foreach(target temporis temporis_static_expansion)
     target_include_directories(${target} PRIVATE 
         ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/../ggg/include
+        ${GGG_INCLUDE_DIR}
     )
     
     target_link_libraries(${target} PRIVATE ${Boost_LIBRARIES})
